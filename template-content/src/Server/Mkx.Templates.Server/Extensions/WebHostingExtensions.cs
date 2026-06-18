@@ -1,10 +1,10 @@
 using Mkx.Templates.Application.Extensions;
 using Mkx.Templates.Client.Extensions;
-using Mkx.Templates.Server.Components;
 using Mkx.Templates.Infrastructure.Extensions;
 using Mkx.Templates.Sdk.Server.Api.Middlewares;
-using Mkx.Templates.Server.Middlewares;
 using Mkx.Templates.Sdk.Server.Shared.Authorization;
+using Mkx.Templates.Server.Components;
+using Mkx.Templates.Server.Middlewares;
 using Mkx.Templates.Shared.Routes;
 using System.Reflection;
 
@@ -53,15 +53,41 @@ public static class WebHostingExtensions
 
             app.UseMiddleware<PathRoleAuthorizationMiddleware>(ClientRoutes.Logs.Base, BuiltinRoles.Administrators);
 
-            app.UseAntiforgery();
+            app.UseAntiforgery(); 
 
             app.MapStaticAssets();
+
+            app.MapServiceWorker();
 
             app.MapControllers();
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode()
                 .AddInteractiveWebAssemblyRenderMode()
                 .AddAdditionalAssemblies(additionalAssemblies);
+
+            return app;
+        }
+
+        public WebApplication MapServiceWorker()
+        {
+            app.MapGet("/service-worker.js", async (HttpContext context, IWebHostEnvironment env) =>
+            {
+                var filePath = Path.Combine(env.WebRootPath, "service-worker.template.js");
+                if (!File.Exists(filePath))
+                {
+                    return Results.NotFound();
+                }
+
+                var content = await File.ReadAllTextAsync(filePath);
+                var assemblyPath = typeof(Program).Assembly.Location;
+                var buildId = File.GetLastWriteTime(assemblyPath).Ticks.ToString();
+
+                content = content.Replace("const CACHE_NAME = 'mkx-pwa-cache-v1';", $"const CACHE_NAME = 'mkx-pwa-cache-{buildId}';");
+                content += $"\n// Build ID: {buildId}";
+
+                context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
+                return Results.Text(content, "application/javascript");
+            });
 
             return app;
         }
