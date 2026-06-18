@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.9" />
+		<PackageReference Include="Rebus" Version="8.9.2" />
+		<PackageReference Include="Rebus.ServiceProvider" Version="10.7.2" />
+		<PackageReference Include="Rebus.SqlServer" Version="8.4.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Mkx.Templates.Sdk.Server.Domain\Mkx.Templates.Sdk.Server.Domain.csproj" />
+		<ProjectReference Include="..\..\Shared\Mkx.Templates.Sdk.Shared\Mkx.Templates.Sdk.Shared.csproj" />
+	</ItemGroup>
+
+</Project>
+

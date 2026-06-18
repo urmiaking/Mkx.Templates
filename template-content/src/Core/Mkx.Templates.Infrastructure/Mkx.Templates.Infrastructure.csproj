@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ 
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Sdk\Mkx.Templates.Sdk.Server.Infrastructure\Mkx.Templates.Sdk.Server.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Shared\Mkx.Templates.Sdk.Shared\Mkx.Templates.Sdk.Shared.csproj" />
+    <ProjectReference Include="..\Mkx.Templates.Domain\Mkx.Templates.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Mapster.DependencyInjection" Version="10.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Mkx.Templates.Sdk.Server.Infrastructure\Mkx.Templates.Sdk.Server.Infrastructure.csproj" />
+	</ItemGroup>
+
+</Project>
+

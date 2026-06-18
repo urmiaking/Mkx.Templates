@@ -1,0 +1,58 @@
+@attribute [Route(ClientRoutes.Accounts.Login)]
+@layout EmptyBoxLayout
+
+<PageTitle>ورود به سیستم</PageTitle>
+
+<MudStack AlignItems="AlignItems.Center">
+    <span class="brand-text" dir="ltr">Mkx.Templates</span>
+    <MudText Typo="Typo.body1">سامانه Mkx.Templates</MudText>
+</MudStack>
+
+<EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+    <MudGrid Spacing="4" Class="mt-2">
+        @if (_options.AllowLocal)
+        {
+            <MudItem xs="12">
+                <MudStaticTextField For="@(() => Input.Username)" @bind-Value="Input.Username"
+                                    Label="نام کاربری" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    UserAttributes="@(new Dictionary<string, object?> { { "autocomplete", "username" }, { "aria-required", "true" }, { "dir", "ltr" } })" />
+            </MudItem> 
+            <MudItem xs="12">
+                <MudStaticTextField For="@(() => Input.Password)" @bind-Value="Input.Password"
+                                    Label="رمز عبور" InputType="InputType.Password" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    UserAttributes="@(new Dictionary<string, object?> { { "autocomplete", "password" }, { "aria-required", "true" }, { "dir", "ltr" } })" />
+            </MudItem>
+
+            @if (_options.ShowRememberMe)
+            {
+                <MudItem xs="12" Class="m-0 p-0">
+                    <MudStaticCheckBox For="@(() => Input.RememberMe)" @bind-Value="Input.RememberMe">مرا بخاطر بسپار</MudStaticCheckBox>
+                </MudItem>
+            }
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <MudItem xs="12" Class="mb-0">
+                    <StatusMessage Message="@_errorMessage" Severity="Severity.Error" />
+                </MudItem>
+            }
+
+            <MudItem xs="12" Class="mt-0">
+                <div class="d-flex align-center gap-2 w-100">
+                    <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                                     FormAction="FormAction.Submit" EndIcon="@Icons.Material.Filled.Login">
+                        ورود به سامانه
+                    </MudStaticButton>
+                </div>
+            </MudItem>
+        }
+    </MudGrid>
+</EditForm>
+
+@if (_options.AllowExternal)
+{
+    <MudDivider Class="my-4" />
+    <div class="d-flex flex-column align-items-center mt-2 w-100">
+        <ExternalLoginPicker AutoRedirect="@(!_options.AllowLocal)" />
+    </div>
+}

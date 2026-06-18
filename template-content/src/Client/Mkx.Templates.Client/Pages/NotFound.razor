@@ -1,0 +1,18 @@
+@attribute [Route(ClientRoutes.General.NotFound)]
+@layout EmptyBoxLayout
+
+<PageTitle>صفحه یافت نشد</PageTitle>
+
+<MudStack AlignItems="AlignItems.Center" Spacing="4" Class="w-100">
+    <span class="brand-text" dir="ltr">Mkx.Templates</span>
+    
+    <MudText Align="Align.Center" Typo="Typo.h4" Class="font-bold">صفحه یافت نشد</MudText>
+    
+    <MudText Align="Align.Center" Typo="Typo.body1" Class="mud-text-secondary px-4">
+        متأسفانه صفحه مورد نظر شما یافت نشد یا تغییر آدرس داده است.
+    </MudText>
+
+    <MudButton Variant="Variant.Filled" Href="@ClientRoutes.Home.Index" StartIcon="@Icons.Material.Filled.Home" Color="Color.Primary" Class="mt-4 px-6 py-2 rounded-lg">
+        بازگشت به صفحه اصلی
+    </MudButton>
+</MudStack>

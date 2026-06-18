@@ -1,0 +1,18 @@
+@inherits LayoutComponentBase
+
+<PageTitle>Mkx.Templates</PageTitle>
+
+<MudRTLProvider RightToLeft="true">
+    <MudThemeProvider Theme="@ThemeService?.CurrentTheme" IsDarkMode="@(ThemeService?.IsDarkMode ?? false)" />
+    <MudPopoverProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
+
+    @Body
+
+    <div id="blazor-error-ui" data-nosnippet>
+        خطایی در حین اجرای برنامه رخ داد
+        <a href="." class="reload">بارگیری مجدد</a>
+        <span class="dismiss">🗙</span>
+    </div>
+</MudRTLProvider>

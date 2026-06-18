@@ -1,0 +1,23 @@
+﻿@using Mkx.Templates.Sdk.Shared.Extensions
+@inherits AppComponentBase
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var redirectUrl = Uri.EscapeDataString(Navigation.Uri);
+
+        if (User?.Identity?.IsAuthenticated == true)
+        {
+            Navigation.NavigateTo(ClientRoutes.Accounts.AccessDenied, true);
+        }
+        else
+        {
+            Navigation.NavigateTo(
+                ClientRoutes.Accounts.Login.AppendQueryString(new { redirectUrl }),
+                true);
+        }
+    }
+
+}

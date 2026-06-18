@@ -1,0 +1,187 @@
+@if (_isOpen)
+{
+    <MudCard Elevation="4" Class="my-6 quick-guide-card rounded-lg overflow-hidden">
+        <div class="quick-guide-header px-6 py-4 d-flex align-center justify-space-between">
+            <div class="d-flex align-center gap-3">
+                <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Class="quick-guide-icon" Size="Size.Large"/>
+                <div>
+                    <MudText Typo="Typo.h5" Class="quick-guide-title">راهنمای شروع سریع پروژه (Quick Start Guide)</MudText>
+                    <MudText Typo="Typo.caption" Class="quick-guide-subtitle">آشنایی با ساختار راهکار، توسعه صفحات و فراخوانی APIها</MudText>
+                </div>
+            </div>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" Class="quick-guide-close-btn" OnClick="CloseGuide"/>
+        </div>
+
+        <MudCardContent Class="pa-6">
+            <MudText Typo="Typo.body1" Class="mb-4 text-justify">
+                این قالب پروژه با استفاده از <strong>معماری تمیز (Clean Architecture)</strong> و فریم‌ورک Blazor طراحی شده است.
+                برای توسعه سریع‌تر و آسان‌تر، بخش‌های راهکار به شرح زیر دسته‌بندی شده‌اند:
+            </MudText>
+
+            <MudExpansionPanels MultiExpansion="false" Class="mt-4 quick-guide-panels">
+                <MudExpansionPanel Text="📂 ساختار لایه‌های پروژه" Icon="@Icons.Material.Filled.FolderOpen" Expanded="true">
+                    <MudList T="string" Dense="true" ReadOnly="true">
+                        <MudListItem Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.subtitle2" Class="font-bold text-primary">Mkx.Templates.Domain & Infrastructure (هسته سیستم)</MudText>
+                                <MudText Typo="Typo.body2">شامل نهادها (Entities)، پیکربندی پایگاه‌داده (EF Core DbContext)، ریپازیتوری‌ها و مشخصات (Specifications) در لایه زیرساخت.</MudText>
+                            </div>
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.subtitle2" Class="font-bold text-primary">Mkx.Templates.Application (لایه کاربرد)</MudText>
+                                <MudText Typo="Typo.body2">منطق کسب‌وکار سمت سرور، سرویس‌ها، اعتبارسنجی‌ها و قوانین نگاشت داده‌ها با استفاده از Mapster.</MudText>
+                            </div>
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.subtitle2" Class="font-bold text-primary">Mkx.Templates.Shared (لایه مشترک)</MudText>
+                                <MudText Typo="Typo.body2">شامل ثابت‌های مسیرهای صفحات (ClientRoutes)، آدرس‌های API (ApiRoutes و ApiUrls)، قراردادها و DTOها.</MudText>
+                            </div>
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.subtitle2" Class="font-bold text-primary">Mkx.Templates.Client (رابط کاربری کلاینت)</MudText>
+                                <MudText Typo="Typo.body2">صفحات Blazor WebAssembly، کامپوننت‌های MudBlazor، قالب‌ها (Layouts) و سرویس‌های کلاینت جهت تبادل داده.</MudText>
+                            </div>
+                        </MudListItem>
+                        <MudListItem Icon="@Icons.Material.Filled.Folder" IconColor="Color.Primary">
+                            <div class="d-flex flex-column">
+                                <MudText Typo="Typo.subtitle2" Class="font-bold text-primary">Mkx.Templates.Server (سرور میزبان)</MudText>
+                                <MudText Typo="Typo.body2">میزبانی برنامه Blazor، کنترلرهای API، فرآیند احراز هویت در قالب SSR (صفحات Login و ExternalLogin) و میان‌افزارها.</MudText>
+                            </div>
+                        </MudListItem>
+                    </MudList>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Text="📄 نحوه افزودن یک صفحه جدید" Icon="@Icons.Material.Filled.AddBox">
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        برای افزودن صفحه جدید به پروژه، طبق مراحل زیر عمل کنید:
+                    </MudText>
+                    <ul class="quick-guide-list">
+                        <li>ابتدا مسیر صفحه را در کلاس <code class="code-highlight">ClientRoutes</code> در لایه <code class="code-highlight-sub">Shared</code> تعریف کنید.</li>
+                        <li>یک فایل Razor در پوشه <code class="code-highlight-sub">Pages</code> پروژه کلاینت ایجاد نمایید.</li>
+                        <li>از خصیصه مسیردهی به شکل <code class="code-highlight">[Route(ClientRoutes.YourFeature.Index)]</code> در بالای صفحه استفاده کنید.</li>
+                        <li>برای استفاده از مزایایی چون مدیریت بارگذاری و مدیریت خودکار خطاها، کلاس خود را از <code class="code-highlight">AppComponentBase</code> ارث‌بری دهید.</li>
+                    </ul>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Text="🔌 نحوه پیاده‌سازی و فراخوانی API جدید" Icon="@Icons.Material.Filled.Hub">
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        ساختار این پروژه فراخوانی سرویس‌ها را بسیار یکپارچه کرده است:
+                    </MudText>
+                    <ul class="quick-guide-list">
+                        <li>یک اینترفیس مشترک برای سرویس خود در پوشه <code class="code-highlight-sub">Shared/Abstractions</code> بنویسید (مثال: <code>ITestService</code>).</li>
+                        <li>آن را در پروژه <code class="code-highlight-sub">Application/Services</code> پیاده‌سازی کرده و در لایه سرور رجیستر کنید.</li>
+                        <li>یک کنترلر API در پروژه سرور ایجاد کنید تا متدهای سرویس را فراخوانی کند.</li>
+                        <li>در کلاینت، یک سرویس کلاینت (مانند <code>TestClientService</code>) بسازید که همان اینترفیس مشترک را پیاده کرده و درخواست HTTP ارسال کند.</li>
+                        <li>در صفحه Blazor کلاینت، متد را با استفاده از تابع کمکی <code class="code-highlight">SendRequestAsync</code> فراخوانی کنید.</li>
+                    </ul>
+                </MudExpansionPanel>
+
+                <MudExpansionPanel Text="🚀 نحوه اجرا در محیط محلی" Icon="@Icons.Material.Filled.PlayArrow">
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        جهت راه‌اندازی و اجرای پروژه در حالت توسعه، دستور زیر را در ترمینال در ریشه پروژه بزنید:
+                    </MudText>
+                    <div class="code-block dir-ltr">
+                        dotnet run --project src/Server/Mkx.Templates.Server
+                    </div>
+                    <MudText Typo="Typo.body2">
+                        برنامه با موفقیت اجرا شده و در مرورگر با آدرس محلی در دسترس خواهد بود.
+                    </MudText>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
+            <div class="quick-guide-footer-alert mt-6 pa-4 d-flex align-center gap-3">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Color="Color.Info"/>
+                <MudText Typo="Typo.body2">
+                    <strong>نکته توسعه‌دهنده:</strong> این کامپوننت جهت راهنمایی شماست. برای حذف آن از صفحه اصلی، کافیست تگ <code>&lt;QuickGuide /&gt;</code> را از فایل <code>Home.razor</code> حذف کنید.
+                </MudText>
+            </div>
+        </MudCardContent>
+    </MudCard>
+}
+<style>
+    .quick-guide-card {
+        border-right: 4px solid var(--mud-palette-primary) !important;
+        background: var(--mud-palette-background-grey) !important;
+    }
+    .quick-guide-header {
+        background: linear-gradient(135deg, var(--mud-palette-primary-hover) 0%, var(--mud-palette-background) 100%);
+        border-bottom: 1px solid var(--mud-palette-divider);
+    }
+    .quick-guide-icon {
+        color: var(--mud-palette-primary);
+    }
+    .quick-guide-title {
+        font-weight: 700;
+        color: var(--mud-palette-primary-darken);
+    }
+    .quick-guide-subtitle {
+        color: var(--mud-palette-text-secondary);
+    }
+    .quick-guide-close-btn {
+        color: var(--mud-palette-text-secondary);
+    }
+    .quick-guide-close-btn:hover {
+        color: var(--mud-palette-error);
+    }
+    .text-justify {
+        text-align: justify;
+    }
+    .quick-guide-panels {
+        border: 1px solid var(--mud-palette-divider);
+        border-radius: 8px;
+        background: var(--mud-palette-surface);
+    }
+    .quick-guide-list {
+        padding-right: 20px;
+        list-style-type: decimal;
+    }
+    .quick-guide-list li {
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+    }
+    .code-highlight {
+        font-family: Consolas, monospace;
+        background-color: var(--mud-palette-primary-hover);
+        color: var(--mud-palette-primary-darken);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+    .code-highlight-sub {
+        font-family: Consolas, monospace;
+        background-color: var(--mud-palette-action-disabled-background);
+        color: var(--mud-palette-text-primary);
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .code-block {
+        background-color: var(--mud-palette-dark-lighten);
+        color: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 12px 0;
+        font-family: Consolas, monospace;
+        font-size: 0.9rem;
+        text-align: left;
+    }
+    .dir-ltr {
+        direction: ltr;
+    }
+    .quick-guide-footer-alert {
+        background-color: var(--mud-palette-info-hover);
+        border-right: 4px solid var(--mud-palette-info);
+        border-radius: 6px;
+    }
+</style>
+
+@code {
+    private bool _isOpen = true;
+
+    private void CloseGuide()
+    {
+        _isOpen = false;
+    }
+}

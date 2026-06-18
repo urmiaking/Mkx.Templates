@@ -1,0 +1,36 @@
+<script type="module" src="@Assets["Layout/ReconnectModal.razor.js"]"></script>
+
+<dialog id="components-reconnect-modal" data-nosnippet dir="rtl" lang="fa">
+    <div class="components-reconnect-container">
+        <div class="components-rejoining-animation" aria-hidden="true">
+            <div></div>
+            <div></div>
+        </div>
+        <!-- Persian text: first attempt -->
+        <p class="components-reconnect-first-attempt-visible">
+            در حال تلاش برای اتصال مجدد... لطفاً شکیبا باشید.
+        </p>
+        <!-- Persian: retrying with seconds countdown -->
+        <p class="components-reconnect-repeated-attempt-visible">
+            اتصال قطع شد. تلاش مجدد تا <span id="components-seconds-to-next-attempt"></span> ثانیه دیگر...
+        </p>
+        <!-- Persian: failed to rejoin -->
+        <p class="components-reconnect-failed-visible">
+            برقراری ارتباط امکان‌پذیر نبود.<br />لطفاً مجدداً تلاش کنید یا صفحه را بارگذاری مجدد نمایید.
+        </p>
+        <button id="components-reconnect-button" class="components-reconnect-failed-visible">
+            تلاش مجدد
+        </button>
+        <!-- Persian: session paused -->
+        <p class="components-pause-visible">
+            زمان نشست کاری شما به پایان رسیده یا توسط سرور متوقف شده است.
+        </p>
+        <!-- Persian: resume failed -->
+        <p class="components-resume-failed-visible">
+            امکان از سرگیری نشست وجود ندارد.<br />لطفاً صفحه را دوباره بارگذاری کنید.
+        </p>
+        <button id="components-resume-button" class="components-pause-visible components-resume-failed-visible">
+            از سرگیری
+        </button>
+    </div>
+</dialog>

@@ -1,0 +1,20 @@
+@attribute [Route(ClientRoutes.Accounts.AccessDenied)]
+@layout EmptyBoxLayout
+
+<PageTitle>عدم دسترسی</PageTitle>
+
+<MudStack AlignItems="AlignItems.Center" Spacing="4" Class="w-100">
+    <span class="brand-text" dir="ltr">Mkx.Templates</span>
+    
+    <MudText Align="Align.Center" Typo="Typo.h4" Class="font-bold">عدم دسترسی</MudText>
+    
+    <MudText Align="Align.Center" Typo="Typo.body1" Class="mud-text-secondary px-4">
+        کاربر گرامی، با عرض پوزش، شما مجوز دسترسی به منابع مورد درخواست را ندارید.
+        جهت ادامه کار، می‌توانید از دکمه‌های زیر اقدام نمایید.
+    </MudText>
+
+    <MudStack Row="true" Spacing="3" Class="mt-4 w-100 justify-center">
+        <MudButton Variant="Variant.Filled" Href="@ClientRoutes.Home.Index" StartIcon="@Icons.Material.Filled.Home" Color="Color.Primary" Class="px-6 py-2 rounded-lg">صفحه اصلی</MudButton>
+        <MudButton Variant="Variant.Outlined" Href="@ClientRoutes.Accounts.Login" StartIcon="@Icons.Material.Filled.Key" Color="Color.Primary" Class="px-6 py-2 rounded-lg">ورود به سامانه</MudButton>
+    </MudStack>
+</MudStack>

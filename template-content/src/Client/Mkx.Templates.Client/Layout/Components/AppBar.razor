@@ -1,0 +1,27 @@
+<MudAppBar Elevation="0" Class="fancy-appbar" Dense="false">
+    <div class="appbar-col-left">
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+    </div>
+    
+    <div class="appbar-col-center">
+        <span class="appbar-title brand-text">Mkx.Templates</span>
+    </div>
+    
+    <div class="appbar-col-right">
+        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Size="Size.Medium" />
+    </div>
+</MudAppBar>
+
+@code {
+    [Parameter]
+    public bool DrawerOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> DrawerOpenChanged { get; set; }
+
+    private async Task ToggleDrawer()
+    {
+        DrawerOpen = !DrawerOpen;
+        await DrawerOpenChanged.InvokeAsync(DrawerOpen);
+    }
+}

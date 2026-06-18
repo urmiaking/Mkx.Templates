@@ -1,0 +1,67 @@
+@inject NavigationManager Navigation
+
+<div class="mobile-nav-container @Class">
+    <div class="mobile-nav-bar">
+        @* Home Link *@
+        <NavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All" class="mobile-nav-item">
+            <div class="mobile-nav-icon-wrapper">
+                <MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Medium" />
+            </div>
+            <span class="mobile-nav-label">داشبرد</span>
+        </NavLink>
+
+        @* Tests Link *@
+        <NavLink href="@ClientRoutes.Tests.Index" class="mobile-nav-item">
+            <div class="mobile-nav-icon-wrapper">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
+            </div>
+            <span class="mobile-nav-label">تست‌ها</span>
+        </NavLink>
+
+        @* Explore *@
+        <NavLink href="/explore" class="mobile-nav-item">
+            <div class="mobile-nav-icon-wrapper">
+                <MudIcon Icon="@Icons.Material.Filled.Explore" Size="Size.Medium" />
+            </div>
+            <span class="mobile-nav-label">اکتشاف</span>
+        </NavLink>
+
+        @* More Menu *@
+        <MudMenu @bind-Open="_isMenuOpen" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" Class="mobile-nav-menu-wrapper" PopoverClass="mobile-nav-popover">
+            <ActivatorContent>
+                <div class="mobile-nav-item" @onclick="context.ToggleAsync">
+                    <div class="mobile-nav-icon-wrapper">
+                        <MudIcon Icon="@Icons.Material.Filled.MoreHoriz" Size="Size.Medium" />
+                    </div>
+                    <span class="mobile-nav-label">بیشتر</span>
+                </div>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem Icon="@Icons.Material.Filled.Search" OnClick="@NavigateToSearch">جستجو</MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Filled.Settings" OnClick="@NavigateToSettings">تنظیمات</MudMenuItem>
+                <MudMenuItem Icon="@Icons.Material.Filled.Info" OnClick="@NavigateToAbout">درباره ما</MudMenuItem>
+            </ChildContent>
+        </MudMenu>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Class { get; set; }
+    
+    private bool _isMenuOpen;
+
+    private void NavigateToSearch()
+    {
+        Navigation.NavigateTo("/search");
+    }
+
+    private void NavigateToSettings()
+    {
+        Navigation.NavigateTo("/settings");
+    }
+
+    private void NavigateToAbout()
+    {
+        Navigation.NavigateTo("/about");
+    }
+}

@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/1. Server/">
+    <Project Path="src/Server/Mkx.Templates.Application/Mkx.Templates.Application.csproj" />
+    <Project Path="src/Server/Mkx.Templates.Server/Mkx.Templates.Server.csproj" />
+  </Folder>
+  <Folder Name="/2. Client/">
+    <Project Path="src/Client/Mkx.Templates.Client/Mkx.Templates.Client.csproj" />
+  </Folder>
+  <Folder Name="/3. Shared/">
+    <Project Path="src/Shared/Mkx.Templates.Sdk.Shared/Mkx.Templates.Sdk.Shared.csproj" />
+    <Project Path="src/Shared/Mkx.Templates.Shared/Mkx.Templates.Shared.csproj" />
+  </Folder>
+  <Folder Name="/4. Core/">
+    <Project Path="src/Core/Mkx.Templates.Domain/Mkx.Templates.Domain.csproj" />
+    <Project Path="src/Core/Mkx.Templates.Infrastructure/Mkx.Templates.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/5. Sdk/">
+    <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Api/Mkx.Templates.Sdk.Server.Api.csproj" />
+    <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Application/Mkx.Templates.Sdk.Server.Application.csproj" />
+    <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Domain/Mkx.Templates.Sdk.Server.Domain.csproj" />
+    <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Infrastructure/Mkx.Templates.Sdk.Server.Infrastructure.csproj" />
+    <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Shared/Mkx.Templates.Sdk.Server.Shared.csproj" />
+  </Folder>
+  <Folder Name="/6. Tests/" />
+</Solution>

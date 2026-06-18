@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Mkx",
+  "classifications": [ "Common", "Blazor" ],
+  "identity": "Mkx.Templates.Blazor",
+  "name": "Mkx Blazor Solution Template",
+  "shortName": "mkx-blazor",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "Mkx.Templates",
+  "preferNameDirectory": true
+}

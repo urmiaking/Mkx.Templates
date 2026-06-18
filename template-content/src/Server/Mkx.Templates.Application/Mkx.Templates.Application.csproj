@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Mkx.Templates.Infrastructure\Mkx.Templates.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Sdk\Mkx.Templates.Sdk.Server.Application\Mkx.Templates.Sdk.Server.Application.csproj" />
+    <ProjectReference Include="..\..\Shared\Mkx.Templates.Shared\Mkx.Templates.Shared.csproj" />
+    <PackageReference Include="MapIdeaHub.BirSign.NetCoreExtension" Version="1.4.0" />
+  </ItemGroup>
+
+</Project>

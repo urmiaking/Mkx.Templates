@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <PackageId>Mkx.Templates.Blazor</PackageId>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Title>Mkx Blazor Solution Template</Title>
+    <Authors>Mkx</Authors>
+    <Description>Visual Studio / dotnet new template for a Blazor solution using .NET 10 and .slnx.</Description>
+    <PackageTags>dotnet-new;templates;blazor;slnx;net10</PackageTags>
+    
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <!-- Include all files in template-content/ under content/ in the nuget package -->
+    <Content Include="template-content\**\*" Exclude="template-content\**\bin\**;template-content\**\obj\**;template-content\**\.vs\**" />
+    
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>
