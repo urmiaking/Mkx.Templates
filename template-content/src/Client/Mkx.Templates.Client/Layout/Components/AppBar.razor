@@ -8,7 +8,9 @@
     </div>
     
     <div class="appbar-col-right">
-        <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Size="Size.Medium" />
+        <MudBadge Color="Color.Error" Dot="true" Overlap="true">
+            <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Size="Size.Medium" OnClick="@ToggleNotifications" />
+        </MudBadge>
     </div>
 </MudAppBar>
 
@@ -19,9 +21,21 @@
     [Parameter]
     public EventCallback<bool> DrawerOpenChanged { get; set; }
 
+    [Parameter]
+    public bool NotificationsOpen { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> NotificationsOpenChanged { get; set; }
+
     private async Task ToggleDrawer()
     {
         DrawerOpen = !DrawerOpen;
         await DrawerOpenChanged.InvokeAsync(DrawerOpen);
+    }
+
+    private async Task ToggleNotifications()
+    {
+        NotificationsOpen = !NotificationsOpen;
+        await NotificationsOpenChanged.InvokeAsync(NotificationsOpen);
     }
 }

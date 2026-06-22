@@ -7,7 +7,7 @@
   style.textContent = `
     .pwa-toast {
       position: fixed;
-      bottom: 24px;
+      bottom: 96px; /* Safe space above bottom MobileNav on mobile/tablet */
       left: 24px;
       right: 24px;
       max-width: 420px;
@@ -32,6 +32,11 @@
         left: 24px;
         right: auto;
         width: 380px;
+      }
+    }
+    @media (min-width: 768px) {
+      .pwa-toast {
+        bottom: 24px; /* Lower position on desktop since MobileNav is hidden */
       }
     }
     @keyframes pwa-slide-in {

@@ -16,7 +16,7 @@ public static class ApiUrls
     {
         public static string PerformExternalLogin() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.PerformExternalLogin);
         public static string Logout(string? returnUrl) => 
-            BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Logout);
+            BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Logout).AppendQueryString(new { returnUrl });
 
         public static string Login(string? returnUrl) =>
             BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Login).AppendQueryString(new { returnUrl });

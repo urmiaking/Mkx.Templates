@@ -1,0 +1,68 @@
+@inherits AppComponentBase
+
+<MudDrawer Open="IsOpen" OpenChanged="IsOpenChanged" Anchor="Anchor.End" Variant="DrawerVariant.Temporary" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"notifications-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
+    @* Drawer Header *@
+    <div class="drawer-header px-6 pt-5 pb-3 d-flex align-center justify-space-between w-100">
+        <MudText Typo="Typo.h6" Class="font-bold">اعلان‌ها</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Default" OnClick="CloseDrawer" Class="rounded-lg" />
+    </div>
+
+    @* Notification List *@
+    <div class="drawer-content px-4 py-3 flex-grow-1 overflow-y-auto" style="padding-bottom: 90px !important;">
+        @if (Notifications.Count == 0)
+        {
+            <div class="d-flex flex-column align-center justify-center py-10 text-center">
+                <MudIcon Icon="@Icons.Material.Filled.NotificationsOff" Color="Color.Default" Style="font-size: 3rem;" Class="mb-3" />
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">هیچ اعلانی یافت نشد</MudText>
+            </div>
+        }
+        else
+        {
+            <MudStack Spacing="3">
+                @foreach (var notification in Notifications)
+                {
+                    <div class="notification-card p-4 rounded-xl d-flex gap-3 align-start transition-all cursor-pointer @(notification.IsRead ? "read" : "unread")"
+                         style="transform: translateX(@(notification.SwipeOffset)px); opacity: @(GetOpacity(notification)); transition: @(notification.IsSwiping ? "none" : "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease");"
+                         @onclick="@(() => ToggleRead(notification))"
+                         @ontouchstart="@(e => HandleTouchStart(e, notification))"
+                         @ontouchmove="@(e => HandleTouchMove(e, notification))"
+                         @ontouchend="@(e => HandleTouchEnd(e, notification))"
+                         @onmousedown="@(e => HandleMouseDown(e, notification))"
+                         @onmousemove="@(e => HandleMouseMove(e, notification))"
+                         @onmouseup="@(e => HandleMouseUp(e, notification))"
+                         @onmouseleave="@(e => HandleMouseLeave(e, notification))">
+                        <div class="notification-icon-wrapper rounded-lg p-2 d-flex align-center justify-center" style="background-color: var(--mud-palette-surface);">
+                            <MudIcon Icon="@notification.Icon" Color="@notification.Color" Size="Size.Medium" />
+                        </div>
+                        <div class="flex-grow-1 select-none">
+                            <div class="d-flex justify-space-between align-center mb-1">
+                                <MudText Typo="Typo.subtitle2" Class="@(notification.IsRead ? "text-regular" : "font-bold")">@notification.Title</MudText>
+                                <span class="notification-time text-caption mud-text-secondary">@notification.Time</span>
+                            </div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary leading-relaxed">@notification.Message</MudText>
+                        </div>
+                        @if (!notification.IsRead)
+                        {
+                            <span class="unread-dot mt-2"></span>
+                        }
+                    </div>
+                }
+            </MudStack>
+        }
+    </div>
+
+    @* Fixed Bottom Action Bar *@
+    @if (Notifications.Count > 0)
+    {
+        <div class="drawer-footer px-6 py-4 w-100 d-flex justify-center position-absolute bottom-0 left-0 right-0">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Error" 
+                       FullWidth="true" 
+                       OnClick="DismissAll" 
+                       StartIcon="@Icons.Material.Filled.DeleteSweep" 
+                       Class="dismiss-all-btn rounded-xl py-3 font-bold">
+                حذف همه اعلان‌ها
+            </MudButton>
+        </div>
+    }
+</MudDrawer>

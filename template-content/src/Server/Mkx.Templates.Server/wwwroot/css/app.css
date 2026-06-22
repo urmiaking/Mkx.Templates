@@ -709,6 +709,106 @@ h1:focus {
     box-shadow: 4px 0px 30px rgba(0, 0, 0, 0.02), inset 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
 
+/* --- Notifications Drawer --- */
+.notifications-drawer {
+    color: var(--mud-palette-text-primary) !important;
+    overflow-x: hidden !important;
+}
+
+.notifications-drawer.dark-mode {
+    background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
+    backdrop-filter: blur(40px) saturate(220%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    border-inline-start: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
+    box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.03), inset -1px 0 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.notifications-drawer.light-mode {
+    background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.06) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.4) 100%) !important;
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    border-inline-start: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
+    box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.02), inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+@media (max-width: 600px) {
+    .notifications-drawer {
+        --mud-drawer-width: 100vw !important;
+        width: var(--mud-drawer-width) !important;
+    }
+}
+@media (min-width: 601px) {
+    .notifications-drawer {
+        --mud-drawer-width: 400px !important;
+        width: var(--mud-drawer-width) !important;
+    }
+}
+
+/* --- Notification Card & Items --- */
+.notification-card {
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.3) !important;
+    border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+}
+
+.notification-card:hover {
+    transform: translateY(-2px);
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
+    border-color: rgba(var(--mud-palette-primary-rgb), 0.25) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.notification-card.unread {
+    border-inline-start: 4px solid var(--mud-palette-primary) !important;
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.04) !important;
+}
+
+.notification-card.unread:hover {
+    background-color: rgba(var(--mud-palette-primary-rgb), 0.08) !important;
+}
+
+.notification-icon-wrapper {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--mud-palette-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notification-time {
+    font-size: 11px !important;
+}
+
+/* --- Fixed Footer & Dismiss All Button --- */
+.drawer-footer {
+    background: linear-gradient(to top, var(--mud-palette-surface) 0%, rgba(var(--mud-palette-surface-rgb), 0.7) 80%, rgba(var(--mud-palette-surface-rgb), 0.0) 100%) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-top: 1px solid rgba(var(--mud-palette-divider-rgb), 0.08) !important;
+    z-index: 10;
+}
+
+.dismiss-all-btn {
+    box-shadow: 0 4px 15px rgba(var(--mud-palette-error-rgb), 0.2) !important;
+    transition: all 0.25s ease-in-out !important;
+}
+
+.dismiss-all-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(var(--mud-palette-error-rgb), 0.35) !important;
+}
+
 
 .fancy-drawer .mud-drawer-content {
     display: flex !important;
@@ -829,4 +929,9 @@ h1:focus {
     background-color: rgba(var(--mud-palette-error-rgb), 0.1) !important;
     border-color: rgba(var(--mud-palette-error-rgb), 0.4) !important;
     color: var(--mud-palette-error) !important;
+}
+
+/* --- Avatar --- */
+.profile-avatar {
+    background: linear-gradient(135deg, var(--mud-palette-primary), color-mix(in srgb, var(--mud-palette-primary) 70%, white));
 }

@@ -2,8 +2,9 @@
 @layout BaseLayout
 
 <MudLayout>
-    <AppBar @bind-DrawerOpen="_drawerOpen" />
+    <AppBar @bind-DrawerOpen="_drawerOpen" @bind-NotificationsOpen="_notificationsOpen" />
     <Drawer @bind-IsDrawerOpen="_drawerOpen" />
+    <NotificationsDrawer @bind-IsOpen="_notificationsOpen" />
     <MudMainContent Class="mt-10 mb-md-4 mb-20 pa-md-4 py-4">
         @Body
         <MobileNav Class="d-md-none d-flex" />
@@ -13,4 +14,5 @@
 @code
 {
     private bool _drawerOpen = false;
+    private bool _notificationsOpen = false;
 }

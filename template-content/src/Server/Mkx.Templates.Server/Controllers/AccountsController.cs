@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +55,12 @@ public class AccountsController(
 
         // Standard logout when BirSign is disabled
         await signInManager.SignOutAsync();
-        return LocalRedirect($"~/{returnUrl ?? ""}");
+
+        var localRedirectUrl = returnUrl ?? "/";
+        if (!localRedirectUrl.StartsWith('/') && !localRedirectUrl.StartsWith("~/"))
+        {
+            localRedirectUrl = "/" + localRedirectUrl;
+        }
+        return LocalRedirect(localRedirectUrl);
     }
 }

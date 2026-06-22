@@ -1,3 +1,4 @@
+using Mkx.Templates.Client.Common;
 using MudBlazor;
 
 namespace Mkx.Templates.Client.Layout.Themes;
@@ -24,10 +25,10 @@ public static class ColorPalettes
 
     public static readonly Dictionary<string, MudTheme> Palettes = new()
     {
-        ["EnterpriseBlue"] = CreateEnterpriseBlueTheme(),
-        ["EnterpriseSlate"] = CreateEnterpriseSlateTheme(),
-        ["EnterpriseTeal"] = CreateEnterpriseTealTheme(),
-        ["EnterpriseIndigo"] = CreateEnterpriseIndigoTheme(),
+        [BuiltInThemes.EnterpriseBlue] = CreateEnterpriseBlueTheme(),
+        [BuiltInThemes.EnterpriseSlate] = CreateEnterpriseSlateTheme(),
+        [BuiltInThemes.EnterpriseTeal] = CreateEnterpriseTealTheme(),
+        [BuiltInThemes.EnterpriseIndigo] = CreateEnterpriseIndigoTheme()
     };
 
     private static MudTheme CreateEnterpriseBlueTheme()

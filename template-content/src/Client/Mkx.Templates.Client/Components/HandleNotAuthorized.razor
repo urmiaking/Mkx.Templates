@@ -1,4 +1,4 @@
-﻿@using Mkx.Templates.Sdk.Shared.Extensions
+@using Mkx.Templates.Sdk.Shared.Extensions
 @inherits AppComponentBase
 
 @code {
@@ -6,7 +6,7 @@
     {
         await base.OnInitializedAsync();
 
-        var redirectUrl = Uri.EscapeDataString(Navigation.Uri);
+        var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
 
         if (User?.Identity?.IsAuthenticated == true)
         {
@@ -15,7 +15,7 @@
         else
         {
             Navigation.NavigateTo(
-                ClientRoutes.Accounts.Login.AppendQueryString(new { redirectUrl }),
+                ClientRoutes.Accounts.Login.AppendQueryString(new { returnUrl }),
                 true);
         }
     }

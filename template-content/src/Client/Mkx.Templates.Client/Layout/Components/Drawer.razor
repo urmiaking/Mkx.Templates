@@ -1,30 +1,28 @@
-@inject ThemeService ThemeService
-@implements IDisposable
+@inherits AppComponentBase
 
 <MudDrawer Open="IsDrawerOpen" OpenChanged="IsDrawerOpenChanged" Variant="DrawerVariant.Temporary" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"fancy-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
     @* User Profile Section *@
     <div class="drawer-header px-6 pt-5 pb-3 d-flex flex-column align-center justify-center">
-        <MudBadge Color="Color.Success" Overlap="true" Dot="true" Bordered="true" Origin="Origin.BottomRight" Class="mb-3">
-            <MudAvatar Color="Color.Primary" Size="Size.Large" Class="elevation-2" Style="background: linear-gradient(135deg, var(--mud-palette-primary), color-mix(in srgb, var(--mud-palette-primary) 70%, white));">
-                U
+        <MudBadge Color="Color.Success" Overlap="true" Dot="IsAuthenticated" Bordered="true" Origin="Origin.BottomRight" Class="mb-3">
+            <MudAvatar Color="Color.Primary" Size="Size.Large" Class="profile-avatar" Elevation="2">
+                @AvatarText
             </MudAvatar>
         </MudBadge>
-        <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">کاربر سیستم</MudText>
-        <MudText Typo="Typo.caption" Class="mud-text-secondary">user@mkx-templates.ir</MudText>
+        <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">@DisplayName</MudText>
+        <MudText Typo="Typo.caption" Class="mud-text-secondary">@UserName</MudText>
     </div>
 
     @* Color Palette Selector *@
     <div class="drawer-palette px-6 pt-3 pb-2 d-flex flex-column align-center justify-center">
-        <MudText Typo="Typo.caption" Class="mud-text-secondary mb-2 font-bold">انتخاب تم رنگی</MudText>
         <div class="d-flex gap-2 justify-center flex-wrap">
             <div class="palette-collection">
                 @{
                     var predefinedColors = new Dictionary<string, string>
                     {
-                        { "EnterpriseBlue", "#2563EB" },
-                        { "EnterpriseSlate", "#334155" },
-                        { "EnterpriseTeal", "#0F766E" },
-                        { "EnterpriseIndigo", "#4F46E5" }
+                        { BuiltInThemes.EnterpriseBlue, "#2563EB" },
+                        { BuiltInThemes.EnterpriseSlate, "#334155" },
+                        { BuiltInThemes.EnterpriseTeal, "#0F766E" },
+                        { BuiltInThemes.EnterpriseIndigo, "#4F46E5" }
                     };
                 }
                 @foreach (var color in predefinedColors)
@@ -40,18 +38,30 @@
 
     @* Shortcuts *@
     <div class="drawer-shortcuts px-6 pt-2 pb-3 d-flex justify-center gap-2">
-        <MudTooltip Text="پروفایل">
-            <MudIconButton Icon="@Icons.Material.Filled.Person" Size="Size.Medium" Class="shortcut-btn" />
-        </MudTooltip>
-        <MudTooltip Text="تنظیمات">
-            <MudIconButton Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Class="shortcut-btn" />
-        </MudTooltip>
+        @if (IsAuthenticated)
+        {
+            <MudTooltip Text="پروفایل">
+                <MudIconButton Icon="@Icons.Material.Filled.Person" Size="Size.Medium" Class="shortcut-btn" />
+            </MudTooltip>
+            <MudTooltip Text="تنظیمات">
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Class="shortcut-btn" />
+            </MudTooltip>
+        }
         <MudTooltip Text="@(ThemeService.IsDarkMode ? "حالت روشن" : "حالت تاریک")">
             <MudIconButton Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.WbSunny : Icons.Material.Filled.NightsStay)" OnClick="ToggleTheme" Size="Size.Medium" Class="shortcut-btn" />
         </MudTooltip>
-        <MudTooltip Text="خروج">
-            <MudIconButton Icon="@Icons.Material.Filled.Logout" Size="Size.Medium" Color="Color.Error" Class="shortcut-btn" />
-        </MudTooltip>
+        @if (IsAuthenticated)
+        {
+            <MudTooltip Text="خروج">
+                <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Size="Size.Medium" Color="Color.Error" Class="shortcut-btn" />
+            </MudTooltip>
+        }
+        else
+        {
+            <MudTooltip Text="ورود به سامانه">
+                <MudIconButton Icon="@Icons.Material.Filled.Login" OnClick="Login" Size="Size.Medium" Color="Color.Primary" Class="shortcut-btn" />
+            </MudTooltip>
+        }
     </div>
 
     @* NavMenu *@
@@ -68,49 +78,3 @@
                        Class="rounded-lg py-2 close-drawer-btn" />
     </div>
 </MudDrawer>
-
-@code {
-    [Parameter]
-    public bool IsDrawerOpen { get; set; }
-
-    [Parameter]
-    public EventCallback<bool> IsDrawerOpenChanged { get; set; }
-
-    protected override void OnInitialized()
-    {
-        ThemeService.OnToggleMode += OnThemeToggled;
-        ThemeService.OnPaletteChanged += OnPaletteChanged;
-    }
-
-    private void OnThemeToggled(object? sender, EventArgs e)
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void OnPaletteChanged(object? sender, EventArgs e)
-    {
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void ToggleTheme()
-    {
-        ThemeService.ToggleMode();
-    }
-
-    private async Task SetPalette(string paletteName)
-    {
-        await ThemeService.SetPaletteAsync(paletteName);
-    }
-
-    private async Task CloseDrawer()
-    {
-        IsDrawerOpen = false;
-        await IsDrawerOpenChanged.InvokeAsync(false);
-    }
-
-    public void Dispose()
-    {
-        ThemeService.OnToggleMode -= OnThemeToggled;
-        ThemeService.OnPaletteChanged -= OnPaletteChanged;
-    }
-}

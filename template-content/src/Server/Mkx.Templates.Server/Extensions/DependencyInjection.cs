@@ -3,6 +3,7 @@ using MapIdeaHub.BirSign.NetCoreExtension.Models;
 using MapIdeaHub.BirSign.SharedKernel.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Mkx.Templates.Application.Services.Abstractions;
 using Mkx.Templates.Sdk.Server.Api.Extensions;
@@ -52,6 +53,7 @@ public static class DependencyInjection
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddSingleton<IApplicationPolicyProvider, AppPolicyProvider>();
             services.AddCascadingAuthenticationState();
+            services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAuthenticationStateProvider>();
 
             var authBuilder = services.AddAuthentication(options =>
             {
