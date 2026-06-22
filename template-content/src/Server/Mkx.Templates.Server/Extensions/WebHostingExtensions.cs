@@ -44,6 +44,7 @@ public static class WebHostingExtensions
 
             app.UseMiddleware<ExceptionHandlerMiddleware>();
             app.UseHttpsRedirection();
+            app.UseStatusCodePagesWithReExecute(ClientRoutes.General.NotFound);
             app.UseStaticFiles();
             app.UseStaticFileCache();
             app.UseRouting();
