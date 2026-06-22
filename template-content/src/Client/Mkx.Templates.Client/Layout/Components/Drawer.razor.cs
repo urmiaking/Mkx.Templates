@@ -34,9 +34,9 @@ public partial class Drawer : AppComponentBase
         InvokeAsync(StateHasChanged);
     }
 
-    private void ToggleTheme()
+    private async Task ToggleTheme()
     {
-        ThemeService.ToggleMode();
+        await ThemeService.ToggleModeAsync();
     }
 
     private async Task SetPalette(string paletteName)

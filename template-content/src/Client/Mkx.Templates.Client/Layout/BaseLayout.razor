@@ -3,7 +3,7 @@
 <PageTitle>Mkx.Templates</PageTitle>
 
 <MudRTLProvider RightToLeft="true">
-    <MudThemeProvider Theme="@ThemeService?.CurrentTheme" IsDarkMode="@(ThemeService?.IsDarkMode ?? false)" />
+    <MudThemeProvider @ref="_mudThemeProvider" Theme="@ThemeService?.CurrentTheme" @bind-IsDarkMode="IsDarkMode" />
     <MudPopoverProvider />
     <MudDialogProvider />
     <MudSnackbarProvider />

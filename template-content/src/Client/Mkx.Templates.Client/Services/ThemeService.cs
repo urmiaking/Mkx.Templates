@@ -17,13 +17,25 @@ public class ThemeService(ILocalStorageService localStorage)
     public event EventHandler? OnToggleMode;
     public event EventHandler? OnPaletteChanged;
 
-    public void ToggleMode()
+    public async Task ToggleModeAsync()
     {
-        _isDarkMode = !_isDarkMode;
+        await SetDarkModeAsync(!_isDarkMode, saveToStorage: true);
+    }
 
-        if (OperatingSystem.IsBrowser())
+    public async Task SetDarkModeAsync(bool isDarkMode, bool saveToStorage = true)
+    {
+        _isDarkMode = isDarkMode;
+
+        if (saveToStorage)
         {
-            _ = localStorage.SetItemAsStringAsync(LocalStorageKeys.IsDarkMode, _isDarkMode.ToString());
+            try
+            {
+                await localStorage.SetItemAsStringAsync(LocalStorageKeys.IsDarkMode, _isDarkMode.ToString());
+            }
+            catch (InvalidOperationException)
+            {
+                // JSInterop not available (prerendering)
+            }
         }
 
         OnToggleMode?.Invoke(this, EventArgs.Empty);
@@ -35,9 +47,13 @@ public class ThemeService(ILocalStorageService localStorage)
         {
             _currentPalette = paletteName;
 
-            if (OperatingSystem.IsBrowser())
+            try
             {
                 await localStorage.SetItemAsStringAsync(LocalStorageKeys.SelectedPalette, paletteName);
+            }
+            catch (InvalidOperationException)
+            {
+                // JSInterop not available (prerendering)
             }
 
             OnPaletteChanged?.Invoke(this, EventArgs.Empty);
@@ -46,23 +62,23 @@ public class ThemeService(ILocalStorageService localStorage)
 
     public async Task LoadSettingsAsync()
     {
-        if (!OperatingSystem.IsBrowser())
+        try
         {
-            _currentPalette = "EnterpriseBlue";
-            _isDarkMode = false;
-            return;
-        }
+            var savedPalette = await localStorage.GetItemAsStringAsync(LocalStorageKeys.SelectedPalette);
+            if (!string.IsNullOrEmpty(savedPalette) && ColorPalettes.Palettes.ContainsKey(savedPalette))
+            {
+                _currentPalette = savedPalette;
+            }
 
-        var savedPalette = await localStorage.GetItemAsStringAsync(LocalStorageKeys.SelectedPalette);
-        if (!string.IsNullOrEmpty(savedPalette) && ColorPalettes.Palettes.ContainsKey(savedPalette))
-        {
-            _currentPalette = savedPalette;
+            var savedDarkMode = await localStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
+            if (!string.IsNullOrEmpty(savedDarkMode) && bool.TryParse(savedDarkMode, out var isDarkMode))
+            {
+                _isDarkMode = isDarkMode;
+            }
         }
-
-        var savedDarkMode = await localStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
-        if (!string.IsNullOrEmpty(savedDarkMode) && bool.TryParse(savedDarkMode, out var isDarkMode))
+        catch (InvalidOperationException)
         {
-            _isDarkMode = isDarkMode;
+            // JSInterop not available (prerendering), fallback to defaults
         }
     }
 }
