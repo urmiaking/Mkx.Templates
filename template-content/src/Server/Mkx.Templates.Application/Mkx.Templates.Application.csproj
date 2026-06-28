@@ -13,4 +13,8 @@
     <PackageReference Include="MapIdeaHub.BirSign.NetCoreExtension" Version="1.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Validators\" />
+  </ItemGroup>
+
 </Project>

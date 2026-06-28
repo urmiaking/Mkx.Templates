@@ -7,8 +7,52 @@
   "shortName": "mkx-blazor",
   "tags": {
     "language": "C#",
-    "type": "project"
+    "type": "solution"
   },
   "sourceName": "Mkx.Templates",
-  "preferNameDirectory": true
+  "preferNameDirectory": false,
+  "symbols": {
+    "UseBirSign": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "displayName": "Use BirSign Authentication",
+      "description": "Whether to use BirSign SSO authentication.",
+      "replaces": "true/*UseBirSign*/"
+    },
+    "AllowLocalRegistration": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "false",
+      "displayName": "Allow Local Registration",
+      "description": "Whether to allow local user registration.",
+      "replaces": "false/*AllowLocalRegistration*/"
+    },
+    "AllowLocalLogin": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "displayName": "Allow Local Login",
+      "description": "Whether to allow local username/password login.",
+      "replaces": "true/*AllowLocalLogin*/"
+    },
+    "RequireEmailConfirmation": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "displayName": "Require Email Confirmation",
+      "description": "Whether to require email confirmation for new local registrations.",
+      "replaces": "true/*RequireEmailConfirmation*/"
+    },
+    "HttpPort": {
+      "type": "generated",
+      "generator": "port",
+      "replaces": "7007"
+    },
+    "HttpsPort": {
+      "type": "generated",
+      "generator": "port",
+      "replaces": "7006"
+    }
+  }
 }

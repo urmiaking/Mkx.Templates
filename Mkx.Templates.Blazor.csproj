@@ -11,6 +11,7 @@
     
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
     <IncludeContentInPack>true</IncludeContentInPack>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <ContentTargetFolders>content</ContentTargetFolders>
@@ -19,6 +20,7 @@
 
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="icon.png" Pack="true" PackagePath="\" />
     <!-- Include all files in template-content/ under content/ in the nuget package -->
     <Content Include="template-content\**\*" Exclude="template-content\**\bin\**;template-content\**\obj\**;template-content\**\.vs\**" />
     
