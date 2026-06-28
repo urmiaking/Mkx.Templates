@@ -1,0 +1,29 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    name: Build & Publish to NuGet
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Mkx.Templates.Blazor.csproj
+
+      - name: Pack Template
+        run: dotnet pack Mkx.Templates.Blazor.csproj -c Release -o out /p:PackageVersion=1.0.${{ github.run_number }}
+
+      - name: Publish to NuGet.org
+        run: dotnet nuget push out/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
