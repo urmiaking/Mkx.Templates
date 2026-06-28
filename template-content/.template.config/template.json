@@ -15,7 +15,7 @@
     "UseBirSign": {
       "type": "parameter",
       "datatype": "bool",
-      "defaultValue": "true",
+      "defaultValue": "false",
       "displayName": "Use BirSign Authentication",
       "description": "Whether to use BirSign SSO authentication.",
       "replaces": "true/*UseBirSign*/"
@@ -39,7 +39,7 @@
     "RequireEmailConfirmation": {
       "type": "parameter",
       "datatype": "bool",
-      "defaultValue": "true",
+      "defaultValue": "false",
       "displayName": "Require Email Confirmation",
       "description": "Whether to require email confirmation for new local registrations.",
       "replaces": "true/*RequireEmailConfirmation*/"
