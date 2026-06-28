@@ -9,7 +9,7 @@ using Mkx.Templates.Sdk.Shared.Attributes;
 
 namespace Mkx.Templates.Application.Seeders;
 
-[ScopedService]
+//[ScopedService] Uncomment this line to use birsign
 internal sealed class BirSignRoleSeeder(
     IdsService idsService,
     IConfiguration configuration,
