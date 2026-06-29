@@ -83,7 +83,7 @@ public static class WebHostingExtensions
                 var assemblyPath = typeof(Program).Assembly.Location;
                 var buildId = File.GetLastWriteTime(assemblyPath).Ticks.ToString();
 
-                content = content.Replace("const CACHE_NAME = 'mkx-pwa-cache-v1';", $"const CACHE_NAME = 'mkx-pwa-cache-{buildId}';");
+                content = content.Replace("const CACHE_NAME = 'Mkx.Templates-pwa-cache-v1';", $"const CACHE_NAME = 'Mkx.Templates-pwa-cache-{buildId}';");
                 content += $"\n// Build ID: {buildId}";
 
                 context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";

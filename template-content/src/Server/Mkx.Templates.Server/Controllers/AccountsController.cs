@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using MapIdeaHub.BirSign.NetCoreExtension.Models;
-using MapIdeaHub.BirSign.SharedKernel.Constants;
 using Mkx.Templates.Sdk.Server.Api;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Server.Pages;
@@ -39,21 +36,6 @@ public class AccountsController(
     [HttpGet(ApiRoutes.Accounts.Logout)]
     public async Task<IActionResult> LogoutAsync([FromQuery] string? returnUrl = null)
     {
-        if (BirSignSettings.IsUseBirSign(configuration))
-        {
-            // 1. Sign out the local application cookie
-            await signInManager.SignOutAsync();
-
-            // 2. Trigger SSO logout on BirSign.
-            //    The OIDC handler will redirect to BirSign's end-session endpoint,
-            //    then back to our PostLogoutRedirectUri, and finally to the provided RedirectUri.
-            var redirectUrl = returnUrl ?? Url.Content("~/");
-            return SignOut(
-                new AuthenticationProperties { RedirectUri = redirectUrl },
-                BirSignConstants.AuthenticationType);
-        }
-
-        // Standard logout when BirSign is disabled
         await signInManager.SignOutAsync();
 
         var localRedirectUrl = returnUrl ?? "/";

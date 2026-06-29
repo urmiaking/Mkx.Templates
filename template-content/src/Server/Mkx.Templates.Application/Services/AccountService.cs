@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mkx.Templates.Application.Services.Abstractions;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
-using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Sdk.Shared.Attributes;
 using System.Security.Claims;
 
@@ -102,104 +101,6 @@ public class AccountService(UserManager<AppUser> userManager, RoleManager<AppRol
             return false;
 
         return await SetPasswordAsync(user, password, cancellationToken);
-    }
-
-
-    public async Task EnsureUserWithBirSignSsoAsync(
-        ClaimsIdentity identity,
-        CancellationToken cancellationToken = default)
-    {
-        // If there's no role don't create user
-        var roleClaims = identity.FindAll("role").Select(c => c.Value).ToList();
-
-        if (!roleClaims.Any())
-            return;
-
-        // ── 1. Extract user identity from claims ─────────────────
-        var username = identity.FindFirst("preferred_username")?.Value
-                    ?? identity.Name;
-        if (string.IsNullOrEmpty(username))
-        {
-            logger.LogError("BirSign SSO: missing username / preferred_username claim.");
-            return;
-        }
-
-        var firstName = identity.FindFirst("MPH_name")?.Value;
-        var lastName = identity.FindFirst("MPH_family")?.Value;
-        var displayName = $"{firstName} {lastName}".Trim();
-        if (string.IsNullOrWhiteSpace(displayName))
-            displayName = username;
-
-        var email = identity.FindFirst("MPH_email")?.Value
-                 ?? identity.FindFirst(ClaimTypes.Email)?.Value;
-        var phone = identity.FindFirst("MPH_phonenumber")?.Value;
-        if (string.IsNullOrWhiteSpace(phone))
-            phone = null;
-
-        // ── 2. Find or create local user ─────────────────────────
-        var user = await FindUserAsync(username);
-        if (user == null)
-        {
-            user = new AppUser(displayName, username, email, phone);
-            var result = await CreateUserAsync(user, cancellationToken: cancellationToken);
-            if (!result.Succeeded)
-            {
-                logger.LogError(
-                    "BirSign SSO: failed to create user {Username}. Errors: {Errors}",
-                    username,
-                    string.Join(", ", result.Errors));
-                return;
-            }
-        }
-        else
-        {
-            // Update personal info if changed
-            var changed = false;
-            if (user.Name != displayName) { user.SetName(displayName); changed = true; }
-            if (user.Email != email) { user.Email = email; changed = true; }
-            if (user.PhoneNumber != phone) { user.PhoneNumber = phone; changed = true; }
-            if (changed)
-                await userManager.UpdateAsync(user);
-        }
-
-        // ── 3. Clear existing roles and claims (fresh sync) ──────
-        var existingRoles = await userManager.GetRolesAsync(user);
-        if (existingRoles.Any())
-            await userManager.RemoveFromRolesAsync(user, existingRoles);
-
-        var existingClaims = await userManager.GetClaimsAsync(user);
-        foreach (var claim in existingClaims)
-            await userManager.RemoveClaimAsync(user, claim);
-
-        // ── 4. Repopulate roles and claims from `role` claims ────
-        foreach (var role in roleClaims)
-        {
-            switch (role)
-            {
-                case BuiltinRoles.Administrators:
-                    await EnsureRoleAsync(BuiltinRoles.Administrators, cancellationToken);
-                    await userManager.AddToRoleAsync(user, BuiltinRoles.Administrators);
-                    break;
-                case BuiltinRoles.Users:
-                    await EnsureRoleAsync(BuiltinRoles.Users, cancellationToken);
-                    await userManager.AddToRoleAsync(user, BuiltinRoles.Users);
-                    break;
-                default:
-                    {
-                        if (role.StartsWith(nameof(Mkx.Templates)))
-                        {
-                            await userManager.AddClaimAsync(user, new Claim(role, ""));
-                        }
-                        else
-                        {
-                            await EnsureRoleAsync(role, cancellationToken);
-                            await userManager.AddToRoleAsync(user, role);
-                        }
-
-                        break;
-                    }
-            }
-        }
     }
 
     public async Task EnsureRoleAsync(string roleName, CancellationToken cancellationToken = default)

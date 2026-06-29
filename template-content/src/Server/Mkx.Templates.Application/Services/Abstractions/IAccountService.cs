@@ -29,5 +29,4 @@ public interface IAccountService
     Task SetMobileAsync(AppUser user, string mobile, CancellationToken cancellationToken = default);
     Task<bool> SetPasswordAsync(AppUser user, string password, CancellationToken cancellationToken = default);
     Task<bool> SetPasswordAsync(string username, string password, CancellationToken cancellationToken = default);
-    Task EnsureUserWithBirSignSsoAsync(ClaimsIdentity identity, CancellationToken cancellationToken = default);
 }

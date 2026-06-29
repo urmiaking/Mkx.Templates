@@ -1,19 +1,13 @@
-using MapIdeaHub.BirSign.NetCoreExtension;
-using MapIdeaHub.BirSign.NetCoreExtension.Models;
-using MapIdeaHub.BirSign.SharedKernel.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Mkx.Templates.Application.Services.Abstractions;
 using Mkx.Templates.Sdk.Server.Api.Extensions;
 using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Sdk.Shared.Extensions;
 using Mkx.Templates.Server.Common;
 using Mkx.Templates.Server.Services;
 using Mkx.Templates.Shared.Authorization;
-using Mkx.Templates.Shared.Routes;
-using System.Security.Claims;
 
 namespace Mkx.Templates.Server.Extensions;
 
@@ -114,8 +108,6 @@ public static class DependencyInjection
 
             services.ConfigureOptions<ConfigureSecurityStampOptions>();
 
-            services.AddBirSignSso(configuration);
-
             return services;
         }
 
@@ -145,52 +137,6 @@ public static class DependencyInjection
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
                 options.KeepAliveInterval = TimeSpan.FromSeconds(15);
             });
-
-            return services;
-        }
-
-        internal IServiceCollection AddBirSignSso(IConfiguration configuration)
-        {
-            if (BirSignSettings.IsUseBirSign(configuration))
-            {
-                services.AddBirSignAuthentication(
-                    configuration,
-                    manageUser: async (sp, identity) =>
-                    {
-                        var accountService = sp.GetRequiredService<IAccountService>();
-                        await accountService.EnsureUserWithBirSignSsoAsync(identity);
-                    },
-                    optionsConfigurator: options =>
-                    {
-                        var originalOnTokenValidated = options.Events.OnTokenValidated;
-
-                        options.Events.OnTokenValidated = async context =>
-                        {
-                            await originalOnTokenValidated(context);
-
-                            var identity = context.Principal?.Identity as ClaimsIdentity;
-
-                            var hasRoles = identity != null && identity.FindAll("role").Any();
-
-                            if (!hasRoles)
-                            {
-                                context.Response.Redirect(ClientRoutes.Accounts.AccessDenied);
-                                context.HandleResponse();
-                            }
-                        };
-                    });
-
-                services.AddScoped(sp =>
-                {
-                    var config = sp.GetRequiredService<IConfiguration>().GetSection("BirSign");
-
-                    return new IdsService(
-                        config["Authority"],
-                        config["ApiUri"],
-                        config["ClientId"],
-                        config["ClientSecret"]);
-                });
-            }
 
             return services;
         }

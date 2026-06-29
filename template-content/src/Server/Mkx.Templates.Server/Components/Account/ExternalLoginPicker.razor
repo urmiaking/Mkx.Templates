@@ -4,7 +4,6 @@
 @using Mkx.Templates.Server.Common
 @using Mkx.Templates.Server.Services
 @using Mkx.Templates.Shared.Routes
-@using MudBlazor
 
 @inject SignInManager<AppUser> SignInManager
 @inject OidcProviderStore OidcProviderStore
@@ -16,42 +15,23 @@
             <AntiforgeryToken />
             <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
 
-            @if (ShouldAutoRedirect())
-            {
-                <div class="align-center d-flex flex-column gap-2 justify-center">
-                    <input type="hidden" name="provider" value="@_externalLogins[0].Scheme" />
-        
-                    <MudText>در حال انتقال به بیرساین...</MudText>
-                    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
-                </div>
+            <div class="d-flex flex-column gap-2">
+                @foreach (var provider in _externalLogins)
+                {
+                    <input type="hidden" name="provider" value="@provider.Scheme" />
 
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        var form = document.getElementById('external-login-form');
-                        if (form) { form.submit(); }
-                    });
-               </script>
-            }
-            else
-            {
-                <div class="d-flex flex-column gap-2">
-                    @foreach (var provider in _externalLogins)
-                    {
-                        <input type="hidden" name="provider" value="@provider.Scheme" />
-
-                        <button type="submit"
-                                class="mud-button-root mud-button mud-button-filled mud-button-filled-primary mud-button-filled-size-medium mud-width-full mud-ripple">
-                            <div class="d-flex gap-2 align-items-center">
-                                ورود با حساب @provider.DisplayName
-                                @if (!string.IsNullOrEmpty(provider.Icon))
-                                {
-                                    <img src="@provider.Icon" width="20" />
-                                }
-                            </div>
-                        </button>
-                    }
-                </div>
-            }
+                    <button type="submit"
+                            class="mud-button-root mud-button mud-button-filled mud-button-filled-primary mud-button-filled-size-medium mud-width-full mud-ripple">
+                        <div class="d-flex gap-2 align-items-center">
+                            ورود با حساب @provider.DisplayName
+                            @if (!string.IsNullOrEmpty(provider.Icon))
+                            {
+                                <img src="@provider.Icon" width="20" />
+                            }
+                        </div>
+                    </button>
+                }
+            </div>
         </div>
     </form>
 }
@@ -73,7 +53,7 @@
             .Select(s =>
             {
                 var meta = descriptors.FirstOrDefault(x => x.Scheme == s.Name);
-                var displayName = s.Name.ToLower() == "birsign" ? "بیرساین" : s.Name;
+                var displayName = s.Name;
 
                 return new OidcDescriptor
                 {
@@ -83,12 +63,5 @@
                 };
             })
             .ToArray();
-    }
-
-    private bool ShouldAutoRedirect()
-    {
-        return AutoRedirect
-               && _externalLogins.Length == 1
-               && _externalLogins[0].Scheme.Equals("birsign", StringComparison.OrdinalIgnoreCase);
     }
 }

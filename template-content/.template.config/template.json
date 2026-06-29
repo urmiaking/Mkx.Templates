@@ -12,58 +12,6 @@
   "sourceName": "Mkx.Templates",
   "preferNameDirectory": false,
   "symbols": {
-    "UseBirSign": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "displayName": "Use BirSign Authentication",
-      "description": "Whether to use BirSign SSO authentication."
-    },
-    "UseBirSignJson": {
-      "type": "derived",
-      "valueSource": "UseBirSign",
-      "valueTransform": "lowerCase",
-      "replaces": "true/*UseBirSign*/"
-    },
-    "AllowLocalRegistration": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "displayName": "Allow Local Registration",
-      "description": "Whether to allow local user registration."
-    },
-    "AllowLocalRegistrationJson": {
-      "type": "derived",
-      "valueSource": "AllowLocalRegistration",
-      "valueTransform": "lowerCase",
-      "replaces": "false/*AllowLocalRegistration*/"
-    },
-    "AllowLocalLogin": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "true",
-      "displayName": "Allow Local Login",
-      "description": "Whether to allow local username/password login."
-    },
-    "AllowLocalLoginJson": {
-      "type": "derived",
-      "valueSource": "AllowLocalLogin",
-      "valueTransform": "lowerCase",
-      "replaces": "true/*AllowLocalLogin*/"
-    },
-    "RequireEmailConfirmation": {
-      "type": "parameter",
-      "datatype": "bool",
-      "defaultValue": "false",
-      "displayName": "Require Email Confirmation",
-      "description": "Whether to require email confirmation for new local registrations."
-    },
-    "RequireEmailConfirmationJson": {
-      "type": "derived",
-      "valueSource": "RequireEmailConfirmation",
-      "valueTransform": "lowerCase",
-      "replaces": "true/*RequireEmailConfirmation*/"
-    },
     "HttpPort": {
       "type": "generated",
       "generator": "port",

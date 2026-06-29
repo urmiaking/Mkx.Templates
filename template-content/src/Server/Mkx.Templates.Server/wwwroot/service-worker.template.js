@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mkx-pwa-cache-v2';
+const CACHE_NAME = 'Mkx.Templates-pwa-cache-v2';
 
 const ASSETS_TO_CACHE = [
   '/',
