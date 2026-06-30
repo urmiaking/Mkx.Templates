@@ -18,7 +18,7 @@
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="10.0.9" />
-		<PackageReference Include="MudBlazor" Version="9.5.0" />
+		<PackageReference Include="MudBlazor" Version="9.6.0" />
 		<PackageReference Include="Net.Codecrete.QrCodeGenerator" Version="3.0.0" />
 	</ItemGroup>
 

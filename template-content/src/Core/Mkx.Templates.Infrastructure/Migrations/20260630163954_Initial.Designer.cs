@@ -12,7 +12,7 @@ using Mkx.Templates.Infrastructure;
 namespace Mkx.Templates.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260616070901_Initial")]
+    [Migration("20260630163954_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -160,7 +160,8 @@ namespace Mkx.Templates.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
@@ -215,10 +216,12 @@ namespace Mkx.Templates.Infrastructure.Migrations
             modelBuilder.Entity("Mkx.Templates.Sdk.Server.Domain.Identity.AppUserLogin", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -236,7 +239,8 @@ namespace Mkx.Templates.Infrastructure.Migrations
             modelBuilder.Entity("Mkx.Templates.Sdk.Server.Domain.Identity.AppUserPasskey", b =>
                 {
                     b.Property<byte[]>("CredentialId")
-                        .HasColumnType("varbinary(900)");
+                        .HasMaxLength(1024)
+                        .HasColumnType("varbinary(1024)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -269,10 +273,12 @@ namespace Mkx.Templates.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
