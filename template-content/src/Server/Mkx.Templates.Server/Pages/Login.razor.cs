@@ -46,6 +46,41 @@ public partial class Login
 
     private async Task LoginUser()
     {
+        if (!string.IsNullOrEmpty(Input.Passkey?.Error))
+        {
+            _errorMessage = $"خطا در احراز هویت: {Input.Passkey.Error}";
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
+        {
+            Logger.LogInformation("Performing passkey sign-in...");
+            var passkeySignInResult = await SignInManager.PasskeySignInAsync(Input.Passkey.CredentialJson);
+
+            if (passkeySignInResult.Succeeded)
+            {
+                RedirectManager.RedirectTo(ReturnUrl);
+                return;
+            }
+            else if (passkeySignInResult.RequiresTwoFactor)
+            {
+                RedirectManager.RedirectTo(
+                    "Account/LoginWith2fa",
+                    new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+                return;
+            }
+            else if (passkeySignInResult.IsLockedOut)
+            {
+                RedirectManager.RedirectTo(ClientRoutes.Accounts.Lockout);
+                return;
+            }
+            else
+            {
+                _errorMessage = "خطا در احراز هویت اثر انگشت. لطفا مجدد تلاش کنید";
+                return;
+            }
+        }
+
         if (_options.AllowLocal)
         {
             if (!_editContext.Validate())
@@ -81,5 +116,12 @@ public partial class Login
         [Required] public string Username { get; set; } = "";
         [Required, DataType(DataType.Password)] public string Password { get; set; } = "";
         public bool RememberMe { get; set; }
+        public PasskeyInputModel? Passkey { get; set; }
+    }
+
+    private sealed class PasskeyInputModel
+    {
+        public string? CredentialJson { get; set; }
+        public string? Error { get; set; }
     }
 }

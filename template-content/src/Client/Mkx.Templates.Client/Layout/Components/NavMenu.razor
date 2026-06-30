@@ -1,4 +1,10 @@
+@using Mkx.Templates.Sdk.Server.Shared.Authorization
+
 <MudNavMenu Bordered>
     <MudNavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">صفحه اصلی</MudNavLink>
     <MudNavLink href="@ClientRoutes.Tests.Index" Icon="@Icons.Material.Filled.CheckCircle">تست‌ها</MudNavLink>
+    
+    <AuthorizeView Roles="@BuiltinRoles.Administrators">
+        <MudNavLink href="@ClientRoutes.UserAccounts.AccountsList" Icon="@Icons.Material.Filled.People">مدیریت کاربران</MudNavLink>
+    </AuthorizeView>
 </MudNavMenu>

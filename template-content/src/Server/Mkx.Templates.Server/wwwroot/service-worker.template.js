@@ -43,13 +43,16 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Bypass API calls completely
-  if (url.pathname.startsWith('/api')) {
+  // Bypass API calls completely and prevent caching
+  if (url.pathname.toLowerCase().startsWith('/api')) {
+    if (event.request.method === 'GET') {
+      event.respondWith(fetch(event.request, { cache: 'no-store' }));
+    }
     return;
   }
 
   // Bypass Account pages completely (static SSR auth pages)
-  if (url.pathname.startsWith('/Account')) {
+  if (url.pathname.toLowerCase().startsWith('/account')) {
     return;
   }
 

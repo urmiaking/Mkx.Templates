@@ -38,6 +38,7 @@ public static class DependencyInjection
             });
 
             services.AddScoped<ThemeService>();
+            services.AddScoped<WebAuthnService>();
 
             return services;
         }

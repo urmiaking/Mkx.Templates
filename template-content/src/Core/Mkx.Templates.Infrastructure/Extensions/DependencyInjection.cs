@@ -53,7 +53,10 @@ public static class DependencyInjection
 
         internal IServiceCollection AddEntityFrameworkIdentity()
         {
-            services.AddIdentity<AppUser, AppRole>()
+            services.AddIdentity<AppUser, AppRole>(options =>
+                {
+                    options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+                })
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders()
                 .AddSignInManager<AppSignInManager<AppUser>>();

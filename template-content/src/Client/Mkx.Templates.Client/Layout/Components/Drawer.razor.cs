@@ -69,4 +69,11 @@ public partial class Drawer : AppComponentBase
         ThemeService.OnPaletteChanged -= OnPaletteChanged;
         await base.DisposeAsync();
     }
+
+    private async Task NavigateToUserAccounts()
+    {
+        Navigation.NavigateTo(ClientRoutes.UserAccounts.Index);
+        IsDrawerOpen = false;
+        await IsDrawerOpenChanged.InvokeAsync(false);
+    }
 }

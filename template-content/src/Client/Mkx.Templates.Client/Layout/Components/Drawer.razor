@@ -41,7 +41,7 @@
         @if (IsAuthenticated)
         {
             <MudTooltip Text="پروفایل">
-                <MudIconButton Icon="@Icons.Material.Filled.Person" Size="Size.Medium" Class="shortcut-btn" />
+                <MudIconButton Icon="@Icons.Material.Filled.Person" OnClick="NavigateToUserAccounts" Size="Size.Medium" Class="shortcut-btn" />
             </MudTooltip>
             <MudTooltip Text="تنظیمات">
                 <MudIconButton Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Class="shortcut-btn" />

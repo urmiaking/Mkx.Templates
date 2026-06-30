@@ -43,6 +43,12 @@
                                      FormAction="FormAction.Submit" EndIcon="@Icons.Material.Filled.Login">
                         ورود به سامانه
                     </MudStaticButton>
+
+                    <div id="passkey-login-section" style="display: none">
+                        <PasskeySubmit Name="Input.Passkey"
+                                       Auto="true"
+                                       Username="Input.Username"/>
+                    </div>
                 </div>
             </MudItem>
         }
@@ -56,3 +62,38 @@
         <ExternalLoginPicker AutoRedirect="@(!_options.AllowLocal)" />
     </div>
 }
+
+<script>
+    function initPasskeyAutoOpen() {
+        const containerId = 'passkey-login-section';
+        const storageKey = 'DeviceRegisteredPasskey';
+        const container = document.getElementById(containerId);
+
+        if (!container) return;
+
+        const isRegistered = localStorage.getItem(storageKey) === 'true';
+
+        if (isRegistered) {
+            container.style.display = 'flex';
+            customElements.whenDefined('passkey-submit').then(() => {
+                const passkeyComponent = container.querySelector('passkey-submit');
+
+                if (passkeyComponent && typeof passkeyComponent.obtainAndSubmitCredential === 'function') {
+                    if (!passkeyComponent.hasAttribute('data-auto-triggered')) {
+                        passkeyComponent.setAttribute('data-auto-triggered', 'true');
+                        console.log("Auto-triggering passkey modal...");
+                        passkeyComponent.obtainAndSubmitCredential(false);
+                    }
+                }
+            });
+        }
+    }
+
+    initPasskeyAutoOpen();
+
+    if (typeof Blazor !== 'undefined') {
+        Blazor.removeEventListener('enhancedload', initPasskeyAutoOpen);
+        Blazor.addEventListener('enhancedload', initPasskeyAutoOpen);
+    }
+</script>
+
