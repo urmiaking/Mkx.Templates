@@ -145,6 +145,11 @@ The brand text logo (e.g. `Mkx.Templates`) uses the `.brand-text` class which im
 - **Tighter Bounds**: Keeping translation range tight (e.g., `120%` to `-20%`) rather than wide offsets keeps the reflection active across the letters rather than spending half the time hidden off-screen.
 - **Shorthand / Important Override**: Do not define `background-position` with `!important` on the class level, as it overrides and locks keyframe animation translations.
 
+### WASM Loading Splash Screen
+- **InteractiveWebAssembly Mode**: The application runs in InteractiveWebAssembly mode (no prerender) for all interactive pages, while authorization pages use static SSR.
+- **Splash Screen**: An `#app-loading` element renders the `Mkx.Templates` logo and a Cloudflare-style loading progress bar.
+- **Dismissal**: Dismissed by invoking `window.Mkx.removeSplash` in `BaseLayout.OnAfterRenderAsync` on the first render.
+
 ### Empty Box Layout (Static SSR Safe)
 `EmptyBoxLayout.razor` is the layout wrapper for static SSR pages (Login, AccessDenied, NotFound).
 - **No ThemeService Injection**: Because these pages render in static SSR mode, they cannot depend on interactive scoped client services like `ThemeService` in C#. Instead, the theme layout adapts natively through standard CSS variables.

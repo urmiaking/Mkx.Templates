@@ -26,8 +26,31 @@
 </head>
 
 <body>
+    @if (ShowSplash)
+    {
+        <div id="app-loading">
+            <div class="splash-screen">
+                <span class="brand-text" dir="ltr">Mkx.Templates</span>
+                <div class="splash-progress-track">
+                    <div class="splash-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    }
+
     <Routes @rendermode="RenderModeForPage" />
     <ReconnectModal />
+
+    <script>
+            window.Mkx = window.Mkx || {};
+            window.Mkx.removeSplash = function () {
+                var el = document.getElementById('app-loading');
+                if (el) {
+                    el.classList.add('fade-out');
+                    setTimeout(function () { el.remove(); }, 300);
+                }
+            };
+    </script>
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
     <script src="@Assets["js/pwa-helper.js"]"></script>

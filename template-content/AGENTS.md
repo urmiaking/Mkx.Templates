@@ -55,7 +55,16 @@ Mkx.Templates/
 
 ---
 
-## 3. Getting Started CLI Commands
+## 3. Core UI Elements & Layouts
+
+### WASM Loading Splash Screen
+- **InteractiveWebAssembly Mode**: The application runs in InteractiveWebAssembly mode (no prerender) for all interactive pages, while authorization pages use static SSR.
+- **Splash Screen**: An `#app-loading` element renders the `Mkx.Templates` logo and a Cloudflare-style loading progress bar.
+- **Dismissal**: Dismissed by invoking `window.Mkx.removeSplash` in `BaseLayout.OnAfterRenderAsync` on the first render.
+
+---
+
+## 4. Getting Started CLI Commands
 
 Use the following commands to restore, compile, or run the project:
 

@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using Mkx.Templates.Client.Common;
 using Mkx.Templates.Client.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 using Mkx.Templates.Client.Layout.Themes;
 
@@ -16,6 +17,7 @@ public partial class BaseLayout
     [Inject] private ThemeService? ThemeService { get; set; }
     [Inject] private ILocalStorageService LocalStorage { get; set; } = default!;
     [Inject] private ISnackbar ToastService { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,6 +47,9 @@ public partial class BaseLayout
     {
         if (firstRender)
         {
+            // Dismiss the WASM loading splash screen (no-op if splash doesn't exist)
+            await JSRuntime.InvokeVoidAsync("Mkx.removeSplash");
+
             await LoadTheme();
             StateHasChanged();
         }

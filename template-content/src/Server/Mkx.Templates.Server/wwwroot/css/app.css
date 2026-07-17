@@ -1030,3 +1030,67 @@ h1:focus {
 .mud-input-outlined-border.mud-input-outlined-border-focus {
     border-color: var(--mud-palette-primary) !important;
 }
+
+/* ==========================================================================
+   WASM LOADING SPLASH SCREEN (Cloudflare-style)
+   ========================================================================== */
+
+#app-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff;
+    transition: opacity 0.3s ease;
+}
+
+#app-loading.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.splash-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Override .brand-text inside splash with hardcoded colors.
+   The global .brand-text uses var(--mud-palette-primary) which isn't
+   available yet before MudBlazor CSS loads, making the text invisible. */
+#app-loading .brand-text {
+    background-image: linear-gradient(90deg,
+        #2563eb 0%,
+        #2563eb 38%,
+        rgba(255, 255, 255, 0.9) 50%,
+        #2563eb 62%,
+        #2563eb 100%
+    ) !important;
+    -webkit-text-fill-color: transparent !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+}
+
+.splash-progress-track {
+    width: 180px;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.splash-progress-bar {
+    width: 40%;
+    height: 100%;
+    background: #2563eb;
+    border-radius: 2px;
+    animation: splash-progress 1.8s ease-in-out infinite;
+}
+
+@keyframes splash-progress {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+}

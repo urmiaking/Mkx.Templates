@@ -4,31 +4,31 @@ This document details the mechanics of Service registrations, Dependency Injecti
 
 ---
 
-## 1. Blazor Interactive Auto Rendering Mode
+## 1. Blazor Render Mode & WASM Loading
 
-The application operates in **Blazor Interactive Auto Mode**, which combines Server-Side Rendering (SSR/Server) and Client-Side WebAssembly (WASM). This affects how services are resolved depending on the active execution context:
+The application uses **InteractiveWebAssembly mode (no prerender)** for all interactive pages (everything except SSR auth pages like Login and AccessDenied). The render mode is configured in `App.razor.cs` and can be switched back to `InteractiveAutoRenderMode(true)` by changing a single line — the architecture is designed for reversibility.
 
 ```
                             ┌──────────────────────┐
                             │   IFeatureService    │  (Shared Layer)
                             └──────────┬───────────┘
                                        │
-            ┌──────────────────────────┴──────────────────────────┐
-            ▼ (Resolved on Server)                                ▼ (Resolved on WASM Client)
- ┌──────────────────────┐                               ┌──────────────────────┐
- │    FeatureService    │                               │ FeatureClientService │ (Client Layer)
- │ (Application Layer)  │                               └──────────┬───────────┘
- └──────────────────────┘                                          │
-                                                                   │ HTTP REST Call
-                                                                   ▼
-                                                        ┌──────────────────────┐
-                                                        │  FeaturesController  │ (Server Layer)
-                                                        └──────────────────────┘
+                                       ▼ (Resolved on WASM Client)
+                              ┌──────────────────────┐
+                              │ FeatureClientService │ (Client Layer)
+                              └──────────┬───────────┘
+                                         │
+                                         │ HTTP REST Call
+                                         ▼
+                              ┌──────────────────────┐
+                              │  FeaturesController  │ (Server Layer)
+                              └──────────────────────┘
 ```
 
-1. **Pre-rendering & Server Execution**: When the page is requested initially, it is rendered on the server. The dependency injection container resolves the shared interface `IFeatureService` to the server-side implementation (`FeatureService` in `Mkx.Templates.Application`), which directly accesses the database via repositories.
-2. **WebAssembly Execution**: Once the WASM bundle downloads and activates in the client's browser, execution switches to the client. The client container resolves `IFeatureService` to the client-side implementation (`FeatureClientService` in `Mkx.Templates.Client`), which communicates with the server via HTTP REST API calls.
+1. **WASM Loading Splash Screen**: Since prerendering is disabled, the server sends an empty HTML shell. A Cloudflare-style splash screen (logo + progress bar) is shown until the WASM runtime boots and the first Blazor component renders. The splash is automatically dismissed by `BaseLayout.OnAfterRenderAsync`.
+2. **WebAssembly Execution**: The client container resolves `IFeatureService` to the client-side implementation (`FeatureClientService` in `Mkx.Templates.Client`), which communicates with the server via HTTP REST API calls.
 3. **API Controllers**: The client services target REST controllers in the server layer (derived from `ApiControllerBase` in `Mkx.Templates.Server.Controllers`), which in turn invoke the server-side `FeatureService`.
+4. **Authentication State**: The client uses a dual-strategy `PersistentAuthenticationStateProvider` that reads from `PersistentComponentState` (prerender on) or falls back to the `/api/Account/auth-state` API endpoint (prerender off).
 
 ---
 
