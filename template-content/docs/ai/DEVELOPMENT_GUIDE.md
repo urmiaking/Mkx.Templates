@@ -182,6 +182,156 @@ public partial class [Feature]s
 
 ---
 
+## Authorization & Access Control
+
+This project provides two authorization mechanisms: **Role-Based Authorization** and **Policy-Based Authorization**. Both are available on both the server (API controllers) and client (Blazor WASM components).
+
+### Built-in Roles
+
+Role constants are defined in `BuiltinRoles` (located in `Sdk/Mkx.Templates.Sdk.Server.Shared/Authorization/BuiltinRoles.cs`):
+
+```csharp
+public static class BuiltinRoles
+{
+    public static readonly string[] Roles = [Administrators, Users];
+
+    public const string Administrators = "Administrators";
+    public const string Users = "Users";
+}
+```
+
+### Policy Definition Pipeline
+
+Policies are defined in a three-layer pipeline:
+
+1. **Policy Constants** — Define string-based policy names in `Mkx.Templates.Shared/Authorization/AppPolicies.cs`:
+   ```csharp
+   public static class AppPolicies
+   {
+       public static class [Feature]s
+       {
+           public const string View = $"{nameof(Mkx.Templates)}-{nameof([Feature]s)}-{nameof(View)}";
+           public const string Edit = $"{nameof(Mkx.Templates)}-{nameof([Feature]s)}-{nameof(Edit)}";
+       }
+   }
+   ```
+
+2. **Policy Provider** — Register policies via `PolicyDefinition.Build()` in `Mkx.Templates.Shared/Authorization/AppPolicyProvider.cs` implementing `IApplicationPolicyProvider`:
+   ```csharp
+   public class AppPolicyProvider : IApplicationPolicyProvider
+   {
+       public string Category => "Mkx.Templates";
+       public IEnumerable<PolicyDefinition> GetPolicies()
+       {
+           yield return PolicyDefinition.Build(AppPolicies.[Feature]s.View, "دسترسی مشاهده [Feature]");
+           yield return PolicyDefinition.Build(AppPolicies.[Feature]s.Edit, "دسترسی ویرایش [Feature]");
+       }
+   }
+   ```
+   The shorthand `PolicyDefinition.Build(string claim, string description)` creates a claim-based policy by calling `RequireClaim(claim)` internally. For custom policy logic, use the builder overload:
+   ```csharp
+   PolicyDefinition.Build("PolicyName", "Description", b => b.RequireClaim("ClaimType", "value1", "value2"));
+   ```
+
+3. **Automatic Registration** — `AppPolicyProvider` is registered as a singleton `IApplicationPolicyProvider` in `DependencyInjection.cs`. The SDK's `AuthorizationPolicyProvider` (which implements `IAuthorizationPolicyProvider`) aggregates all `IApplicationPolicyProvider` instances to resolve policies at runtime.
+
+4. **Seeding** — The `RoleSeeder` automatically seeds all policy claim requirements as role claims on the `Administrators` role during database initialization, granting administrators full access to every defined policy by default.
+
+### Server-Side Authorization (API Controllers)
+
+#### Role-Based: `[Authorize(Roles = ...)]`
+Apply the standard `[Authorize]` attribute at controller or action level for role-based checks:
+```csharp
+// Require authentication (any role)
+[Authorize]
+public class [Feature]sController : ApiControllerBase { }
+
+// Restrict to Administrators role
+[Authorize(Roles = BuiltinRoles.Administrators)]
+[HttpPost]
+public async Task<IActionResult> Delete(Guid id) { }
+```
+
+#### Policy-Based: `[Authorize(Policy = ...)]` (Preferred)
+Use the standard ASP.NET Core `[Authorize(Policy = "...")]` attribute to enforce a policy check on an action. This is the **preferred** approach:
+```csharp
+using Mkx.Templates.Shared.Authorization;
+
+[Authorize(Policy = AppPolicies.[Feature]s.View)]
+[HttpGet]
+public async Task<IActionResult> GetAll() { }
+```
+
+> **Note:** A custom `[AuthorizePolicies]` attribute also exists in `Sdk.Server.Api` for scenarios where you need **OR logic** (succeeds if *any* of the supplied policies pass). Prefer the standard `[Authorize(Policy = "...")]` for single-policy checks.
+
+#### Programmatic Policy Check: `IPolicyValidator`
+Inject `IPolicyValidator` (from `Sdk.Server.Shared`) into application services to check roles or policies imperatively:
+```csharp
+public class [Feature]Service(IPolicyValidator policyValidator)
+{
+    public async Task DoSomethingAsync()
+    {
+        if (!await policyValidator.HasPolicyAsync(AppPolicies.[Feature]s.Edit))
+            throw new UnauthorizedAccessException();
+    }
+}
+```
+
+### Client-Side Authorization (Blazor WASM)
+
+#### Page-Level: `@attribute [Authorize]`
+Apply the `[Authorize]` attribute at the top of a `.razor` page to require authentication or a specific role:
+```razor
+@attribute [Route(ClientRoutes.[Feature]s.Index)]
+@attribute [Authorize]
+@inherits AppComponentBase
+```
+For role-restricted pages:
+```razor
+@attribute [Authorize(Roles = BuiltinRoles.Administrators)]
+```
+
+#### Inline UI: `<AuthorizeView>`
+Use `<AuthorizeView>` to conditionally render UI sections based on roles:
+```razor
+<AuthorizeView Roles="@BuiltinRoles.Administrators">
+    <Authorized>
+        <MudButton OnClick="DeleteAsync">حذف</MudButton>
+    </Authorized>
+</AuthorizeView>
+```
+For policy-based inline checks:
+```razor
+<AuthorizeView Policy="@AppPolicies.[Feature]s.Edit">
+    <Authorized>
+        <MudButton OnClick="EditAsync">ویرایش</MudButton>
+    </Authorized>
+</AuthorizeView>
+```
+
+#### Programmatic Policy Check: `HasPolicyAsync`
+`AppComponentBase` exposes a `HasPolicyAsync(string policy)` helper for imperative policy checks inside component code-behind:
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    var canEdit = await HasPolicyAsync(AppPolicies.[Feature]s.Edit);
+    if (canEdit)
+    {
+        // Show edit controls
+    }
+}
+```
+
+### Adding a New Policy (Step-by-Step)
+
+1. Add a new `const string` to the relevant nested class in `AppPolicies.cs` (`Mkx.Templates.Shared/Authorization/`).
+2. Register the policy in `AppPolicyProvider.GetPolicies()` via `PolicyDefinition.Build()` (`Mkx.Templates.Shared/Authorization/`).
+3. Apply the policy on the **server** using `[Authorize(Policy = AppPolicies.[Feature]s.YourPolicy)]` on the relevant controller action.
+4. Apply the policy on the **client** using `@attribute [Authorize(Policy = "...")]` on the page, or `<AuthorizeView Policy="...">` for inline sections, or `HasPolicyAsync(...)` for programmatic checks.
+5. The `RoleSeeder` will automatically grant the new policy's claims to the `Administrators` role on the next database seed.
+
+---
+
 ## System Test Aggregate
 The repository comes pre-bundled with a `Test` aggregate matching this exact pattern. This is an illustrative feature example to showcase real-world clean architecture flow. When you begin implementing the actual business requirements, the `Test` aggregates, services, and routes can be safely deleted or replaced.
 
@@ -190,7 +340,7 @@ The repository comes pre-bundled with a `Test` aggregate matching this exact pat
 The project includes a `Dockerfile` at the project root. To build the Docker image locally, run:
 
 ```bash
-docker build -t mkx.templates:latest .
+docker build -t mkx.templates:latest . -f
 ```
 
 > **Important:** This is documentation only. The agent **must not** execute Docker commands or create images automatically.

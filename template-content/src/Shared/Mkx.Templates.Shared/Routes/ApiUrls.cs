@@ -20,6 +20,9 @@ public static class ApiUrls
 
         public static string Login(string? returnUrl) =>
             BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Login).AppendQueryString(new { returnUrl });
+
+        public static string AuthState() =>
+            BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.AuthState);
     }
 
     public static class UserAccounts

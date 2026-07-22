@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Mkx.Templates.Sdk.Server.Api;
+using Mkx.Templates.Client.Common;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Server.Pages;
 using Mkx.Templates.Shared.Routes;
@@ -43,5 +44,23 @@ public class AccountsController(
             localRedirectUrl = "/" + localRedirectUrl;
         }
         return LocalRedirect(localRedirectUrl);
+    }
+
+    /// <summary>
+    /// Returns the current user's authentication claims for WASM client initialization.
+    /// This endpoint serves as a fallback when prerendering is disabled and
+    /// PersistentComponentState cannot transfer auth data to the client.
+    /// </summary>
+    [HttpGet(ApiRoutes.Accounts.AuthState)]
+    public IActionResult GetAuthState()
+    {
+        var principal = HttpContext.User;
+
+        if (principal.Identity?.IsAuthenticated == true)
+        {
+            return Ok(new UserInfo(principal.Claims));
+        }
+
+        return Ok(new UserInfo { UserClaims = [] });
     }
 }
