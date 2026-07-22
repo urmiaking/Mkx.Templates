@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using System.Security.Claims;
 
@@ -29,4 +29,5 @@ public interface IAccountService
     Task SetMobileAsync(AppUser user, string mobile, CancellationToken cancellationToken = default);
     Task<bool> SetPasswordAsync(AppUser user, string password, CancellationToken cancellationToken = default);
     Task<bool> SetPasswordAsync(string username, string password, CancellationToken cancellationToken = default);
+    Task<AppUser?> FindUserByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default);
 }

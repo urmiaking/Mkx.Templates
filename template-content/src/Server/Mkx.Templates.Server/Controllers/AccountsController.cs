@@ -11,8 +11,7 @@ namespace Mkx.Templates.Server.Controllers;
 
 [Route(ApiRoutes.Accounts.Base)] 
 public class AccountsController(
-    SignInManager<AppUser> signInManager,
-    IConfiguration configuration) : ApiControllerBase
+    SignInManager<AppUser> signInManager) : ApiControllerBase
 {
     [HttpPost(ApiRoutes.Accounts.PerformExternalLogin)] 
     public IActionResult PerformExternalLogin([FromForm] string provider,

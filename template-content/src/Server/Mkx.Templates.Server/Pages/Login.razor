@@ -14,7 +14,7 @@
         {
             <MudItem xs="12">
                 <MudStaticTextField For="@(() => Input.Username)" @bind-Value="Input.Username"
-                                    Label="نام کاربری" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                    Label="نام کاربری / شماره تلفن همراه" Variant="Variant.Outlined" Margin="Margin.Dense"
                                     UserAttributes="@(new Dictionary<string, object?> { { "autocomplete", "username" }, { "aria-required", "true" }, { "dir", "ltr" } })" />
             </MudItem> 
             <MudItem xs="12">
@@ -25,7 +25,7 @@
 
             @if (_options.ShowRememberMe)
             {
-                <MudItem xs="12" Class="m-0 p-0">
+                <MudItem xs="12" Class="m-0 p-0 d-flex align-center justify-space-between">
                     <MudStaticCheckBox For="@(() => Input.RememberMe)" @bind-Value="Input.RememberMe">مرا بخاطر بسپار</MudStaticCheckBox>
                 </MudItem>
             }
@@ -50,6 +50,10 @@
                                        Username="Input.Username"/>
                     </div>
                 </div>
+            </MudItem>
+
+            <MudItem xs="12" Class="d-flex justify-center">
+                <a href="@ClientRoutes.Accounts.ForgotPassword" class="mud-typography mud-link mud-primary-text mud-link-underline-hover mud-typography-body2">رمز عبور را فراموش کرده‌اید؟</a>
             </MudItem>
         }
     </MudGrid>

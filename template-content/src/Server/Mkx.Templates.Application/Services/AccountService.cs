@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mkx.Templates.Application.Services.Abstractions;
@@ -275,4 +275,7 @@ public class AccountService(UserManager<AppUser> userManager, RoleManager<AppRol
         var token = await userManager.GenerateChangePhoneNumberTokenAsync(user, user.PhoneNumber);
         await userManager.ChangePhoneNumberAsync(user, user.PhoneNumber, token);
     }
+
+    public Task<AppUser?> FindUserByPhoneNumberAsync(string phoneNumber, CancellationToken cancellationToken = default)
+        => userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber, cancellationToken);
 }

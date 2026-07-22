@@ -19,6 +19,7 @@ public static class ClientRoutes
         public const string ExternalLogin = $"{Prefix}/ExternalLogin";
         public const string Login = $"{Prefix}/Login";
         public const string Lockout = $"{Prefix}/Lockout";
+        public const string ForgotPassword = $"{Prefix}/ForgotPassword";
     }
 
     public static class UserAccounts

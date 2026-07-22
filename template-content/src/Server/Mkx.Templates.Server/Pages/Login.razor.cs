@@ -1,6 +1,7 @@
 using Mkx.Templates.Server.Common;
 using Mkx.Templates.Server.Services;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
+using Mkx.Templates.Application.Services.Abstractions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -26,6 +27,7 @@ public partial class Login
     [Inject] private NavigationManager NavigationManager { get; set; } = default!;
     [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
     [Inject] private IOptions<LoginOptions> Options { get; set; } = default!;
+    [Inject] private IAccountService AccountService { get; set; } = default!;
 
     protected override void OnInitialized()
     {
@@ -86,8 +88,18 @@ public partial class Login
             if (!_editContext.Validate())
                 return;
 
+            var actualUsername = Input.Username;
+            if (!string.IsNullOrWhiteSpace(Input.Username))
+            {
+                var userByPhone = await AccountService.FindUserByPhoneNumberAsync(Input.Username);
+                if (userByPhone != null)
+                {
+                    actualUsername = userByPhone.UserName ?? Input.Username;
+                }
+            }
+
             var result = await SignInManager.PasswordSignInAsync(
-                Input.Username,
+                actualUsername,
                 Input.Password,
                 Input.RememberMe,
                 lockoutOnFailure: _options.LockoutOnFailure);
