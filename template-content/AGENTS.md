@@ -80,3 +80,27 @@ Use the following commands to restore, compile, or run the project:
   ```powershell
   dotnet run --project src/Server/Mkx.Templates.Server/Mkx.Templates.Server.csproj
   ```
+
+## 5. Verification Build Instructions
+
+When you have edited files, follow these steps to verify that the code builds without errors:
+
+1. **Identify the projects that were modified**
+   - If the changes only affect a single project (e.g., `Mkx.Templates.Server`, `Mkx.Templates.Client`, or any of the core libraries), run a build for that specific project.
+   - If the edits span multiple projects across the solution, building the entire solution is acceptable.
+
+2. **Run the appropriate `dotnet build` command**
+
+   *Single‑project build* (replace `<ProjectPath>` with the actual `.csproj` file you changed):
+   ```powershell
+   dotnet build <ProjectPath>
+   ```
+
+   *Full‑solution build* (when changes affect several projects):
+   ```powershell
+   dotnet build Mkx.Templates.slnx
+   ```
+
+3. **Interpret the result**
+   - A successful build means the changes compile.
+   - If errors appear, review the compiler messages, fix the code, and rebuild.
