@@ -17,8 +17,7 @@ public static class DependencyInjection
     {
         internal IServiceCollection AddServer(IConfiguration configuration)
         {
-            services.InitializeDefaultCulture()
-                .AddControllers(configuration)
+            services.AddControllers(configuration)
                 .AddComponents()
                 .AddSwagger()
                 .AddCache()

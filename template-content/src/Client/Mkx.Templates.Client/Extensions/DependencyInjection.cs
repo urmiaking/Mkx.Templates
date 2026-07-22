@@ -30,6 +30,8 @@ public static class DependencyInjection
         {
             services.AddBlazoredLocalStorage();
 
+            services.InitializeDefaultCulture();
+
             services.AddMudServices(config =>
             {
                 config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomLeft;

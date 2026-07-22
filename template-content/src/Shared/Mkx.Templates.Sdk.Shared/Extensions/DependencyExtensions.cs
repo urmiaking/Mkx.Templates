@@ -1,6 +1,8 @@
-﻿using Mkx.Templates.Sdk.Shared.Attributes;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Mkx.Templates.Sdk.Shared.Attributes;
+using Mkx.Templates.Sdk.Shared.Utilities;
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
@@ -159,6 +161,18 @@ public static class DependencyExtensions
                     }
                 }
             }
+        }
+
+        public IServiceCollection InitializeDefaultCulture()
+        {
+            var culture = CultureHelper.GetPersianCulture();
+
+            CultureInfo.CurrentCulture = culture;
+            CultureInfo.CurrentUICulture = culture;
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+            return services;
         }
     }
 }

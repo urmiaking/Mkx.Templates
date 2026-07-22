@@ -57,17 +57,5 @@ public static class ServiceCollectionExtensions
 
             return services;
         }
-
-        public IServiceCollection InitializeDefaultCulture()
-        {
-            var culture = CultureHelper.GetPersianCulture();
-
-            CultureInfo.CurrentCulture = culture;
-            CultureInfo.CurrentUICulture = culture;
-            CultureInfo.DefaultThreadCurrentCulture = culture;
-            CultureInfo.DefaultThreadCurrentUICulture = culture;
-
-            return services;
-        }
     }
 }
