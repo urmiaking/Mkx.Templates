@@ -1,3 +1,4 @@
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Sdk.Shared.Extensions;
 
 namespace Mkx.Templates.Shared.Routes;
@@ -82,8 +83,9 @@ public static class ApiUrls
             BuildUrl(ApiRoutes.UserAccounts.Base, ApiRoutes.UserAccounts.RemovePasskey)
                 .FormatRoute(new { credentialId });
 
-        public static string GetAccountsList() =>
-            BuildUrl(ApiRoutes.UserAccounts.Base, ApiRoutes.UserAccounts.GetAccountsList);
+        public static string GetAccountsList(RequestFilter filter) =>
+            BuildUrl(ApiRoutes.UserAccounts.Base, ApiRoutes.UserAccounts.GetAccountsList)
+                .AppendQueryString(filter);
 
         public static string LockUser(Guid id) =>
             BuildUrl(ApiRoutes.UserAccounts.Base, ApiRoutes.UserAccounts.LockUser)

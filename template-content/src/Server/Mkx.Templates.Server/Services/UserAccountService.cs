@@ -16,6 +16,7 @@ using Mkx.Templates.Application.Validators.UserAccounts;
 using Mkx.Templates.Sdk.Server.Application.Abstractions;
 using Mkx.Templates.Sdk.Server.Application.Exceptions;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Sdk.Server.Shared.Exceptions;
 using Mkx.Templates.Sdk.Shared.Attributes;
 using Mkx.Templates.Server.Extensions;
@@ -299,15 +300,35 @@ internal sealed class UserAccountService(
             throw new InvalidOperationException(string.Join(",", result.Errors.Select(x => x.Description)));
     }
 
-    public async Task<List<GetUserAccountResponse>> GetAccountsListAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedList<GetUserAccountResponse>> GetAccountsListAsync(RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        var users = await userManager.Users
+        var skip = filter.Skip ?? 0;
+        var take = filter.Take ?? 100;
+
+        var query = userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Search))
+        {
+            query = query.Where(u => u.UserName!.Contains(filter.Search) || u.Name.Contains(filter.Search) || (u.PhoneNumber != null && u.PhoneNumber.Contains(filter.Search)));
+        }
+
+        var count = await query.CountAsync(cancellationToken);
+
+        var users = await query
             .Include(x => x.UserRoles)
-            .ThenInclude(x => x.Role)
+                .ThenInclude(x => x.Role)
             .OrderBy(x => x.UserName)
+            .Skip(skip)
+            .Take(take)
             .ToListAsync(cancellationToken);
 
-        return mapper.Map<List<GetUserAccountResponse>>(users);
+        return new PagedList<GetUserAccountResponse>
+        {
+            Data = mapper.Map<List<GetUserAccountResponse>>(users),
+            Total = count,
+            Skip = skip,
+            Take = take
+        };
     }
 
     public async Task LockUserAsync(Guid id, CancellationToken cancellationToken = default)

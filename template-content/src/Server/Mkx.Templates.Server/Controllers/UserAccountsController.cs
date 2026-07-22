@@ -9,6 +9,7 @@ using Mkx.Templates.Sdk.Server.Api;
 using Mkx.Templates.Sdk.Server.Application.Abstractions;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Sdk.Server.Shared.Authorization;
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Shared.DTOs.UserAccounts;
 using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
@@ -148,9 +149,9 @@ public class UserAccountsController(IUserAccountService service) : ApiController
 
     [HttpGet(ApiRoutes.UserAccounts.GetAccountsList)]
     [Authorize(Roles = BuiltinRoles.Administrators)]
-    public async Task<IActionResult> GetAccountsListAsync(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetAccountsListAsync([FromQuery] RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        var list = await service.GetAccountsListAsync(cancellationToken);
+        var list = await service.GetAccountsListAsync(filter, cancellationToken);
         return Ok(list);
     }
 

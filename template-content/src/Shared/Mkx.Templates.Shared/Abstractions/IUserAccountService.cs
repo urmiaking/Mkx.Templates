@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Shared.DTOs.UserAccounts;
 
 namespace Mkx.Templates.Shared.Abstractions;
@@ -47,7 +48,7 @@ public interface IUserAccountService
 
     #region Users
 
-    Task<List<GetUserAccountResponse>> GetAccountsListAsync(CancellationToken cancellationToken = default);
+    Task<PagedList<GetUserAccountResponse>> GetAccountsListAsync(RequestFilter filter, CancellationToken cancellationToken = default);
     Task LockUserAsync(Guid id, CancellationToken cancellationToken = default);
     Task UnlockUserAsync(Guid id, CancellationToken cancellationToken = default);
     Task CreateAccountAsync(UserAccountRequestDto request, CancellationToken cancellationToken = default);

@@ -1,3 +1,4 @@
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Sdk.Server.Shared.Exceptions;
 using Mkx.Templates.Sdk.Shared.Attributes;
 using Mkx.Templates.Sdk.Shared.Exceptions;
@@ -183,14 +184,14 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
             throw HttpRequestFailedException.GetException(response.StatusCode, response);
     }
 
-    public async Task<List<GetUserAccountResponse>> GetAccountsListAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedList<GetUserAccountResponse>> GetAccountsListAsync(RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        using var response = await client.GetAsync(ApiUrls.UserAccounts.GetAccountsList(), cancellationToken);
+        using var response = await client.GetAsync(ApiUrls.UserAccounts.GetAccountsList(filter), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
             throw HttpRequestFailedException.GetException(response.StatusCode, response);
 
-        var result = await response.Content.ReadFromJsonAsync<List<GetUserAccountResponse>>(jsonOptions, cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<PagedList<GetUserAccountResponse>>(jsonOptions, cancellationToken);
 
         return result ?? throw new UnexpectedHttpResponseException();
     }
