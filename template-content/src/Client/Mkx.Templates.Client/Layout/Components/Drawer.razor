@@ -43,8 +43,8 @@
             <MudTooltip Text="پروفایل">
                 <MudIconButton Icon="@Icons.Material.Filled.Person" OnClick="NavigateToUserAccounts" Size="Size.Medium" Class="shortcut-btn" />
             </MudTooltip>
-            <MudTooltip Text="تنظیمات">
-                <MudIconButton Icon="@Icons.Material.Filled.Settings" Size="Size.Medium" Class="shortcut-btn" />
+            <MudTooltip Text="رویدادها">
+                <MudIconButton Icon="@Icons.Material.Filled.EventNote" Class="shortcut-btn" Href="@ClientRoutes.Logs.Base" />
             </MudTooltip>
         }
         <MudTooltip Text="@(ThemeService.IsDarkMode ? "حالت روشن" : "حالت تاریک")">

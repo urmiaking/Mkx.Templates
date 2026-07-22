@@ -6,6 +6,7 @@ using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Server.Components;
 using Mkx.Templates.Server.Middlewares;
 using Mkx.Templates.Shared.Routes;
+using Serilog.Ui.Web.Extensions;
 using System.Reflection;
 
 
@@ -59,6 +60,8 @@ public static class WebHostingExtensions
             app.MapStaticAssets();
 
             app.MapServiceWorker();
+
+            app.UseSerilogUi();
 
             app.MapControllers();
             app.MapRazorComponents<App>()
