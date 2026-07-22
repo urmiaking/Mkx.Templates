@@ -184,3 +184,13 @@ public partial class [Feature]s
 
 ## System Test Aggregate
 The repository comes pre-bundled with a `Test` aggregate matching this exact pattern. This is an illustrative feature example to showcase real-world clean architecture flow. When you begin implementing the actual business requirements, the `Test` aggregates, services, and routes can be safely deleted or replaced.
+
+## Docker Build Instructions
+
+The project includes a `Dockerfile` at the project root. To build the Docker image locally, run:
+
+```bash
+docker build -t mkx.templates:latest .
+```
+
+> **Important:** This is documentation only. The agent **must not** execute Docker commands or create images automatically.

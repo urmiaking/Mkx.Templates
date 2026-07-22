@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Mkx.Templates.Server": {
+    "Server": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
