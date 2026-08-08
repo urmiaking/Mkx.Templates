@@ -7,7 +7,7 @@ namespace Mkx.Templates.Client.Services;
 
 public class ThemeService(ILocalStorageService localStorage)
 {
-    private string _currentPalette = "EnterpriseBlue";
+    private string _currentPalette = BuiltInThemes.OceanBlue;
     private bool _isDarkMode;
 
     public bool IsDarkMode => _isDarkMode;

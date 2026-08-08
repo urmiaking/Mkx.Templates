@@ -16,8 +16,8 @@
     /* Dynamic liquid glass effect utilizing MudBlazor CSS variables */
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.88) 50%, rgba(var(--mud-palette-surface-rgb), 0.82) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.85) !important;
-    backdrop-filter: blur(40px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
     color: var(--mud-palette-text-primary) !important;
 }
@@ -30,8 +30,8 @@
 /* Stylish backdrop with blur */
 #components-reconnect-modal::backdrop {
     background: rgba(15, 23, 42, 0.35) !important;
-    backdrop-filter: blur(12px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+    backdrop-filter: blur(8px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(120%) !important;
     animation: components-reconnect-modal-fadeInOpacity 0.35s ease-out;
     opacity: 1;
 }

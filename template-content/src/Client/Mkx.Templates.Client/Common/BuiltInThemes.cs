@@ -1,9 +1,9 @@
-﻿namespace Mkx.Templates.Client.Common;
+namespace Mkx.Templates.Client.Common;
 
 public static class BuiltInThemes
 {
-    public const string EnterpriseBlue = nameof(EnterpriseBlue);
-    public const string EnterpriseSlate = nameof(EnterpriseSlate);
-    public const string EnterpriseTeal = nameof(EnterpriseTeal);
-    public const string EnterpriseIndigo = nameof(EnterpriseIndigo);
+    public const string OceanBlue = nameof(OceanBlue);
+    public const string GoldenAmber = nameof(GoldenAmber);
+    public const string EmeraldGreen = nameof(EmeraldGreen);
+    public const string RoyalPurple = nameof(RoyalPurple);
 }

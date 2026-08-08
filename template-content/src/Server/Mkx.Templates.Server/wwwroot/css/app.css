@@ -104,8 +104,8 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.18) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.12) 0%, rgba(var(--mud-palette-surface-rgb), 0.4) 50%, rgba(var(--mud-palette-surface-rgb), 0.25) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.3) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
     color: var(--mud-palette-text-primary) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -506,8 +506,9 @@ h1:focus {
 .fancy-appbar {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     border-bottom: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     color: var(--mud-palette-text-primary) !important;
@@ -560,8 +561,9 @@ h1:focus {
     height: 72px;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     box-shadow: 0px -4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     border-top: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     border-radius: 24px 24px 24px 24px;
@@ -639,8 +641,8 @@ h1:focus {
 .mobile-nav-item.active .mobile-nav-icon-wrapper {
     transform: translateY(-20px);
     background: rgba(var(--mud-palette-surface-rgb), 0.55) !important;
-    backdrop-filter: blur(25px) saturate(210%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(210%) !important;
+    backdrop-filter: blur(10px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
     box-shadow: 0px 8px 24px rgba(var(--mud-palette-primary-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     opacity: 1;
     color: var(--mud-palette-primary);
@@ -658,8 +660,8 @@ h1:focus {
 .mobile-nav-popover {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.3) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.25) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     border-radius: 16px !important;
@@ -693,8 +695,9 @@ h1:focus {
 .fancy-drawer.dark-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     border-inline-end: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 4px 0px 30px rgba(0, 0, 0, 0.03), inset 1px 0 0 rgba(255, 255, 255, 0.2) !important;
 }
@@ -702,8 +705,9 @@ h1:focus {
 .fancy-drawer.light-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.06) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.4) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     border-inline-end: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     box-shadow: 4px 0px 30px rgba(0, 0, 0, 0.02), inset 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
@@ -717,8 +721,9 @@ h1:focus {
 .notifications-drawer.dark-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     border-inline-start: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.03), inset -1px 0 0 rgba(255, 255, 255, 0.2) !important;
 }
@@ -726,8 +731,9 @@ h1:focus {
 .notifications-drawer.light-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.06) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.4) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+    transform: translateZ(0);
     border-inline-start: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.02), inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
@@ -747,9 +753,8 @@ h1:focus {
 
 /* --- Notification Card & Items --- */
 .notification-card {
-    background-color: rgba(var(--mud-palette-surface-rgb), 0.3) !important;
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.1) !important;
-    backdrop-filter: blur(10px) !important;
     position: relative;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
@@ -791,9 +796,9 @@ h1:focus {
 
 /* --- Fixed Footer & Dismiss All Button --- */
 .drawer-footer {
-    background: linear-gradient(to top, var(--mud-palette-surface) 0%, rgba(var(--mud-palette-surface-rgb), 0.7) 80%, rgba(var(--mud-palette-surface-rgb), 0.0) 100%) !important;
-    backdrop-filter: blur(12px) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
+    background: linear-gradient(to top, var(--mud-palette-surface) 0%, rgba(var(--mud-palette-surface-rgb), 0.85) 80%, rgba(var(--mud-palette-surface-rgb), 0.0) 100%) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
     border-top: 1px solid rgba(var(--mud-palette-divider-rgb), 0.08) !important;
     z-index: 10;
 }
@@ -940,8 +945,8 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.05) 0%, rgba(var(--mud-palette-surface-rgb), 0.65) 50%, rgba(var(--mud-palette-surface-rgb), 0.45) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
     color: var(--mud-palette-text-primary) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -965,8 +970,8 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.05) 0%, rgba(var(--mud-palette-surface-rgb), 0.65) 50%, rgba(var(--mud-palette-surface-rgb), 0.45) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+    backdrop-filter: blur(14px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
     color: var(--mud-palette-text-primary) !important;
     border-radius: 20px !important;
@@ -976,31 +981,29 @@ h1:focus {
    GLOBAL MUDBLAZOR GLASSMORPHIC OVERRIDES
    ========================================================================== */
 
-/* Globally style all MudPaper and MudCard components with glassmorphism */
+/* Globally style all MudPaper and MudCard components with high-performance surface styling */
 .mud-paper:not(.mud-paper-outlined):not(.mud-dialog) {
-    background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.05) 0%, rgba(var(--mud-palette-surface-rgb), 0.65) 50%, rgba(var(--mud-palette-surface-rgb), 0.45) 100%) !important;
-    background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
-    backdrop-filter: blur(40px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-    border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+    background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.03) 0%, rgba(var(--mud-palette-surface-rgb), 0.85) 50%, rgba(var(--mud-palette-surface-rgb), 0.75) 100%) !important;
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.85) !important;
+    border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.12) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
 }
 
 /* Globally style MudDialog containers */
 .mud-dialog {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.1) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.35) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.4) !important;
-    backdrop-filter: blur(40px) saturate(220%) !important;
-    -webkit-backdrop-filter: blur(40px) saturate(220%) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 30px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 /* Globally style popovers and dropdown menus */
 .mud-popover-provider .mud-popover:not(.mud-tooltip-popover) {
-    background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
-    backdrop-filter: blur(30px) saturate(200%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(200%) !important;
+    background-color: rgba(var(--mud-palette-surface-rgb), 0.75) !important;
+    backdrop-filter: blur(12px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.08) !important;
 }
@@ -1092,4 +1095,14 @@ h1:focus {
 @keyframes splash-progress {
     0%   { transform: translateX(-100%); }
     100% { transform: translateX(350%); }
+}
+
+/* ==========================================================================
+   PERFORMANCE & ACCESSIBILITY FALLBACK (Reduced Motion / Low Power Hardware)
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
 }

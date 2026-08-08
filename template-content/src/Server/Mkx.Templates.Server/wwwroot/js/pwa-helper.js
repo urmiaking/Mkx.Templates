@@ -12,8 +12,8 @@
       right: 24px;
       max-width: 420px;
       background-color: rgba(var(--mud-palette-surface-rgb, 15, 23, 42), 0.85);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      backdrop-filter: blur(12px) saturate(120%);
+      -webkit-backdrop-filter: blur(12px) saturate(120%);
       border: 1px solid rgba(var(--mud-palette-primary-rgb, 37, 99, 235), 0.25);
       border-radius: 16px;
       padding: 18px;
