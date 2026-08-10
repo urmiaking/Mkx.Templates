@@ -1,5 +1,4 @@
 using MapsterMapper;
-using Microsoft.EntityFrameworkCore;
 using Mkx.Templates.Domain.TestAggregate;
 using Mkx.Templates.Infrastructure.Repositories.Abstractions;
 using Mkx.Templates.Infrastructure.Specifications.Tests;
@@ -17,18 +16,14 @@ internal sealed class TestService(
 {
     public async Task<List<GetTestResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var tests = await testRepository
-            .Get(new AllTestsSpecification())
-            .ToListAsync(cancellationToken);
+        var tests = await testRepository.ListAsync(new AllTestsSpecification(), cancellationToken);
 
         return mapper.Map<List<GetTestResponse>>(tests);
     }
 
     public async Task<GetTestResponse> GetAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var test = await testRepository
-            .Get(new TestById(new TestId(id)))
-            .FirstOrDefaultAsync(cancellationToken)
+        var test = await testRepository.SingleOrDefaultAsync(new TestById(new TestId(id)), cancellationToken)
                    ?? throw new NotFoundException();
 
         return mapper.Map<GetTestResponse>(test);

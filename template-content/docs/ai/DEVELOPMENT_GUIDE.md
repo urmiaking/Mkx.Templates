@@ -77,16 +77,16 @@ Under `Mkx.Templates.Infrastructure/Specifications/[Feature]s/`, write query spe
 
 *Template Example (`[Feature]ByIdSpecification.cs`):*
 ```csharp
-using Mkx.Templates.Sdk.Server.Infrastructure.Specifications;
+using Ardalis.Specification;
 using Mkx.Templates.Domain.[Feature]Aggregate;
 
 namespace Mkx.Templates.Infrastructure.Specifications.[Feature]s;
 
-public class [Feature]ByIdSpecification : SpecificationBase<[Feature]>
+public class [Feature]ByIdSpecification : SingleResultSpecification<[Feature]>
 {
     public [Feature]ByIdSpecification([Feature]Id id)
     {
-        AddCriteria(x => x.Id == id);
+        Query.Where(x => x.Id == id);
     }
 }
 ```

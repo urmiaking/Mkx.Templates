@@ -1,136 +1,37 @@
-﻿using Mkx.Templates.Sdk.Server.Domain;
-using Mkx.Templates.Sdk.Server.Infrastructure.Extensions;
-using Mkx.Templates.Sdk.Server.Infrastructure.Specifications;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Data.Common;
+using Ardalis.Specification;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+using Mkx.Templates.Sdk.Server.Domain;
+using Mkx.Templates.Sdk.Server.Infrastructure.Extensions;
 
 namespace Mkx.Templates.Sdk.Server.Infrastructure.Repositories;
 
-public abstract class RepositoryBase<TEntity>(DbContext context) :
+public abstract class RepositoryBase<TEntity> :
+    Ardalis.Specification.EntityFrameworkCore.RepositoryBase<TEntity>,
     IRepository<TEntity>,
     ICreateRepository<TEntity>,
     IUpdateRepository<TEntity>,
     IDeleteRepository<TEntity>
     where TEntity : EntityBase
 {
+    private readonly DbContext _context;
+
+    protected RepositoryBase(DbContext context) : base(context)
+    {
+        _context = context;
+    }
+
     protected bool Tracking { get; private set; } = true;
 
-    public virtual IQueryable<TEntity> Query => context.Set<TEntity>().SetTracking(Tracking);
+    public virtual IQueryable<TEntity> Query => _context.Set<TEntity>().SetTracking(Tracking);
 
     public virtual void AsNoTracking() => Tracking = false;
 
     public virtual void AsTracking() => Tracking = true;
 
-    public virtual void Create(TEntity entity) => context.Add(entity);
-
-    public virtual void CreateRange(IEnumerable<TEntity> entities) => context.AddRange(entities);
-
-    public virtual void Update(TEntity entity) => context.Update(entity);
-
-    public virtual void UpdateRange(IEnumerable<TEntity> entities) => context.UpdateRange(entities);
-
-    public virtual void Delete(TEntity entity) => context.Remove(entity);
-
-    public virtual void DeleteRange(IEnumerable<TEntity> entities) => context.RemoveRange(entities);
-
-    public virtual Task<int> SaveAsync(CancellationToken cancellationToken = default)
-    {
-        return context.SaveChangesAsync(cancellationToken);
-    }
-
-    public virtual Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel,
-      CancellationToken cancellationToken = default)
-    {
-        return context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
-    }
-
-    public virtual Task<IDbContextTransaction?> UseTransactionAsync(
-      DbTransaction transaction,
-      CancellationToken cancellationToken = default)
-    {
-        return context.Database.UseTransactionAsync(transaction, cancellationToken);
-    }
-
-    public IQueryable<TEntity> Get(ISpecification<TEntity> specification)
-    {
-        var query = Query;
-
-        // Apply criteria
-        if (specification.Criteria != null)
-        {
-            query = query.Where(specification.Criteria);
-        }
-
-        // Apply includes
-        query = specification.Includes
-            .Aggregate(query, (current, include) => current.Include(include));
-
-        // Apply ordering with support for ThenBy chains
-        IOrderedQueryable<TEntity>? ordered = null;
-
-        if (specification.OrderBy != null)
-        {
-            ordered = query.OrderBy(specification.OrderBy);
-        }
-        else if (specification.OrderByDescending != null)
-        {
-            ordered = query.OrderByDescending(specification.OrderByDescending);
-        }
-
-        if (ordered != null)
-        {
-            foreach (var thenBy in specification.ThenBy)
-            {
-                ordered = ordered.ThenBy(thenBy);
-            }
-
-            foreach (var thenByDesc in specification.ThenByDescending)
-            {
-                ordered = ordered.ThenByDescending(thenByDesc);
-            }
-
-            query = ordered;
-        }
-
-        // Apply paging
-        if (specification.IsPagingEnabled)
-        {
-            query = query.Skip(specification.Skip ?? 0).Take(specification.Take ?? 100);
-        }
-
-        return query;
-    }
-
-    public Task<int> CountAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
-    {
-        var query = Query;
-
-        if (specification.Criteria != null)
-        {
-            query = query.Where(specification.Criteria);
-        }
-
-        return query.CountAsync(cancellationToken);
-    }
-
-    public Task<bool> ExistsAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
-    {
-        var query = Query;
-
-        if (specification.Criteria != null)
-        {
-            query = query.Where(specification.Criteria);
-        }
-
-        return query.AnyAsync(cancellationToken);
-    }
-
-    public virtual IDbContextTransaction? GetCurrentTransaction()
-    {
-        return context.Database.CurrentTransaction;
-    }
+    public virtual void Create(TEntity entity) => _context.Add(entity);
 
     public virtual async Task CreateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
@@ -138,61 +39,82 @@ public abstract class RepositoryBase<TEntity>(DbContext context) :
         await SaveAsync(cancellationToken);
     }
 
+    public virtual void CreateRange(IEnumerable<TEntity> entities) => _context.AddRange(entities);
+
     public virtual async Task CreateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         CreateRange(entities);
         await SaveAsync(cancellationToken);
     }
 
-    public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public virtual void Update(TEntity entity) => _context.Update(entity);
+
+    public new virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Update(entity);
         await SaveAsync(cancellationToken);
     }
 
-    public virtual async Task UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    public virtual void UpdateRange(IEnumerable<TEntity> entities) => _context.UpdateRange(entities);
+
+    public new virtual async Task UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         UpdateRange(entities);
         await SaveAsync(cancellationToken);
     }
 
-    //public virtual Task<int> ExecuteUpdateAsync(ISpecification<TEntity> specification,
-    //    Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setPropertyCalls,
-    //    CancellationToken cancellationToken = default)
-    //{
-    //    IQueryable<TEntity> query = context.Set<TEntity>();
+    public virtual void Delete(TEntity entity) => _context.Remove(entity);
 
-    //    if (specification.Criteria == null)
-    //        throw new InvalidOperationException(
-    //            "ExecuteUpdate requires a specification with Criteria.");
-
-    //    query = query.Where(specification.Criteria);
-
-    //    return query.ExecuteUpdateAsync(setPropertyCalls, cancellationToken);
-    //}
-
-    public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public new virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         Delete(entity);
         await SaveAsync(cancellationToken);
     }
 
-    public virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+    public virtual void DeleteRange(IEnumerable<TEntity> entities) => _context.RemoveRange(entities);
+
+    public new virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
     {
         DeleteRange(entities);
         await SaveAsync(cancellationToken);
     }
 
+    public virtual Task<int> SaveAsync(CancellationToken cancellationToken = default)
+    {
+        return _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public virtual Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel,
+      CancellationToken cancellationToken = default)
+    {
+        return _context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+    }
+
+    public virtual Task<IDbContextTransaction?> UseTransactionAsync(
+      DbTransaction transaction,
+      CancellationToken cancellationToken = default)
+    {
+        return _context.Database.UseTransactionAsync(transaction, cancellationToken);
+    }
+
+    public virtual IDbContextTransaction? GetCurrentTransaction()
+    {
+        return _context.Database.CurrentTransaction;
+    }
+
+    public IQueryable<TEntity> Get(ISpecification<TEntity> specification)
+    {
+        return ApplySpecification(specification);
+    }
+
+    public Task<bool> ExistsAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
+    {
+        return AnyAsync(specification, cancellationToken);
+    }
+
     public virtual Task<int> ExecuteDeleteAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default)
     {
-        IQueryable<TEntity> query = context.Set<TEntity>();
-
-        if (specification.Criteria == null)
-            throw new InvalidOperationException(
-                "ExecuteDelete requires a specification with Criteria.");
-
-        query = query.Where(specification.Criteria);
-
+        var query = ApplySpecification(specification, evaluateCriteriaOnly: true);
         return query.ExecuteDeleteAsync(cancellationToken);
     }
 }

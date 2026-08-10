@@ -63,6 +63,6 @@ To maintain strict alignment between backend controllers and frontend client ser
 ## 4. Specification Pattern
 
 To prevent repository classes from bloating with custom query methods (e.g., `GetActiveProductsByCategoryId`), database queries are written as strongly-typed specifications:
-- Specifications derive from `SpecificationBase<TEntity>` (provided in the Sdk).
+- Specifications derive from `Specification<T>` or `SingleResultSpecification<T>` (provided by `Ardalis.Specification`).
 - They encapsulate query logic (where criteria, includes, ordering, pagination) into a single, unit-testable class.
 - The Repository accepts the specification and applies it to the EF Core queryable.

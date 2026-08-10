@@ -1,5 +1,5 @@
-﻿using Mkx.Templates.Sdk.Server.Domain;
-using Mkx.Templates.Sdk.Server.Infrastructure.Specifications;
+using Ardalis.Specification;
+using Mkx.Templates.Sdk.Server.Domain;
 
 namespace Mkx.Templates.Sdk.Server.Infrastructure.Repositories;
 
@@ -11,4 +11,3 @@ public interface IDeleteRepository<TEntity> where TEntity : EntityBase
     Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
     Task<int> ExecuteDeleteAsync(ISpecification<TEntity> specification, CancellationToken cancellationToken = default);
 }
-
