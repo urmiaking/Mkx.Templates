@@ -1,4 +1,4 @@
-# Agent Guidelines & Skills: Mkx.Templates
+﻿# Agent Guidelines & Skills: Mkx.Templates
 
 Follow these rules and best practices at all times when adding or refactoring code inside this project.
 
@@ -29,3 +29,18 @@ Follow these rules and best practices at all times when adding or refactoring co
 - Always inherit from `AppComponentBase` and call services inside the `SendRequestAsync(...)` wrapper.
 - Utilize the overloads accepting `afterSend` and `onFailure` callback arguments to bind state mutations directly on successful execution and define fallback/cleanup behavior on failure.
 - This manages the `IsBusy` rendering state, handles token cancellations, and automatically intercepts, formats, and displays standard business exception toasts (e.g. invalid arguments, validation errors, resource not found) inside MudBlazor Snackbars.
+
+---
+
+## 5. Responsive Mini Drawer & Mobile Temporary Layout
+- **Drawer Variant & Breakpoints**: The navigation sidebar uses Variant="DrawerVariant.Mini" Breakpoint="Breakpoint.Md" PreserveOpenState="true" ClipMode="DrawerClipMode.Never".
+- **Desktop Mini Mode**: On desktop ($\ge 960\text{px}$), the drawer collapses to a compact \text{px}$ icon rail by default. The header, profile text, palette selector, and text labels are automatically concealed in collapsed mode, leaving centered navigation icons.
+- **Mobile Mode**: On screens $< 960\text{px}$, MudBlazor automatically degrades the mini drawer to a full Temporary overlay with backdrop.
+- **Z-Index Layering**: The drawer uses z-index: calc(var(--mud-zindex-appbar) + 2) to ensure it sits safely above the semi-transparent overlay backdrop on mobile while rendering full-height on desktop.
+
+---
+
+## 6. Mobile Numeric & Virtual Keyboard Standards (InputMode)
+- **Decimal Inputs (Quantities, Percentages, Weights)**: Use InputMode="@(InputMode.@decimal)" with dir="ltr" so virtual keyboards on iOS and Android show the numeric keypad with decimal point separator.
+- **Phone Numbers**: Use InputMode="@InputMode.tel" with dir="ltr" on all phone input fields.
+- **Verification / OTP / 2FA**: Use InputMode="@InputMode.numeric" with dir="ltr" on all numeric security codes and token fields.

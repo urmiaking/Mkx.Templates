@@ -1,4 +1,4 @@
-/*@import '../fonts/vazir/Vazirmatn-font-face.css';*/
+﻿/*@import '../fonts/vazir/Vazirmatn-font-face.css';*/
 @import '../fonts/IRANSANS/IRANSANS-font-face.css';
 @import '../fonts/Google/google-fonts.css';
 
@@ -690,6 +690,9 @@ h1:focus {
 .fancy-drawer {
     color: var(--mud-palette-text-primary) !important;
     overflow-x: hidden !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: calc(var(--mud-zindex-appbar) + 2) !important;
 }
 
 .fancy-drawer.dark-mode {
@@ -716,6 +719,9 @@ h1:focus {
 .notifications-drawer {
     color: var(--mud-palette-text-primary) !important;
     overflow-x: hidden !important;
+    top: 0 !important;
+    height: 100vh !important;
+    z-index: calc(var(--mud-zindex-appbar) + 2) !important;
 }
 
 .notifications-drawer.dark-mode {
@@ -822,6 +828,120 @@ h1:focus {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     padding-bottom: 10px !important;
+    transition: padding 0.25s ease-in-out;
+}
+
+/* --- Mini Drawer Desktop Collapsed State Adaptations --- */
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .drawer-header {
+    display: none !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .drawer-user-info,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .drawer-palette,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .drawer-shortcuts {
+    display: none !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .drawer-content {
+    padding-top: 14px !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-navmenu {
+    padding: 4px 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link {
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 !important;
+    margin: 4px auto !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    max-width: 42px !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
+    text-indent: -9999px !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link-text,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-group-text,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link span:not(.mud-icon-root),
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link div:not(.mud-ripple) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link .mud-nav-link-icon,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link svg,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link .mud-icon-root {
+    margin: 0 !important;
+    margin-inline-end: 0 !important;
+    margin-inline-start: 0 !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    font-size: 1.35rem !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: var(--mud-palette-text-primary) !important;
+    text-indent: 0 !important;
+}
+
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link.active .mud-nav-link-icon,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link.active svg,
+.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) .mud-nav-link.active .mud-icon-root {
+    color: var(--mud-palette-primary) !important;
+}
+
+/* --- Mini Drawer Desktop Layout Spacing & Initial State Fix --- */
+@media (min-width: 960px) {
+    .fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary) {
+        width: var(--mud-drawer-width-mini-right, 56px) !important;
+    }
+
+    .fancy-drawer.mud-drawer--open:not(.mud-drawer-temporary) {
+        width: var(--mud-drawer-width-right, 280px) !important;
+    }
+
+    /* When mini drawer is collapsed (including on initial load before JavaScript triggers) */
+    .mud-layout:has(.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary)) .mud-main-content {
+        margin-right: var(--mud-drawer-width-mini-right, 56px) !important;
+        margin-left: 0 !important;
+        transition: margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .mud-layout:has(.fancy-drawer.mud-drawer--closed:not(.mud-drawer-temporary)) .fancy-appbar {
+        margin-right: var(--mud-drawer-width-mini-right, 56px) !important;
+        margin-left: 0 !important;
+        width: calc(100% - var(--mud-drawer-width-mini-right, 56px)) !important;
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* When mini drawer is open on desktop */
+    .mud-layout:has(.fancy-drawer.mud-drawer--open:not(.mud-drawer-temporary)) .mud-main-content {
+        margin-right: var(--mud-drawer-width-right, 280px) !important;
+        margin-left: 0 !important;
+        transition: margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .mud-layout:has(.fancy-drawer.mud-drawer--open:not(.mud-drawer-temporary)) .fancy-appbar {
+        margin-right: var(--mud-drawer-width-right, 280px) !important;
+        margin-left: 0 !important;
+        width: calc(100% - var(--mud-drawer-width-right, 280px)) !important;
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
 }
 
 .drawer-header {

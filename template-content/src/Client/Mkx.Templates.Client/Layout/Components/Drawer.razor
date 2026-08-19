@@ -1,6 +1,6 @@
 @inherits AppComponentBase
 
-<MudDrawer Open="IsDrawerOpen" OpenChanged="IsDrawerOpenChanged" Variant="DrawerVariant.Temporary" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"fancy-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
+<MudDrawer Open="IsDrawerOpen" OpenChanged="IsDrawerOpenChanged" Variant="DrawerVariant.Mini" Breakpoint="Breakpoint.Md" PreserveOpenState="true" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"fancy-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
     @* User Profile Section *@
     <div class="drawer-header px-6 pt-5 pb-3 d-flex flex-column align-center justify-center">
         <MudBadge Color="Color.Success" Overlap="true" Dot="IsAuthenticated" Bordered="true" Origin="Origin.BottomRight" Class="mb-3">
@@ -8,8 +8,10 @@
                 @AvatarText
             </MudAvatar>
         </MudBadge>
-        <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">@DisplayName</MudText>
-        <MudText Typo="Typo.caption" Class="mud-text-secondary">@UserName</MudText>
+        <div class="drawer-user-info d-flex flex-column align-center text-center">
+            <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">@DisplayName</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">@UserName</MudText>
+        </div>
     </div>
 
     @* Color Palette Selector *@
