@@ -28,7 +28,8 @@ catch (Exception ex) when (ex is not HostAbortedException)
 {
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("An error occurred:");
-    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex);
+    Environment.ExitCode = 1;
 }
 finally
 {

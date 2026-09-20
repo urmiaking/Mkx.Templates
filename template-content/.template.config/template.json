@@ -10,6 +10,7 @@
     "type": "solution"
   },
   "sourceName": "Mkx.Templates",
+  "guids": [ "3cb26e0d-a6a9-4679-b220-676bb6eea2ce" ],
   "preferNameDirectory": false,
   "symbols": {
     "HttpPort": {
