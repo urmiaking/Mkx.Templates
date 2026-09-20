@@ -1,51 +1,71 @@
 # Domain Knowledge Guide
 
-*Note for Developers: Update this document with specific terminology, invariants, state machine logic, policies, and business rules of your application so that AI agents can verify requirements and write business logic matching real-world conditions.*
+This file is the durable business-context workspace for the application generated from this template. Unlike architecture documents, it should evolve with the product domain.
 
----
+Agents: update this file when the user establishes a stable business term, invariant, workflow, state transition, calculation rule, or domain decision. Do not add guesses, transient requirements, secrets, or implementation-only details.
 
 ## 1. Glossary & Ubiquitous Language
 
-Define terms used in code classes, properties, and database tables to ensure alignment across all layers.
+Document domain terms in the language used by stakeholders.
 
-| Term | Definition | Code Symbol (if applicable) |
-| :--- | :--- | :--- |
-| **ExampleTerm** | Brief description of what this term means in business context. | `ExampleClass` |
-
----
+| Term | Meaning | Notes |
+|---|---|---|
+| Example | Replace with a real domain term | Delete template rows once real domain knowledge exists |
 
 ## 2. Core Business Invariants & Constraints
 
-List core rules that must remain true at all times in the system. Domain models should validate these constraints before persisting state changes.
+Record rules that must always remain true regardless of UI/API implementation.
 
-- **Invariant A**: E.g., "An invoice balance cannot become negative."
-- **Invariant B**: E.g., "A customer account cannot be deleted if there are open transactions."
-
----
+Example format:
+- **Invoice posting:** A posted invoice cannot be edited directly; corrections use the domain's reversal/correction workflow.
+- **Uniqueness:** Describe identifiers that must be unique and whether the database also enforces them.
 
 ## 3. Core Workflows & State Machines
 
-Draw diagrams or describe state transitions for business objects (e.g. Orders, Shipments, Invoices):
+Describe meaningful lifecycle transitions explicitly.
 
+```text
+Draft -> Submitted -> Approved
+   \-> Cancelled
 ```
-[ Draft ] ──( Submit )──> [ Pending Approval ] ──( Approve )──> [ Active ]
-```
 
-- **Draft State**: Editable, not visible to system operations.
-- **Pending State**: Read-only, waiting for approval.
-- **Active State**: Validated and operational.
+For each workflow, document:
+- allowed transitions;
+- who/what can trigger them;
+- validation/invariants;
+- important side effects.
 
----
+## 4. Calculations & Financial/Domain Formulas
 
-## 4. User Roles & Security Policies
+Record formulas with units, rounding rules, currency/unit assumptions, and examples. Do not leave critical calculation semantics only in code.
 
-List the actors in the system, their access scope, and authorization rules:
+## 5. User Roles & Security Policies
 
-- **Administrators**: Built-in administrator role. It receives registered policy claims from the startup seeder.
-- **Users**: Built-in standard user role. Its policy claims can be assigned in the role claim editor.
+Document business meaning of roles and capabilities. Technical policy registration belongs in the authorization documentation; this section explains what the permissions mean to the business.
 
-### Template identity and policy editor
+### Template Identity and Policy Editor
+The template ships with administrator/user identity infrastructure and a policy-tree editor. Application-specific policies should be added as the generated product's authorization requirements become known.
 
-The template's actual built-in Identity roles are `Administrators` and `Users` (`BuiltinRoles.Roles`). The administrator role is seeded with claims from registered policy providers when the host starts. The user management policies are `AppPolicies.Users.View`, `Manage`, and `ManageClaims`; the initial tree also contains `AppPolicies.Tests.View`. This is a template policy catalog, so applications should add their own policies to `AppPolicyProvider` as they add features.
+## 6. Integrations & External Systems
 
-The user claim editor changes direct claims on one user. The role claim editor changes claims on a built-in role; role membership is managed separately. The current role seeder reapplies provider policy claims to `Administrators` on startup, so removing one of those claims from that role in the editor is not persistent across a restart. Identity claims outside the registered policy catalog are not editable through this tree.
+For each durable integration document:
+- business purpose;
+- source of truth;
+- identifiers exchanged;
+- sync direction;
+- failure/retry expectations;
+- ownership of data.
+
+Never store credentials or secrets here.
+
+## 7. Business Decisions
+
+Keep short dated entries for decisions that future agents need to understand.
+
+### YYYY-MM-DD — Decision title
+- **Decision:** What was decided.
+- **Reason:** Why.
+- **Consequences:** What future implementation must preserve.
+- **Supersedes:** Link/identify an older decision if applicable.
+
+Cross-cutting technical architecture decisions belong in `docs/ai/decisions/` instead.

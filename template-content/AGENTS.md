@@ -1,112 +1,80 @@
-# Developer Guide for AI Agents: Mkx.Templates
+# AI Agent Guide: Mkx.Templates
 
-Welcome to the `Mkx.Templates` codebase. This document is the primary entry point for AI coding agents to understand the workspace structure, architectural patterns, and development guidelines of this project.
+This repository is designed to be extended by coding agents. This file is the entry point, not the complete manual. Use progressive disclosure: read the documents relevant to the task instead of loading every guide.
 
-> [!IMPORTANT]
-> **CRITICAL RULE FOR AGENTS**:
-> Whenever you implement a new feature, modify existing services, introduce refactorings, or make breaking changes, you **must** update the corresponding documentation files in the `docs/ai/` folder and this `AGENTS.md` file. Keeping documentation in sync with code is mandatory.
+## Instruction Priority
+1. Follow the user's explicit requirement.
+2. Follow this `AGENTS.md`.
+3. Follow the relevant `docs/ai/*.md` source of truth.
+4. Follow the closest existing implementation of the same concept.
+5. Follow established repository conventions.
+6. Follow framework/library conventions.
+7. Introduce a new pattern only when none of the above cleanly handles the requirement.
 
----
+When code and documentation disagree, inspect current code and verify behavior. Do not blindly reproduce stale documentation. Update the authoritative documentation when stable behavior or conventions change.
 
-## 1. Documentation Map
+## Required Preflight
+Before creating an abstraction, service, component, route, policy, DTO, helper, exception, repository, specification, or CSS class, search for an existing equivalent and inspect the nearest reference implementation. Keep changes focused.
 
-To understand the project and build features correctly, refer to the following documents in the `docs/ai/` directory:
+## Documentation Map
+| Document | Use it for |
+|---|---|
+| [ARCHITECTURE.md](docs/ai/ARCHITECTURE.md) | Layer boundaries and dependency flow |
+| [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md) | End-to-end feature implementation |
+| [CONVENTIONS.md](docs/ai/CONVENTIONS.md) | Naming, placement and coding conventions |
+| [GUARDRAILS.md](docs/ai/GUARDRAILS.md) | Architectural prohibitions and change constraints |
+| [FEATURE_CHECKLIST.md](docs/ai/FEATURE_CHECKLIST.md) | Checklist for adding a business feature |
+| [SERVICE_ARCHITECTURE.md](docs/ai/SERVICE_ARCHITECTURE.md) | Shared contracts, client/server services, error flow |
+| [AUTHENTICATION.md](docs/ai/AUTHENTICATION.md) | Authentication, SSR/WASM boundary and authorization |
+| [DATABASE.md](docs/ai/DATABASE.md) | EF Core, repositories, specs, migrations and seeders |
+| [UI_GUIDE.md](docs/ai/UI_GUIDE.md) | MudBlazor UX, responsive behavior, forms and styling |
+| [DOMAIN_KNOWLEDGE.md](docs/ai/DOMAIN_KNOWLEDGE.md) | Business glossary/invariants/workflows |
+| [VERIFICATION.md](docs/ai/VERIFICATION.md) | Definition of done |
+| [TOOLS.md](docs/ai/TOOLS.md) | Build/test/EF CLI commands |
+| [SKILLS.md](docs/ai/SKILLS.md) | Compact high-frequency rules |
+| [decisions/](docs/ai/decisions/) | Architectural decision records |
 
-| Document | Purpose |
-| :--- | :--- |
-| **[Architecture Guide](file:///docs/ai/ARCHITECTURE.md)** | Explains the Clean Architecture layers, project relations, DDD boundaries, and query specification patterns. |
-| **[Development Guide](file:///docs/ai/DEVELOPMENT_GUIDE.md)** | Step-by-step walkthrough for adding a new business feature/aggregate from scratch. |
-| **[Service Architecture](file:///docs/ai/SERVICE_ARCHITECTURE.md)** | Covers Dependency Injection auto-scanning, client-server polymorphism, and exception/error handling. |
-| **[Tools & CLI Guide](file:///docs/ai/TOOLS.md)** | Standard dotnet commands, EF migrations, build, and test execution details. |
-| **[Agent Guidelines & Skills](file:///docs/ai/SKILLS.md)** | Coding style guidelines, rules for aggregates, styling patterns, and best practices. |
-| **[Domain Knowledge](file:///docs/ai/DOMAIN_KNOWLEDGE.md)** | Reserved workspace containing the business glossary, policies, and domain logic (updated by human developers). |
+## Architecture in One Minute
+- Domain: business model and invariants.
+- Infrastructure: EF Core, persistence, repositories and specifications.
+- Application: use-case orchestration, validation and mapping.
+- Shared: DTOs, service contracts, routes and authorization definitions.
+- Server: APIs, middleware and hosting.
+- Client: Blazor WASM UI and HTTP implementations of shared contracts.
 
----
+Business rules stay out of controllers and UI. Reusable queries use specifications. DI follows attribute scanning.
 
-## 2. Solution Structure at a Glance
-
-This repository is built as a modern, clean-architecture template for .NET 10 Blazor Web Apps, using the XML-based `.slnx` solution configuration.
-
+## Standard Feature Path
+```text
+Domain aggregate
+ -> EF configuration
+ -> specifications/repository as needed
+ -> Shared DTOs + service contract + routes
+ -> Application service + validation + mapping
+ -> API controller
+ -> Client HTTP service
+ -> Blazor page/component
+ -> tests + migration + verification as applicable
 ```
-Mkx.Templates/
-├── Mkx.Templates.slnx                 # XML-based solution configuration
-├── docs/
-│   └── ai/                            # Detailed AI guidance and architecture logs
-│       ├── ARCHITECTURE.md
-│       ├── DEVELOPMENT_GUIDE.md
-│       ├── DOMAIN_KNOWLEDGE.md
-│       ├── SERVICE_ARCHITECTURE.md
-│       ├── SKILLS.md
-│       └── TOOLS.md
-├── src/
-│   ├── Core/
-│   │   ├── Mkx.Templates.Domain/          # Core Domain entities and aggregates
-│   │   └── Mkx.Templates.Infrastructure/  # EF Core Context, configurations, repositories
-│   ├── Server/
-│   │   ├── Mkx.Templates.Application/     # Use case orchestrators, mappers, validators
-│   │   └── Mkx.Templates.Server/          # Server API Controllers, Program.cs, CSS/Assets
-│   ├── Client/
-│   │   └── Mkx.Templates.Client/          # Blazor WASM views, client services, custom UI
-│   ├── Shared/
-│   │   └── Mkx.Templates.Shared/          # Shared interfaces, contracts, DTOs, routes
-│   └── Sdk/                               # Shared base models and helper utilities
-└── AGENTS.md                              # This main guide
+Use [FEATURE_CHECKLIST.md](docs/ai/FEATURE_CHECKLIST.md).
+
+## UI and Render Modes
+Interactive application pages run in Interactive WebAssembly mode without prerendering. Authentication/account surfaces may use static SSR. Do not inject interactive-only client services into static SSR pages.
+
+Use MudBlazor and existing UI patterns. Current source code is authoritative for exact drawer/layout parameters; desktop navigation is Mini/collapsible and mobile navigation must remain overlay/temporary.
+
+## Authorization
+Policy-based authorization is preferred for capabilities. Adding a policy normally requires an `AppPolicies` constant, registration in `AppPolicyProvider`, server enforcement, and appropriate client behavior. Client hiding alone is never security.
+
+## Verification
+A task is not complete merely because code was written. Follow [VERIFICATION.md](docs/ai/VERIFICATION.md).
+
+```powershell
+dotnet build Mkx.Templates.slnx
+dotnet test
 ```
 
----
+Never claim a build, test, migration, runtime or browser check passed unless actually executed. If blocked, report the exact blocker.
 
-## 3. Core UI Elements & Layouts
-
-### Users and claims management
-- `src/Client/Mkx.Templates.Client/Pages/Users/Index.razor` manages users and their direct claims; `RoleClaims.razor` manages claims for built-in roles. Their `Components/ClaimsTreeDialog.razor` displays policy definitions as a selectable tree. These pages and their MudBlazor styling follow the SmartPlaque dashboard reference.
-- The pages use `IUserManagementService` via `AppComponentBase.SendRequestAsync`. `UserManagementClientService` calls `UserManagementController`, which delegates to the application `UserManagementService`. Contracts, DTOs, and route constants are in `Mkx.Templates.Shared`.
-- `AppPolicies.Users` defines `View`, `Manage`, and `ManageClaims`. `AppPolicyProvider` supplies the tree; register each new policy there so it can be displayed and assigned. Search in the claim dialog must operate on the original tree nodes, preserving selections made while filtering.
-- See `docs/ai/ARCHITECTURE.md`, `docs/ai/SERVICE_ARCHITECTURE.md`, and `docs/ai/DOMAIN_KNOWLEDGE.md` for the route and authorization flow. Restart a running host after server/API edits and refresh the sign-in session after newly seeded claims are added.
-
-### WASM Loading Splash Screen
-- **InteractiveWebAssembly Mode**: The application runs in InteractiveWebAssembly mode (no prerender) for all interactive pages, while authorization pages use static SSR.
-- **Splash Screen**: An `#app-loading` element renders the `Mkx.Templates` logo and a Cloudflare-style loading progress bar.
-- **Dismissal**: Dismissed by invoking `window.Mkx.removeSplash` in `BaseLayout.OnAfterRenderAsync` on the first render.
-
----
-
-## 4. Getting Started CLI Commands
-
-Use the following commands to restore, compile, or run the project:
-
-- **Restore NuGet Packages**:
-  ```powershell
-  dotnet restore
-  ```
-- **Build Solution**:
-  ```powershell
-  dotnet build Mkx.Templates.slnx
-  ```
-- **Run Backend Web API / Host**:
-  ```powershell
-  dotnet run --project src/Server/Mkx.Templates.Server/Mkx.Templates.Server.csproj
-  ```
-
-## 5. Verification Build Instructions
-
-When you have edited files, follow these steps to verify that the code builds without errors:
-
-1. **Identify the projects that were modified**
-   - If the changes only affect a single project (e.g., `Mkx.Templates.Server`, `Mkx.Templates.Client`, or any of the core libraries), run a build for that specific project.
-   - If the edits span multiple projects across the solution, building the entire solution is acceptable.
-
-2. **Run the appropriate `dotnet build` command**
-
-   *Single‑project build* (replace `<ProjectPath>` with the actual `.csproj` file you changed):
-   ```powershell
-   dotnet build <ProjectPath>
-   ```
-
-   *Full‑solution build* (when changes affect several projects):
-   ```powershell
-   dotnet build Mkx.Templates.slnx
-   ```
-
-3. **Interpret the result**
-   - A successful build means the changes compile.
-   - If errors appear, review the compiler messages, fix the code, and rebuild.
+## Documentation Maintenance
+Keep this file concise and navigational. Put detailed durable knowledge in `docs/ai/`. Update docs when stable behavior changes. Record business knowledge in `DOMAIN_KNOWLEDGE.md` and cross-cutting decisions in `docs/ai/decisions/`. Never store secrets or transient debugging/machine state here.
