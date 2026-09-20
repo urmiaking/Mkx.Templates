@@ -21,6 +21,7 @@ Follow these rules and best practices at all times when adding or refactoring co
 - **Centralized Styling**: Write all custom styling (e.g., glassmorphism, glowing shines, radial gradients) in the central `app.css` stylesheet located under `src/Server/Mkx.Templates.Server/wwwroot/css/app.css` instead of writing inline CSS or component-scoped CSS.
 - **CSS Variables for Theming**: Bind custom class definitions to native MudBlazor variables such as `rgba(var(--mud-palette-surface-rgb), 0.45)` or `var(--mud-palette-primary)`. This allows layouts to dynamically adapt to light/dark modes and remain resilient during Server-Side Rendering (SSR) page runs.
 - **Prerendering Compatibility**: Do not inject scoped client services like `ThemeService` or interactive state providers inside static SSR pages (such as Login, AccessDenied, or NotFound). Rely entirely on standard theme-driven CSS layout variables inside the stylesheet.
+- **Users claim screens**: Preserve the SmartPlaque dashboard's MudBlazor structure and classes in `Pages/Users/Index.razor`, `RoleClaims.razor`, and `Components/ClaimsTreeDialog.razor`. When fixing interactions, keep styling changes tied to that reference. The copied dialog contains a few local layout styles; avoid adding new visual conventions to it.
 
 ---
 

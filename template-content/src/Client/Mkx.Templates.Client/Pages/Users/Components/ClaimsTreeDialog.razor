@@ -1,0 +1,199 @@
+@using Mkx.Templates.Shared.DTOs.Claims
+@inherits AppComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <div style="max-height: 60vh; overflow-y: auto;" class="d-flex flex-column gap-3 py-2 px-1">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-1">
+                برای تغییر دسترسی‌ها، گزینه‌های مورد نظر را علامت بزنید. با علامت زدن هر بخش، تمامی زیرمجموعه‌های آن به طور خودکار تغییر می‌یابند.
+            </MudAlert>
+
+            <div class="d-flex align-center justify-space-between gap-2">
+                <MudTextField @bind-Value="_searchQuery"
+                              Placeholder="جستجو در دسترسی‌ها..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Small"
+                              Immediate="true"
+                              Clearable="true"
+                              Class="flex-grow-1"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" OnClick="@SelectAll">
+                    انتخاب همه
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small" OnClick="@DeselectAll">
+                    لغو همه
+                </MudButton>
+            </div>
+
+            <MudDivider Class="my-1" />
+
+            <div class="d-flex flex-column gap-3 pb-8">
+                @foreach (var category in FilteredTree)
+                {
+                    <MudPaper Class="pa-3 border-solid border border-primary-lighten-4" Elevation="0" Style="border-radius: 8px; background-color: var(--mud-palette-background-grey);">
+                        <div class="d-flex align-center justify-space-between mb-2">
+                            <div class="d-flex align-center gap-2">
+                                <MudIcon Icon="@Icons.Material.Filled.FolderSpecial" Color="Color.Primary" Size="Size.Small" />
+                                <MudText Typo="Typo.subtitle1" Class="fw-bold color-primary">@category.Description</MudText>
+                            </div>
+                            <MudCheckBox T="bool"
+                                         Value="@category.IsGranted"
+                                         ValueChanged="@(val => ToggleNode(category, val))"
+                                         Color="Color.Primary"
+                                         Dense="true">
+                                <span class="text-caption font-weight-medium">انتخاب این گروه</span>
+                            </MudCheckBox>
+                        </div>
+
+                        @if (category.Children.Any())
+                        {
+                            <div class="d-flex flex-column gap-1 pl-4 mt-2">
+                                @foreach (var child in category.Children)
+                                {
+                                    @RenderPolicyNode(child, 1, MatchesSelf(category, _searchQuery))
+                                }
+                            </div>
+                        }
+                    </MudPaper>
+                }
+            </div>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">انصراف</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">
+            ذخیره دسترسی‌ها
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public List<PolicyTreeNodeDto> InitialTree { get; set; } = [];
+
+    private List<PolicyTreeNodeDto> _tree = [];
+    private string _searchQuery = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        _tree = InitialTree;
+    }
+
+    private IEnumerable<PolicyTreeNodeDto> FilteredTree =>
+        _tree.Where(node => MatchesNode(node, _searchQuery));
+
+    private static bool MatchesSelf(PolicyTreeNodeDto node, string query) =>
+        string.IsNullOrWhiteSpace(query) ||
+        node.Description.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase) ||
+        node.Name.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase);
+
+    private static bool MatchesNode(PolicyTreeNodeDto node, string query) =>
+        MatchesSelf(node, query) || node.Children.Any(child => MatchesNode(child, query));
+
+    private RenderFragment RenderPolicyNode(PolicyTreeNodeDto node, int level, bool showAll = false) => __builder =>
+    {
+        if (!showAll && !MatchesNode(node, _searchQuery))
+            return;
+
+        var indentStyle = level switch
+        {
+            1 => "margin-right: 8px;",
+            2 => "margin-right: 24px; border-right: 2px solid var(--mud-palette-primary); padding-right: 12px;",
+            _ => "margin-right: 36px; border-right: 2px solid var(--mud-palette-secondary); padding-right: 12px;"
+        };
+
+        <div class="my-1" style="@indentStyle">
+            <div class="d-flex align-center justify-space-between py-1 px-2 rounded hover-light">
+                <div class="d-flex align-center gap-2">
+                    <MudIcon Icon="@(node.Children.Any() ? Icons.Material.Filled.AccountTree : Icons.Material.Filled.VpnKey)" Size="Size.Small" Color="Color.Default" />
+                    <div>
+                        <MudText Typo="Typo.body2" Class="fw-medium">@node.Description</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-size: 0.75rem;">@node.Name</MudText>
+                    </div>
+                </div>
+
+                <MudCheckBox T="bool"
+                             Value="@node.IsGranted"
+                             ValueChanged="@(val => ToggleNode(node, val))"
+                             Color="Color.Success"
+                             Dense="true" />
+            </div>
+
+            @if (node.Children.Any())
+            {
+                <div class="d-flex flex-column gap-1">
+                    @foreach (var childNode in node.Children)
+                    {
+                        @RenderPolicyNode(childNode, level + 1, showAll || MatchesSelf(node, _searchQuery))
+                    }
+                </div>
+            }
+        </div>
+    };
+
+    private void ToggleNode(PolicyTreeNodeDto node, bool value)
+    {
+        node.IsGranted = value;
+        SetChildrenState(node.Children, value);
+        StateHasChanged();
+    }
+
+    private void SetChildrenState(List<PolicyTreeNodeDto> children, bool value)
+    {
+        foreach (var child in children)
+        {
+            child.IsGranted = value;
+            if (child.Children.Any())
+            {
+                SetChildrenState(child.Children, value);
+            }
+        }
+    }
+
+    private void SelectAll()
+    {
+        SetChildrenState(_tree, true);
+        foreach (var cat in _tree)
+        {
+            cat.IsGranted = true;
+        }
+        StateHasChanged();
+    }
+
+    private void DeselectAll()
+    {
+        SetChildrenState(_tree, false);
+        foreach (var cat in _tree)
+        {
+            cat.IsGranted = false;
+        }
+        StateHasChanged();
+    }
+
+    private void Submit()
+    {
+        var grantedClaimNames = new List<string>();
+        CollectGrantedClaims(_tree, grantedClaimNames);
+        MudDialog.Close(DialogResult.Ok(grantedClaimNames));
+    }
+
+    private void CollectGrantedClaims(List<PolicyTreeNodeDto> nodes, List<string> list)
+    {
+        foreach (var node in nodes)
+        {
+            if (node.IsGranted && !node.Name.StartsWith("Category_"))
+            {
+                list.Add(node.Name);
+            }
+            if (node.Children.Any())
+            {
+                CollectGrantedClaims(node.Children, list);
+            }
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

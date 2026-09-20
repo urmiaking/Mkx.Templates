@@ -40,9 +40,9 @@ The system is organized into a nested concentric directory structure where depen
 
 ---
 
-## 2. Polymorphic Interface Segregation & Blazor Interactive Auto Mode
+## 2. Polymorphic Interface Segregation & Blazor WebAssembly
 
-To support Blazor's **Interactive Auto Mode** (which dynamically switches between Server pre-rendering and Client-side WebAssembly execution), the application resolves service contracts polymorphically:
+Interactive pages currently run in **InteractiveWebAssembly mode without prerendering**. The shared service contract still keeps server and client implementations separate:
 
 - **Service Interfaces** (e.g., `IFeatureService`) are defined inside `Mkx.Templates.Shared/Abstractions/`.
 - **Server Implementation** is placed inside `Mkx.Templates.Application/Services/` (e.g., `FeatureService` directly querying repositories/DB).
@@ -66,3 +66,19 @@ To prevent repository classes from bloating with custom query methods (e.g., `Ge
 - Specifications derive from `Specification<T>` or `SingleResultSpecification<T>` (provided by `Ardalis.Specification`).
 - They encapsulate query logic (where criteria, includes, ordering, pagination) into a single, unit-testable class.
 - The Repository accepts the specification and applies it to the EF Core queryable.
+
+---
+
+## 5. Users and Claims Management
+
+The administrator UI lives in `src/Client/Mkx.Templates.Client/Pages/Users/`: `Index.razor` manages users and their direct claims, `RoleClaims.razor` manages built-in role claims, and `Components/ClaimsTreeDialog.razor` edits the policy tree. This page and component layout follows the SmartPlaque dashboard's `Pages/Users` structure. The separate `Pages/UserAccounts` area retains account profile and account-list functionality.
+
+The flow crosses the same layer boundaries as other application services:
+
+```text
+Pages/Users -> IUserManagementService -> UserManagementClientService
+    -> ApiUrls.UserManagement -> UserManagementController
+    -> UserManagementService -> ASP.NET Core Identity user and role managers
+```
+
+`Mkx.Templates.Shared` owns `IUserManagementService`, the user/role/claim DTOs, and the `Users` and `UserManagement` route constants. `AppPolicies.Users` contains `View`, `Manage`, and `ManageClaims`. `AppPolicyProvider.GetPolicies()` defines the editable hierarchy; the application service marks each node from the subject's direct user claims or role claims. The tree shows only policies registered by providers, so adding a policy constant alone does not make it assignable.

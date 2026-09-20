@@ -21,7 +21,9 @@ This repository is built as a modern, clean-architecture template for .NET 10 Bl
 ```
 d:\source\Mkx.Templates.Blazor
 ├── template-content/
-│   ├── Mkx.Templates.Blazor.slnx   # XML solution configuration file
+│   ├── Mkx.Templates.slnx          # XML solution configuration file
+│   ├── AGENTS.md                   # Guidance for generated template content
+│   ├── docs/ai/                    # Architecture and service guides
 │   └── src/
 │       ├── Core/
 │       │   ├── Mkx.Templates.Domain/          # Domain layer (Entities, Aggregates, Value Objects)
@@ -123,7 +125,19 @@ The `Test` aggregate showcases the end-to-end clean architecture flow:
 
 ---
 
-## 4. Design System & Styling (app.css)
+## 4. User and Role Claim Management
+
+The template includes a dedicated administrator UI at `ClientRoutes.Users.Index` (`/users`) and `ClientRoutes.Users.RoleClaims` (`/users/role-claims`). It follows the SmartPlaque dashboard's `Pages/Users` page, code-behind, and dialog structure. Keep the copied MudBlazor markup and classes aligned with that reference when changing these screens; do not add an unrelated visual treatment.
+
+- **Shared contract and DTOs**: `IUserManagementService`, `UserDto`, `RoleClaimsDto`, and `PolicyTreeNodeDto` live in `template-content/src/Shared/Mkx.Templates.Shared/`. `ApiRoutes.UserManagement`, `ApiUrls.UserManagement`, and `ClientRoutes.Users` define their API and page paths.
+- **Request path**: `Pages/Users/Index.razor.cs` and `RoleClaims.razor.cs` call `IUserManagementService` through `AppComponentBase.SendRequestAsync`. The WASM `UserManagementClientService` calls `UserManagementController`, which delegates to the application `UserManagementService`.
+- **Tree source**: `AppPolicyProvider.GetPolicies()` defines the editable policy hierarchy. The application service combines those definitions with a user's direct Identity claims or a role's Identity claims. Add new application policies to both `AppPolicies` and `AppPolicyProvider` so they appear in the editor.
+- **Authorization**: Viewing the pages and read endpoints requires `AppPolicies.Users.View`. Mutating users requires `AppPolicies.Users.Manage`; saving claim selections requires `AppPolicies.Users.ManageClaims`. `RoleSeeder` grants registered policy claims to the administrator role during startup.
+- **Dialog behavior**: `Pages/Users/Components/ClaimsTreeDialog.razor` edits the returned tree and sends selected policy names on save. Search must retain references to the original nodes so filtered selections are included in the submitted tree.
+
+The existing `Pages/UserAccounts` area remains the account profile and account-list flow. A running Visual Studio debug host must be restarted after API changes, and an existing authentication session may need a fresh sign-in to acquire newly seeded policy claims.
+
+## 5. Design System & Styling (app.css)
 
 All layout-specific, custom glassmorphic and animation styles are centralized in the Server's `app.css` file (`template-content/src/Server/Mkx.Templates.Server/wwwroot/css/app.css`) rather than scoped CSS files.
 
@@ -136,7 +150,7 @@ All layout-specific, custom glassmorphic and animation styles are centralized in
 
 ---
 
-## 5. Core UI Elements & Layouts
+## 6. Core UI Elements & Layouts
 
 ### Brand Text & Shine Animation
 The brand text logo (e.g. `Mkx.Templates`) uses the `.brand-text` class which implements a premium glowing shine animation:
@@ -172,7 +186,7 @@ A custom connection-status handler in `ReconnectModal.razor` and `ReconnectModal
 
 ---
 
-## 6. Compilation & Verification
+## 7. Compilation & Verification
 
 Before finalizing changes, compile the entire solution file:
 ```powershell

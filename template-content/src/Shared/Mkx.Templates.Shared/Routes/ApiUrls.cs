@@ -106,5 +106,20 @@ public static class ApiUrls
             BuildUrl(ApiRoutes.UserAccounts.Base, ApiRoutes.UserAccounts.DeleteAccount)
                 .FormatRoute(new { id });
     }
+
+    public static class UserManagement
+    {
+        public static string GetUsers() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUsers);
+        public static string GetUserById(Guid id) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUserById).FormatRoute(new { id });
+        public static string CreateUser() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.CreateUser);
+        public static string UpdateUser() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.UpdateUser);
+        public static string DeleteUser(Guid id) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.DeleteUser).FormatRoute(new { id });
+        public static string GetUserClaimsTree(Guid userId) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUserClaimsTree).FormatRoute(new { userId });
+        public static string UpdateUserClaims(Guid userId) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.UpdateUserClaims).FormatRoute(new { userId });
+        public static string GetRoles() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetRoles);
+        public static string GetRoleClaimsTree(string roleName) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetRoleClaimsTree).FormatRoute(new { roleName });
+        public static string UpdateRoleClaims(string roleName) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.UpdateRoleClaims).FormatRoute(new { roleName });
+        public static string Enabled() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.Enabled);
+    }
 }
 

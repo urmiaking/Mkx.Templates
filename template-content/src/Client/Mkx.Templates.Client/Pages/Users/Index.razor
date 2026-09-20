@@ -1,0 +1,188 @@
+@attribute [Route(ClientRoutes.Users.Index)]
+@attribute [Authorize(Policy = AppPolicies.Users.View)]
+
+@using Mkx.Templates.Sdk.Server.Shared.Authorization
+@using Mkx.Templates.Sdk.Shared.Extensions
+@using Mkx.Templates.Client.Extensions
+@inherits AppComponentBase
+
+<PageTitle>مدیریت کاربران و دسترسی‌ها</PageTitle>
+
+@if (_isDisabled)
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="pt-8 text-center">
+        <MudPaper Class="pa-6 rounded-lg my-4" Elevation="1">
+            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Warning" Class="mb-3" />
+            <MudText Typo="Typo.h6" Class="fw-bold mb-2">مدیریت کاربران غیرفعال است</MudText>
+            <MudText Typo="Typo.body2" Color="Color.Secondary">
+                بخش مدیریت کاربران در دسترس نمی‌باشد.
+            </MudText>
+        </MudPaper>
+    </MudContainer>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pb-6">
+        <MudBreadcrumbs Class="px-0" Items="_breadcrumbs" MaxItems="2">
+            <SeparatorTemplate>
+                <MudIcon Icon="@Icons.Material.Filled.ArrowForwardIos" Size="Size.Small" />
+            </SeparatorTemplate>
+        </MudBreadcrumbs>
+
+        <MudPaper Class="pa-4 mb-4 rounded-lg glassy-card" Elevation="1">
+            <div class="d-flex flex-wrap align-center justify-space-between gap-4">
+                <div class="d-flex align-center gap-3">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">
+                        <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Medium" />
+                    </MudAvatar>
+                    <div>
+                        <MudText Typo="Typo.h5">مدیریت کاربران و دسترسی‌ها</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">مدیریت حساب‌های کاربری، نقش‌ها و سطوح دسترسی سیستم</MudText>
+                    </div>
+                </div>
+
+                <div class="d-flex align-center gap-2 flex-wrap justify-center">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.AdminPanelSettings"
+                               Href="@ClientRoutes.Users.RoleClaims">
+                        مدیریت دسترسی نقش‌ها
+                    </MudButton>
+
+                    <AuthorizeView Policy="@AppPolicies.Users.Manage">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                                   OnClick="OpenAddUserDialog">
+                            افزودن کاربر جدید
+                        </MudButton>
+                    </AuthorizeView>
+                </div>
+            </div>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 rounded-lg glassy-card" Elevation="1">
+            <div class="d-flex align-center justify-space-between mb-4 gap-4 flex-wrap">
+                <MudTextField @bind-Value="_searchQuery"
+                              Placeholder="جستجو بر اساس نام، نام کاربری یا ایمیل..."
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              IconSize="Size.Small"
+                              Immediate="true"
+                              Clearable="true"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense"
+                              Class="flex-grow-1"
+                              Style="max-width: 400px;" />
+            </div>
+
+            <MudTable Items="FilteredUsers"
+                      Loading="@IsBusy"
+                      Hover="true"
+                      Breakpoint="Breakpoint.Sm"
+                      Elevation="0"
+                      Dense="true">
+                <HeaderContent>
+                    <MudTh>کاربر</MudTh>
+                    <MudTh>اطلاعات تماس</MudTh>
+                    <MudTh>نقش‌های سیستم</MudTh>
+                    <MudTh>دسترسی‌های مستقیم</MudTh>
+                    <MudTh Style="text-align: left;">عملیات</MudTh>
+                </HeaderContent>
+                <RowTemplate Context="user">
+                    <MudTd DataLabel="کاربر">
+                        <div class="d-flex align-center gap-3">
+                            <MudAvatar Color="Color.Secondary">
+                                @(Mkx.Templates.Sdk.Shared.Extensions.StringExtensions.GetInitialsWithPeriods(user.Name))
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.subtitle2" Class="fw-bold">@user.Name</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@@@user.UserName</MudText>
+                            </div>
+                        </div>
+                    </MudTd>
+
+                    <MudTd DataLabel="اطلاعات تماس">
+                        <div>
+                            @if (!string.IsNullOrEmpty(user.Email))
+                            {
+                                <div class="d-flex align-center gap-1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Color="Color.Secondary" />
+                                    <MudText Typo="Typo.body2">@user.Email</MudText>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(user.PhoneNumber))
+                            {
+                                <div class="d-flex align-center gap-1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Phone" Size="Size.Small" Color="Color.Secondary" />
+                                    <MudText Typo="Typo.caption">@user.PhoneNumber</MudText>
+                                </div>
+                            }
+                            @if (string.IsNullOrEmpty(user.Email) && string.IsNullOrEmpty(user.PhoneNumber))
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">ثبت نشده</MudText>
+                            }
+                        </div>
+                    </MudTd>
+
+                    <MudTd DataLabel="نقش‌های سیستم">
+                        <div class="d-flex flex-wrap gap-1">
+                            @if (!user.Roles.Any())
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined">بدون نقش</MudChip>
+                            }
+                            else
+                            {
+                                @foreach (var role in user.Roles)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Text">@role.GetRoleName()</MudChip>
+                                }
+                            }
+                        </div>
+                    </MudTd>
+
+                    <MudTd DataLabel="دسترسی‌های مستقیم">
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">
+                            @user.DirectClaimsCount دسترسی اختصاصی
+                        </MudChip>
+                    </MudTd>
+
+                    <MudTd DataLabel="عملیات" Style="text-align: left;">
+                        <div class="d-flex align-center justify-end gap-1">
+                            <AuthorizeView Policy="@AppPolicies.Users.ManageClaims" Context="authCtx1">
+                                <MudTooltip Text="تنظیم دسترسی‌های کاربر">
+                                    <MudIconButton Icon="@Icons.Material.Filled.VpnKey"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => ManageUserClaims(user))" />
+                                </MudTooltip>
+                            </AuthorizeView>
+
+                            <AuthorizeView Policy="@AppPolicies.Users.Manage" Context="authCtx2">
+                                <MudTooltip Text="ویرایش کاربر">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                   Color="Color.Info"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => OpenEditUserDialog(user))" />
+                                </MudTooltip>
+
+                                @if (!user.UserName.Equals("admin", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <MudTooltip Text="حذف کاربر">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                       Color="Color.Error"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => ConfirmDeleteUser(user))" />
+                                    </MudTooltip>
+                                }
+                            </AuthorizeView>
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText Class="pa-4 text-center" Color="Color.Secondary">هیچ کاربری یافت نشد.</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </MudPaper>
+    </MudContainer>
+}

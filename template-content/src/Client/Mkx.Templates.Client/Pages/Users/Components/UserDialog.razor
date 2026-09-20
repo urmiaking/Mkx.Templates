@@ -1,0 +1,110 @@
+@using Mkx.Templates.Sdk.Server.Shared.Authorization
+@using Mkx.Templates.Client.Extensions
+@inherits AppComponentBase
+
+<MudForm Model="Model" @ref="@_form">
+    <MudDialog>
+        <DialogContent>
+            <div class="d-flex flex-column gap-3 py-2">
+                <MudTextField @bind-Value="Model.Name"
+                              Label="نام و نام خانوادگی"
+                              Required="true"
+                              RequiredError="نام و نام خانوادگی الزامی است"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <MudTextField @bind-Value="Model.UserName"
+                              Label="نام کاربری"
+                              Disabled="@IsEdit"
+                              Required="true"
+                              RequiredError="نام کاربری الزامی است"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <MudTextField @bind-Value="Model.Email"
+                              Label="ایمیل"
+                              InputType="InputType.Email"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <MudTextField @bind-Value="Model.PhoneNumber"
+                              Label="شماره همراه"
+                              InputType="InputType.Telephone"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <MudTextField @bind-Value="Model.Password"
+                              Label="@(IsEdit ? "کلمه عبور جدید (در صورت عدم تغییر خالی بگذارید)" : "کلمه عبور")"
+                              InputType="InputType.Password"
+                              Required="@(!IsEdit)"
+                              RequiredError="کلمه عبور الزامی است"
+                              Variant="Variant.Outlined"
+                              Margin="Margin.Dense" />
+
+                <div>
+                    <MudText Typo="Typo.body2" Class="mb-1">نقش‌های سیستم:</MudText>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var role in BuiltinRoles.Roles)
+                        {
+                            <MudCheckBox T="bool"
+                                         Value="@Model.SelectedRoles.Contains(role)"
+                                         ValueChanged="@(val => ToggleRole(role, val))"
+                                         Color="Color.Primary"
+                                         Dense="true">
+                                @role.GetRoleName()
+                            </MudCheckBox>
+                        }
+                    </div>
+                </div>
+            </div>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel" Variant="Variant.Text">انصراف</MudButton>
+            <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">
+                ذخیره
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public bool IsEdit { get; set; }
+    [Parameter] public UserModel Model { get; set; } = new();
+
+    private MudForm _form = default!;
+
+    public class UserModel
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? Password { get; set; }
+        public List<string> SelectedRoles { get; set; } = [];
+    }
+
+    private void ToggleRole(string role, bool isSelected)
+    {
+        if (isSelected && !Model.SelectedRoles.Contains(role))
+        {
+            Model.SelectedRoles.Add(role);
+        }
+        else if (!isSelected && Model.SelectedRoles.Contains(role))
+        {
+            Model.SelectedRoles.Remove(role);
+        }
+    }
+
+    private async Task Submit()
+    {
+        await _form.ValidateAsync();
+        if (_form.IsValid)
+        {
+            MudDialog.Close(DialogResult.Ok(Model));
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

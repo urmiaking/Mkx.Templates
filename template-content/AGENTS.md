@@ -57,6 +57,12 @@ Mkx.Templates/
 
 ## 3. Core UI Elements & Layouts
 
+### Users and claims management
+- `src/Client/Mkx.Templates.Client/Pages/Users/Index.razor` manages users and their direct claims; `RoleClaims.razor` manages claims for built-in roles. Their `Components/ClaimsTreeDialog.razor` displays policy definitions as a selectable tree. These pages and their MudBlazor styling follow the SmartPlaque dashboard reference.
+- The pages use `IUserManagementService` via `AppComponentBase.SendRequestAsync`. `UserManagementClientService` calls `UserManagementController`, which delegates to the application `UserManagementService`. Contracts, DTOs, and route constants are in `Mkx.Templates.Shared`.
+- `AppPolicies.Users` defines `View`, `Manage`, and `ManageClaims`. `AppPolicyProvider` supplies the tree; register each new policy there so it can be displayed and assigned. Search in the claim dialog must operate on the original tree nodes, preserving selections made while filtering.
+- See `docs/ai/ARCHITECTURE.md`, `docs/ai/SERVICE_ARCHITECTURE.md`, and `docs/ai/DOMAIN_KNOWLEDGE.md` for the route and authorization flow. Restart a running host after server/API edits and refresh the sign-in session after newly seeded claims are added.
+
 ### WASM Loading Splash Screen
 - **InteractiveWebAssembly Mode**: The application runs in InteractiveWebAssembly mode (no prerender) for all interactive pages, while authorization pages use static SSR.
 - **Splash Screen**: An `#app-loading` element renders the `Mkx.Templates` logo and a Cloudflare-style loading progress bar.

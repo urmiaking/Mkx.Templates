@@ -59,5 +59,21 @@ public static class ApiRoutes
     {
         public const string Base = "/health";
     }
+
+    public class UserManagement
+    {
+        public const string Base = "/api/user-management";
+        public const string GetUsers = "users";
+        public const string GetUserById = "users/{id}";
+        public const string CreateUser = "users";
+        public const string UpdateUser = "users";
+        public const string DeleteUser = "users/{id}";
+        public const string GetUserClaimsTree = "users/{userId}/claims";
+        public const string UpdateUserClaims = "users/{userId}/claims";
+        public const string GetRoles = "roles";
+        public const string GetRoleClaimsTree = "roles/{roleName}/claims";
+        public const string UpdateRoleClaims = "roles/{roleName}/claims";
+        public const string Enabled = "enabled";
+    }
 }
 

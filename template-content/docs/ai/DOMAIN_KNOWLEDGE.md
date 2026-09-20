@@ -41,6 +41,11 @@ Draw diagrams or describe state transitions for business objects (e.g. Orders, S
 
 List the actors in the system, their access scope, and authorization rules:
 
-- **Admin**: Full system access, can configure global settings.
-- **Operator**: Can create and edit business records but cannot delete them.
-- **Viewer**: Read-only access to specific dashboards.
+- **Administrators**: Built-in administrator role. It receives registered policy claims from the startup seeder.
+- **Users**: Built-in standard user role. Its policy claims can be assigned in the role claim editor.
+
+### Template identity and policy editor
+
+The template's actual built-in Identity roles are `Administrators` and `Users` (`BuiltinRoles.Roles`). The administrator role is seeded with claims from registered policy providers when the host starts. The user management policies are `AppPolicies.Users.View`, `Manage`, and `ManageClaims`; the initial tree also contains `AppPolicies.Tests.View`. This is a template policy catalog, so applications should add their own policies to `AppPolicyProvider` as they add features.
+
+The user claim editor changes direct claims on one user. The role claim editor changes claims on a built-in role; role membership is managed separately. The current role seeder reapplies provider policy claims to `Administrators` on startup, so removing one of those claims from that role in the editor is not persistent across a restart. Identity claims outside the registered policy catalog are not editable through this tree.

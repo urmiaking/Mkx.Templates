@@ -1,6 +1,6 @@
-# Service Architecture & Interactive Auto Polymorphism: Mkx.Templates
+# Service Architecture & Client/Server Service Contracts: Mkx.Templates
 
-This document details the mechanics of Service registrations, Dependency Injection (DI) scanning, client-server polymorphic resolution under **Blazor Interactive Auto rendering mode**, and exception/error handling.
+This document details service registrations, dependency injection (DI) scanning, client/server implementations under the current **InteractiveWebAssembly rendering mode**, and exception/error handling.
 
 ---
 
@@ -102,3 +102,13 @@ The error handling flow spans both server and client layers:
 - **Server Side**: Controllers process calls. If validations or logic fail, application exceptions (like `NotFoundException` or `ValidationException`) are thrown. The server global exception middleware converts them to Problem Details JSON (`404 Not Found`, `400 Bad Request`).
 - **Client Side**: If an HTTP call fails (`!response.IsSuccessStatusCode`), the client service converts the status code to a typed client exception (e.g. `HttpRequestFailedException` or `HttpRequestValidationException`).
 - **UI Interaction**: Components calling services via `SendRequestAsync` in `AppComponentBase` automatically catch these exceptions and display formatted toast alerts to the user, resetting the loading state safely.
+
+---
+
+## 6. Claim Tree Request and Save Flow
+
+`Pages/Users/Index.razor.cs` requests `GetUserClaimsTreeAsync(userId)`; `RoleClaims.razor.cs` requests `GetRoleClaimsTreeAsync(roleName)`. Both pass the returned `List<PolicyTreeNodeDto>` to `ClaimsTreeDialog`. The dialog returns selected policy names, and the page calls the corresponding update method through `SendRequestAsync`.
+
+The client implementation is `UserManagementClientService` (`[ScopedService]`). It uses `ApiUrls.UserManagement` to reach the authorized `UserManagementController`. The controller delegates to the application `UserManagementService` (`[ScopedService]`), which reads Identity claims and builds nodes from the registered `IApplicationPolicyProvider` implementations. The server registers `AppPolicyProvider` in `DependencyInjection.AddAuth`; an empty provider collection would produce an empty tree.
+
+Read endpoints and pages require `AppPolicies.Users.View`; user mutations require `Manage`; claim mutations require `ManageClaims`. Claim updates accept names from registered policy definitions, retain unrelated Identity claims, and reject unknown policy names. A user's tree reflects **direct** claims only; role claims are edited on the separate role page. An existing authentication session can continue carrying old claims until the user signs in again.
