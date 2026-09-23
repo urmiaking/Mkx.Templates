@@ -1,67 +1,39 @@
-@inject NavigationManager Navigation
-
-<div class="mobile-nav-container @Class">
-    <div class="mobile-nav-bar">
-        @* Home Link *@
+<div class="mobile-nav-container @Class" aria-label="ناوبری اصلی موبایل">
+    <nav class="mobile-nav-bar" aria-label="ناوبری اصلی">
         <NavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All" class="mobile-nav-item">
-            <div class="mobile-nav-icon-wrapper">
-                <MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Medium" />
-            </div>
-            <span class="mobile-nav-label">داشبرد</span>
+            <span class="mobile-nav-icon-wrapper"><MudIcon Icon="@Icons.Material.Filled.Home" Size="Size.Medium" /></span>
+            <span class="mobile-nav-label">خانه</span>
         </NavLink>
 
-        @* Tests Link *@
         <NavLink href="@ClientRoutes.Tests.Index" class="mobile-nav-item">
-            <div class="mobile-nav-icon-wrapper">
-                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" />
-            </div>
+            <span class="mobile-nav-icon-wrapper"><MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Medium" /></span>
             <span class="mobile-nav-label">تست‌ها</span>
         </NavLink>
 
-        @* Explore *@
-        <NavLink href="/explore" class="mobile-nav-item">
-            <div class="mobile-nav-icon-wrapper">
-                <MudIcon Icon="@Icons.Material.Filled.Explore" Size="Size.Medium" />
-            </div>
-            <span class="mobile-nav-label">اکتشاف</span>
-        </NavLink>
+        <AuthorizeView Policy="@AppPolicies.Users.View">
+            <NavLink href="@ClientRoutes.Users.Index" class="mobile-nav-item">
+                <span class="mobile-nav-icon-wrapper"><MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Medium" /></span>
+                <span class="mobile-nav-label">کاربران</span>
+            </NavLink>
+        </AuthorizeView>
 
-        @* More Menu *@
-        <MudMenu @bind-Open="_isMenuOpen" AnchorOrigin="Origin.TopCenter" TransformOrigin="Origin.BottomCenter" Class="mobile-nav-menu-wrapper" PopoverClass="mobile-nav-popover">
-            <ActivatorContent>
-                <div class="mobile-nav-item" @onclick="context.ToggleAsync">
-                    <div class="mobile-nav-icon-wrapper">
-                        <MudIcon Icon="@Icons.Material.Filled.MoreHoriz" Size="Size.Medium" />
-                    </div>
-                    <span class="mobile-nav-label">بیشتر</span>
-                </div>
-            </ActivatorContent>
-            <ChildContent>
-                <MudMenuItem Icon="@Icons.Material.Filled.Search" OnClick="@NavigateToSearch">جستجو</MudMenuItem>
-                <MudMenuItem Icon="@Icons.Material.Filled.Settings" OnClick="@NavigateToSettings">تنظیمات</MudMenuItem>
-                <MudMenuItem Icon="@Icons.Material.Filled.Info" OnClick="@NavigateToAbout">درباره ما</MudMenuItem>
-            </ChildContent>
-        </MudMenu>
-    </div>
+        <AuthorizeView>
+            <Authorized>
+                <NavLink href="@ClientRoutes.UserAccounts.Index" class="mobile-nav-item">
+                    <span class="mobile-nav-icon-wrapper"><MudIcon Icon="@Icons.Material.Filled.AccountCircle" Size="Size.Medium" /></span>
+                    <span class="mobile-nav-label">حساب من</span>
+                </NavLink>
+            </Authorized>
+            <NotAuthorized>
+                <a href="@ClientRoutes.Accounts.Login" class="mobile-nav-item">
+                    <span class="mobile-nav-icon-wrapper"><MudIcon Icon="@Icons.Material.Filled.Login" Size="Size.Medium" /></span>
+                    <span class="mobile-nav-label">ورود</span>
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </nav>
 </div>
 
 @code {
     [Parameter] public string? Class { get; set; }
-    
-    private bool _isMenuOpen;
-
-    private void NavigateToSearch()
-    {
-        Navigation.NavigateTo("/search");
-    }
-
-    private void NavigateToSettings()
-    {
-        Navigation.NavigateTo("/settings");
-    }
-
-    private void NavigateToAbout()
-    {
-        Navigation.NavigateTo("/about");
-    }
 }
