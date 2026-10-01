@@ -1,6 +1,6 @@
 # Database & Persistence Guide
 
-EF Core belongs in Infrastructure. Domain/Shared remain persistence-agnostic and Client never accesses DbContext.
+EF Core belongs in Infrastructure. Domain has no EF context/configuration; SDK Domain intentionally contains Identity models that Core Domain may reference. Shared has no server persistence dependencies and Client never accesses DbContext.
 
 Use `IEntityTypeConfiguration<T>` and explicitly configure keys, strong-ID conversions, required/optional columns, string lengths, decimal precision, relationships/FKs, indexes/uniqueness and delete behavior where integrity depends on them.
 

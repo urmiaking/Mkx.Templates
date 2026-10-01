@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
     font-family: "IRANSans";
     src: url('eot/IRANSansWeb(FaNum)_Medium.eot');
     src: url('eot/IRANSansWeb(FaNum)_Medium.eot') format('embedded-opentype'),
@@ -7,4 +7,5 @@
         url('ttf/IRANSansWeb(FaNum)_Medium.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }

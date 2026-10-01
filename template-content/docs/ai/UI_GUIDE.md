@@ -1,18 +1,17 @@
-# UI & UX Guide
+# UI and performance
 
-Use MudBlazor as the primary component system and preserve the existing theme-aware visual language. Reuse application components before custom equivalents.
+Use MudBlazor, shared routes/policies, AppComponentBase and markup/code-behind for non-trivial components. New request flows use TryRequestAsync with explicit success, error and retry states. Inspect Tests/TestEditor for pagination, debounce, optimistic concurrency and save-in-place dialogs. Existing SendRequestAsync wrappers are compatibility helpers.
 
-## Pages and Styling
-Non-trivial pages normally use shared `ClientRoutes`, authorization, `AppComponentBase`, separate markup/code-behind, and `SendRequestAsync`. Use central project CSS unless an existing component intentionally uses scoped CSS. Prefer MudBlazor palette variables and preserve light/dark, focus, hover, disabled and error states.
+Preserve the established visual design: the central stylesheet retains the original gradients, spacing, radii, brand font and theme colors. Do not rewrite the stylesheet or replace fonts as a performance optimization. Only the desktop appbar can blur: a bounded 8px surface behind @supports, width >=960px, fine pointer and hover. Phones use opaque surface backgrounds, zero application backdrop blur and no route-entry animation. Respect the operating system prefers-reduced-motion preference automatically; do not add a user-facing effects/performance switch. Do not add blur to global MudPaper or nested repeated content.
 
-## Responsive Navigation
-`Layout/Components/Drawer.razor` is authoritative for exact parameters. Desktop navigation is Mini/collapsible. Below the configured breakpoint it must be Temporary/overlay and must not permanently consume body width.
+Use explicit CSS transition properties, short durations, reduced-motion rules and no permanent will-change on page wrappers. Page animation keys contain the path only, so search query changes do not recreate the whole page. Preserve light/dark, visible focus and readable contrast; use theme tokens rather than multiple theme-specific overrides.
 
-## Motion
-Use the global page transition rather than competing per-page route animations. Motion must be short, non-blocking, avoid layout shift, and respect `prefers-reduced-motion`.
+Navigation starts closed. MudBreakpointProvider chooses Mini on desktop and Temporary below Md; key the drawer by desktop/mobile mode so MudLayout registration is recreated correctly. Set the drawer's own Breakpoint=None: application code owns responsiveness, and MudDrawer must not independently auto-open on its first viewport notification. Its OpenChanged handler updates both local and parent state. Initial desktop load must show a 56px mini rail, and the first hamburger click must reveal the full profile/palette. Verify before clicking and after refresh, not only after an open/close cycle. A closed mobile drawer reserves no width for a mini rail; hidden temporary content is not rendered. Render profile, palette and shortcuts only when IsDrawerOpen; closed desktop rails contain only navigation. Preserve content space and safe-area bottom padding for mobile navigation. Dialog content scrolls with a dvh-aware max-height so mobile keyboards/large fonts cannot hide fields. MainLayout supplies #main-content and a skip link; route focus targets that stable element.
 
-## Forms, Tables, Dialogs
-Use established validation/error UX and prevent duplicate submits while busy. Use decimal/tel/numeric `InputMode` appropriately. Page/filter large datasets server-side. Provide loading/empty states and confirm destructive actions. Dialogs should be focused and return deterministic results.
+Use native links/buttons for actions, accessible names for icon-only controls, preserve the 24px palette circles and compact established spacing (do not enlarge them without user approval), and aria-pressed for palette state. Tooltip alone is not a button name. Do not expose fake notification badges/data. NotificationsDrawer is currently an empty extension surface, not a persistent notification system. It is modal: its overlay must cover the navigation drawer as well as the page, with the notification panel above that overlay. MainLayout makes the background inert while notifications are open; keep the notification drawer outside that inert container. Trap focus inside the panel, allow Escape/close/overlay to dismiss, and restore background interaction after dismissal. Verify with navigation expanded and in Mini mode.
 
-## Accessibility and SSR
-Give icon-only actions accessible names, preserve keyboard/focus behavior, do not rely only on color, and maintain contrast. Static SSR pages must not depend on interactive scoped client services.
+Default locale is fa/RTL with IRANSans (FaNum) Medium WOFF2 and font-display:swap; typography falls back to Vazirmatn, Helvetica and Arial. Keep the local Google font assets used by the original Cinzel Decorative brand. Keep full ICU support because Persian culture/calendar behavior needs it; trimming ICU or switching prerender requires measured, tested locale/startup work. Font CSS and assets must be included in both template packages and published output; verify this during template instantiation.
+
+See [PERFORMANCE.md](PERFORMANCE.md) for release measurement scenarios and budgets. Browser viewport emulation verifies layout, not a phone GPU's frame rate.
+
+Tests toolbar uses Margin.None plus zero CSS margin for the outlined search field, a 56px add button and center alignment so both controls share the same height and vertical bounds.

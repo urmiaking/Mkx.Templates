@@ -1,104 +1,55 @@
 using Blazored.LocalStorage;
-using Mkx.Templates.Client.Common;
-using Mkx.Templates.Client.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Mkx.Templates.Client.Common;
+using Mkx.Templates.Client.Services;
 using MudBlazor;
-using Mkx.Templates.Client.Layout.Themes;
 
 namespace Mkx.Templates.Client.Layout;
 
-public partial class BaseLayout
+public partial class BaseLayout : IDisposable
 {
     private MudThemeProvider? _mudThemeProvider;
-
+    private bool _disposed;
     public bool IsDarkMode { get; set; }
-
-    [Inject] private ThemeService? ThemeService { get; set; }
+    [Inject] private ThemeService ThemeService { get; set; } = default!;
     [Inject] private ILocalStorageService LocalStorage { get; set; } = default!;
-    [Inject] private ISnackbar ToastService { get; set; } = default!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        if (ThemeService is not null)
-        {
-            await ThemeService.LoadSettingsAsync();
-            ThemeService.OnToggleMode += OnToggleMode;
-            ThemeService.OnPaletteChanged += OnPaletteChanged;
-            IsDarkMode = ThemeService.IsDarkMode;
-        }
-
-        await base.OnInitializedAsync();
+        ThemeService.OnToggleMode += AppearanceChanged;
+        ThemeService.OnPaletteChanged += AppearanceChanged;
     }
-
-    public void OnPaletteChanged(object? sender, EventArgs e)
+    private async void AppearanceChanged(object? sender, EventArgs args)
     {
-        StateHasChanged();
+        if (_disposed) return;
+        try { await InvokeAsync(async () => { IsDarkMode = ThemeService.IsDarkMode; await ApplyAppearanceAsync(); StateHasChanged(); }); }
+        catch (JSDisconnectedException) { }
+        catch (Exception ex) { if (!_disposed) await DispatchExceptionAsync(ex); }
     }
-
-    public void OnToggleMode(object? sender, EventArgs e)
-    {
-        IsDarkMode = ThemeService?.IsDarkMode ?? false;
-        StateHasChanged();
-    }
-
+    private ValueTask ApplyAppearanceAsync() => JSRuntime.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender || _disposed || _mudThemeProvider is null) return;
+        await ThemeService.LoadSettingsAsync();
+        if (string.IsNullOrEmpty(await LocalStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode)))
         {
-            // Dismiss the WASM loading splash screen (no-op if splash doesn't exist)
-            await JSRuntime.InvokeVoidAsync("Mkx.removeSplash");
-
-            await LoadTheme();
-            StateHasChanged();
-        }
-
-        await base.OnAfterRenderAsync(firstRender);
-    }
-
-    private async Task LoadTheme()
-    {
-        if (ThemeService is null || _mudThemeProvider is null) return;
-
-        // 1. Try to load saved dark mode preference from local storage
-        var savedDarkMode = await LocalStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
-
-        bool isDark;
-        if (string.IsNullOrEmpty(savedDarkMode))
-        {
-            // No explicit user preference, load from OS preference
-            isDark = await _mudThemeProvider.GetSystemDarkModeAsync();
-            // Update ThemeService's state, but do NOT save it to local storage since it's just OS preference
-            await ThemeService.SetDarkModeAsync(isDark, saveToStorage: false);
-
-            // Subscribe to system preference changes dynamically (only when user has no saved preference)
-            await _mudThemeProvider.WatchSystemDarkModeAsync(async (newValue) =>
+            await ThemeService.SetDarkModeAsync(await _mudThemeProvider.GetSystemDarkModeAsync(), false);
+            await _mudThemeProvider.WatchSystemDarkModeAsync(async value =>
             {
-                // Only apply if user still hasn't explicitly set a preference
-                var currentSaved = await LocalStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
-                if (string.IsNullOrEmpty(currentSaved))
-                {
-                    await ThemeService.SetDarkModeAsync(newValue, saveToStorage: false);
-                    IsDarkMode = newValue;
-                    StateHasChanged();
-                }
+                if (!_disposed && string.IsNullOrEmpty(await LocalStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode)))
+                    await ThemeService.SetDarkModeAsync(value, false);
             });
         }
-        else
-        {
-            // Use saved preference
-            bool.TryParse(savedDarkMode, out isDark);
-            await ThemeService.SetDarkModeAsync(isDark, saveToStorage: true);
-        }
-
-        var savedPalette = await LocalStorage.GetItemAsStringAsync(LocalStorageKeys.SelectedPalette);
-        if (!string.IsNullOrEmpty(savedPalette) && ColorPalettes.Palettes.ContainsKey(savedPalette))
-        {
-            await ThemeService.SetPaletteAsync(savedPalette!);
-        }
-
         IsDarkMode = ThemeService.IsDarkMode;
+        await ApplyAppearanceAsync();
+        await JSRuntime.InvokeVoidAsync("Mkx.removeSplash");
         StateHasChanged();
+    }
+    public void Dispose()
+    {
+        _disposed = true;
+        ThemeService.OnToggleMode -= AppearanceChanged;
+        ThemeService.OnPaletteChanged -= AppearanceChanged;
     }
 }

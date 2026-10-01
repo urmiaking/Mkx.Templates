@@ -1,4 +1,4 @@
-﻿namespace Mkx.Templates.Server.Common;
+namespace Mkx.Templates.Server.Common;
 
 public record LoginOptions
 {
@@ -7,5 +7,5 @@ public record LoginOptions
     public bool AllowLocal { get; init; } = true;
     public bool AllowExternal { get; init; } = true;
     public bool ShowRememberMe { get; init; } = true;
-    public bool LockoutOnFailure { get; init; } = false;
+    public bool LockoutOnFailure { get; init; } = true;
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Mkx.Templates.Sdk.Server.Shared.Authorization;
 
@@ -55,7 +55,7 @@ public class PolicyDefinition
     {
         return Build(claim,
                      description,
-                     b => b.RequireClaim(claim),
+                     b => b.RequireAuthenticatedUser().RequireClaim(claim),
                      childPolicies);
     }
 }

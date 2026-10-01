@@ -60,10 +60,7 @@ else
     }
     else
     {
-        <MudPaper Class="pa-4 py-5 action-card cursor-pointer"
-                  Width="100%"
-                  @onclick="OnClick"
-                  Elevation="0">
+<button type="button" class="pa-4 py-5 action-card" @onclick="OnClick" aria-label="@Title">
 
             <MudStack Row="true"
                       Justify="Justify.SpaceBetween"
@@ -84,7 +81,7 @@ else
                 <MudIcon Icon="@Icons.Material.Filled.ArrowBackIos"
                          Color="@Color" />
             </MudStack>
-        </MudPaper>
+        </button>
     }
 }
 

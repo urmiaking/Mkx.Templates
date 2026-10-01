@@ -8,6 +8,7 @@ using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Sdk.Shared.Extensions;
 using Mkx.Templates.Sdk.Shared.Utilities;
 using MudBlazor.Services;
+using Mkx.Templates.Shared.Authorization;
 
 namespace Mkx.Templates.Client.Extensions;
 
@@ -20,7 +21,7 @@ public static class DependencyInjection
             services.AddClientServerServices()
                 .DiscoverServices()
                 .AddAuthServices()
-                .AddHttpClientService(environment, new TimeSpan(0, 10, 0))
+                .AddHttpClientService(environment, TimeSpan.FromSeconds(30))
                 .AddJsonOptions();
 
             return services;
@@ -35,8 +36,8 @@ public static class DependencyInjection
             services.AddMudServices(config =>
             {
                 config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomLeft;
-                config.SnackbarConfiguration.HideTransitionDuration = 1500;
-                config.PopoverOptions.Duration = TimeSpan.FromMilliseconds(500);
+                config.SnackbarConfiguration.HideTransitionDuration = 150;
+                config.PopoverOptions.Duration = TimeSpan.FromMilliseconds(150);
             });
 
             services.AddScoped<ThemeService>();
@@ -50,7 +51,7 @@ public static class DependencyInjection
             var baseAddress = environment.BaseAddress;
             services.AddScoped(sp =>
             {
-                var client = new HttpClient { BaseAddress = new Uri(baseAddress) };
+                var client = new HttpClient(new AntiforgeryHandler(new Uri(baseAddress))) { BaseAddress = new Uri(baseAddress) };
                 client.Timeout = timeOut;
                 return client;
             });
@@ -69,9 +70,11 @@ public static class DependencyInjection
         public IServiceCollection AddAuthServices()
         {
             services.AddSingleton<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+            services.AddSingleton<IApplicationPolicyProvider, AppPolicyProvider>();
             services.AddAuthorizationCore();
             services.AddCascadingAuthenticationState();
-            services.AddScoped<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
+            services.AddScoped<PersistentAuthenticationStateProvider>();
+            services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<PersistentAuthenticationStateProvider>());
 
             return services;
         }

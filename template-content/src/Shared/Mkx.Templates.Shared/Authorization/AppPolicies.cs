@@ -1,4 +1,4 @@
-﻿namespace Mkx.Templates.Shared.Authorization;
+namespace Mkx.Templates.Shared.Authorization;
 
 public static class AppPolicies
 {
@@ -11,6 +11,7 @@ public static class AppPolicies
 
     public static class Tests
     {
+        public const string Manage = $"{nameof(Mkx.Templates)}-{nameof(Tests)}-{nameof(Manage)}";
         public const string View = $"{nameof(Mkx.Templates)}-{nameof(Tests)}-{nameof(View)}";
     }
 }

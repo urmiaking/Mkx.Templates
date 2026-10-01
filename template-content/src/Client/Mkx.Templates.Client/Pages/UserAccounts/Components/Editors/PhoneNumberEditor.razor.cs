@@ -51,12 +51,8 @@ public partial class PhoneNumberEditor
 
     private async Task SendToken()
     {
-        if(string.IsNullOrEmpty(_oldPhoneNumber))
+        if (IsBusy || string.IsNullOrEmpty(_oldPhoneNumber))
             return;
-
-        _tokenSent = true;
-        _sendTokenDisabled = true;
-        StartOtpTimer();
 
         var request = new SendVerificationCodeRequest(_oldPhoneNumber, PhoneNumber);
 
@@ -64,6 +60,9 @@ public partial class PhoneNumberEditor
             action: (s, ct) => s.SendVerificationTokenAsync(request, ct),
             afterSend: () =>
             {
+                _tokenSent = true;
+                _sendTokenDisabled = true;
+                StartOtpTimer();
                 AddInfoToast($"کد فعالسازی به شماره {_oldPhoneNumber} ارسال شد");
                 return Task.CompletedTask;
             });
@@ -91,6 +90,13 @@ public partial class PhoneNumberEditor
         }
 
         _sendTokenDisabled = false;
-        await InvokeAsync(StateHasChanged);
+        if (!IsDisposed) await InvokeAsync(StateHasChanged);
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        _otpCts?.Cancel();
+        _otpCts?.Dispose();
+        await base.DisposeAsync();
     }
 }

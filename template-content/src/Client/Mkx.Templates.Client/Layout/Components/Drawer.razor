@@ -1,73 +1,86 @@
 @inherits AppComponentBase
 
-<MudDrawer Open="IsDrawerOpen" OpenChanged="IsDrawerOpenChanged" Variant="DrawerVariant.Mini" Breakpoint="Breakpoint.Md" PreserveOpenState="true" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"fancy-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
-    @* User Profile Section *@
-    <div class="drawer-header px-6 pt-5 pb-3 d-flex flex-column align-center justify-center">
-        <MudBadge Color="Color.Success" Overlap="true" Dot="IsAuthenticated" Bordered="true" Origin="Origin.BottomRight" Class="mb-3">
-            <MudAvatar Color="Color.Primary" Size="Size.Large" Class="profile-avatar" Elevation="2">
-                @AvatarText
-            </MudAvatar>
-        </MudBadge>
-        <div class="drawer-user-info d-flex flex-column align-center text-center">
-            <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">@DisplayName</MudText>
-            <MudText Typo="Typo.caption" Class="mud-text-secondary">@UserName</MudText>
-        </div>
-    </div>
-
-    @* Color Palette Selector *@
-    <div class="drawer-palette px-6 pt-3 pb-2 d-flex flex-column align-center justify-center">
-        <div class="d-flex gap-2 justify-center flex-wrap">
-            <div class="palette-collection">
-                @{
-                    var predefinedColors = new Dictionary<string, string>
-                    {
-                        { BuiltInThemes.OceanBlue, "#2563EB" },
-                        { BuiltInThemes.GoldenAmber, "#B8860B" },
-                        { BuiltInThemes.EmeraldGreen, "#0D7C5F" },
-                        { BuiltInThemes.RoyalPurple, "#7C3F8E" }
-                    };
-                }
-                @foreach (var color in predefinedColors)
-                {
-                    <div class="palette-dot @(ThemeService.CurrentPalette == color.Key ? "selected" : "")"
-                         style="background-color:@color.Value"
-                         @onclick="@(() => SetPalette(color.Key))">
+<MudBreakpointProvider OnBreakpointChanged="@(value => _breakpoint = value)" />
+<MudDrawer @key="(_breakpoint >= Breakpoint.Md)" Open="IsDrawerOpen" OpenChanged="OnDrawerOpenChanged" Variant="@(_breakpoint >= Breakpoint.Md ? DrawerVariant.Mini : DrawerVariant.Temporary)" Breakpoint="Breakpoint.None" ClipMode="DrawerClipMode.Never" Elevation="0" Class="@($"fancy-drawer {(ThemeService.IsDarkMode ? "dark-mode" : "light-mode")}")">
+    @if (_breakpoint >= Breakpoint.Md || IsDrawerOpen)
+    {
+        <div @onkeydown="HandleDrawerKeyDown">
+            @if (_breakpoint < Breakpoint.Md)
+            {
+                <div class="d-flex justify-end pa-2"><MudIconButton Icon="@Icons.Material.Filled.Close" aria-label="بستن ناوبری" OnClick="CloseDrawer" /></div>
+            }
+            @if (IsDrawerOpen)
+            {
+                @* User Profile Section *@
+                <div class="drawer-header px-6 pt-5 pb-3 d-flex flex-column align-center justify-center">
+                    <MudBadge Color="Color.Success" Overlap="true" Dot="true" Visible="IsAuthenticated" Bordered="true" Origin="Origin.BottomRight" Class="mb-3">
+                        <MudAvatar Color="Color.Primary" Size="Size.Large" Class="profile-avatar" Elevation="2">
+                            @AvatarText
+                        </MudAvatar>
+                    </MudBadge>
+                    <div class="drawer-user-info d-flex flex-column align-center text-center">
+                        <MudText Typo="Typo.subtitle1" Class="font-bold mb-0">@DisplayName</MudText>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@UserName</MudText>
                     </div>
-                }
+                </div>
+
+                @* Color Palette Selector *@
+                <div class="drawer-palette px-6 pt-3 pb-2 d-flex flex-column align-center justify-center">
+                    <div class="d-flex gap-2 justify-center flex-wrap">
+                        <div class="palette-collection">
+                            @{
+                                var predefinedColors = new Dictionary<string, string>
+                                {
+                                    { BuiltInThemes.OceanBlue, "#2563EB" },
+                                    { BuiltInThemes.GoldenAmber, "#B8860B" },
+                                    { BuiltInThemes.EmeraldGreen, "#0D7C5F" },
+                                    { BuiltInThemes.RoyalPurple, "#7C3F8E" }
+                                };
+                            }
+                            @foreach (var color in predefinedColors)
+                            {
+                                <button type="button" aria-label="@($"رنگ {color.Key}")" aria-pressed="@(ThemeService.CurrentPalette == color.Key ? "true" : "false")" class="palette-dot @(ThemeService.CurrentPalette == color.Key ? "selected" : "")"
+                                     style="background-color:@color.Value"
+                                     @onclick="@(() => SetPalette(color.Key))">
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                @* Shortcuts *@
+                <div class="drawer-shortcuts px-6 pt-2 pb-3 d-flex justify-center gap-2">
+                    @if (IsAuthenticated)
+                    {
+                        <MudTooltip Text="پروفایل">
+                            <MudIconButton aria-label="پروفایل" Icon="@Icons.Material.Filled.Person" OnClick="NavigateToUserAccounts" Size="Size.Medium" Class="shortcut-btn" />
+                        </MudTooltip>
+                        <MudTooltip Text="رویدادها">
+                            <MudIconButton aria-label="رویدادها" Icon="@Icons.Material.Filled.EventNote" Class="shortcut-btn" OnClick="OpenLogs" />
+                        </MudTooltip>
+                    }
+                    <MudTooltip Text="@(ThemeService.IsDarkMode ? "حالت روشن" : "حالت تاریک")">
+                        <MudIconButton aria-label="تغییر نمایش" Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.WbSunny : Icons.Material.Filled.NightsStay)" OnClick="ToggleTheme" Size="Size.Medium" Class="shortcut-btn" />
+                    </MudTooltip>
+                    @if (IsAuthenticated)
+                    {
+                        <MudTooltip Text="خروج">
+                            <MudIconButton aria-label="خروج" Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Size="Size.Medium" Color="Color.Error" Class="shortcut-btn" />
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="ورود به سامانه">
+                            <MudIconButton aria-label="ورود" Icon="@Icons.Material.Filled.Login" OnClick="Login" Size="Size.Medium" Color="Color.Primary" Class="shortcut-btn" />
+                        </MudTooltip>
+                    }
+                </div>
+
+            }
+            @* NavMenu *@
+            <div class="drawer-content px-4 pt-2 pb-6">
+                <NavMenu />
             </div>
         </div>
-    </div>
-
-    @* Shortcuts *@
-    <div class="drawer-shortcuts px-6 pt-2 pb-3 d-flex justify-center gap-2">
-        @if (IsAuthenticated)
-        {
-            <MudTooltip Text="پروفایل">
-                <MudIconButton Icon="@Icons.Material.Filled.Person" OnClick="NavigateToUserAccounts" Size="Size.Medium" Class="shortcut-btn" />
-            </MudTooltip>
-            <MudTooltip Text="رویدادها">
-                <MudIconButton Icon="@Icons.Material.Filled.EventNote" Class="shortcut-btn" Href="@ClientRoutes.Logs.Base" />
-            </MudTooltip>
-        }
-        <MudTooltip Text="@(ThemeService.IsDarkMode ? "حالت روشن" : "حالت تاریک")">
-            <MudIconButton Icon="@(ThemeService.IsDarkMode ? Icons.Material.Filled.WbSunny : Icons.Material.Filled.NightsStay)" OnClick="ToggleTheme" Size="Size.Medium" Class="shortcut-btn" />
-        </MudTooltip>
-        @if (IsAuthenticated)
-        {
-            <MudTooltip Text="خروج">
-                <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Size="Size.Medium" Color="Color.Error" Class="shortcut-btn" />
-            </MudTooltip>
-        }
-        else
-        {
-            <MudTooltip Text="ورود به سامانه">
-                <MudIconButton Icon="@Icons.Material.Filled.Login" OnClick="Login" Size="Size.Medium" Color="Color.Primary" Class="shortcut-btn" />
-            </MudTooltip>
-        }
-    </div>
-
-    @* NavMenu *@
-    <div class="drawer-content px-4 pt-2 pb-6">
-        <NavMenu />
-    </div>
+    }
 </MudDrawer>

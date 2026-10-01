@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Mkx.Templates.Sdk.Server.Shared.Authorization;
@@ -25,7 +25,7 @@ public class AuthorizationPolicyProvider(IServiceProvider serviceProvider) : IAu
             .FirstOrDefault(x => x.Name == policyName);
 
         if (policyDef == null)
-            return GetDefaultPolicyAsync()!;
+            return Task.FromResult<AuthorizationPolicy?>(null);
 
         return Task.FromResult(policyDef.Policy)!;
     }

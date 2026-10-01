@@ -20,7 +20,7 @@
 ## Server & Client
 - [ ] Thin authorized controller using shared routes.
 - [ ] Client service using `ApiUrls` and standard HTTP exception flow.
-- [ ] Blazor markup + code-behind using `AppComponentBase` and `SendRequestAsync`.
+- [ ] Blazor markup + code-behind using `AppComponentBase` and `TryRequestAsync` (explicit success; legacy `SendRequestAsync` remains for compatibility).
 - [ ] Loading/error/empty/responsive/theme/accessibility behavior.
 - [ ] NavMenu entry only if appropriate.
 

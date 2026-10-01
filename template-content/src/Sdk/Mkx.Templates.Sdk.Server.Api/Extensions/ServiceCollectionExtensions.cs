@@ -1,4 +1,4 @@
-﻿using Mkx.Templates.Sdk.Shared.Utilities;
+using Mkx.Templates.Sdk.Shared.Utilities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog.Ui.Core.Extensions;
@@ -7,6 +7,7 @@ using Serilog.Ui.Web.Extensions;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Mkx.Templates.Sdk.Server.Api.Extensions;
 
@@ -17,7 +18,7 @@ public static class ServiceCollectionExtensions
         public IServiceCollection AddControllers(IConfiguration configuration)
         {
             services
-                .AddControllers()
+                .AddControllersWithViews(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()))
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -45,12 +46,13 @@ public static class ServiceCollectionExtensions
 
         public IServiceCollection AddSerilogUiService(IConfiguration configuration)
         {
+            if (!configuration.GetValue<bool>("Logging:UseSqlStore")) return services;
             services.AddSerilogUi(opts =>
             {
                 opts.UseSqlServer(options =>
                 {
                     options
-                        .WithConnectionString(configuration.GetConnectionString("Default")!)
+                        .WithConnectionString(configuration.GetConnectionString("Mkx.Templates")!)
                         .WithTable("Logs");
                 });
             });

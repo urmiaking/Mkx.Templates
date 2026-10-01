@@ -3,15 +3,18 @@
 @layout BaseLayout
 
 <MudLayout>
-    <AppBar @bind-DrawerOpen="_drawerOpen" @bind-NotificationsOpen="_notificationsOpen" />
-    <Drawer @bind-IsDrawerOpen="_drawerOpen" />
+    <div inert="@(_notificationsOpen ? string.Empty : null)">
+        <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+        <AppBar @bind-DrawerOpen="_drawerOpen" @bind-NotificationsOpen="_notificationsOpen" />
+        <Drawer @bind-IsDrawerOpen="_drawerOpen" />
+        <MudMainContent Class="mt-10 mb-md-4 mb-20 pa-md-4 py-4">
+            <main id="main-content" tabindex="-1" class="page-transition" @key="_currentUri">
+                @Body
+            </main>
+            <MobileNav Class="d-md-none d-flex" />
+        </MudMainContent>
+    </div>
     <NotificationsDrawer @bind-IsOpen="_notificationsOpen" />
-    <MudMainContent Class="mt-10 mb-md-4 mb-20 pa-md-4 py-4">
-        <div class="page-transition" @key="_currentUri">
-            @Body
-        </div>
-        <MobileNav Class="d-md-none d-flex" />
-    </MudMainContent>
 </MudLayout>
 
 @code
@@ -24,13 +27,13 @@
 
     protected override void OnInitialized()
     {
-        _currentUri = Navigation.Uri;
+        _currentUri = new Uri(Navigation.Uri).AbsolutePath;
         Navigation.LocationChanged += OnLocationChanged;
     }
 
     private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        _currentUri = e.Location;
+        _currentUri = new Uri(e.Location).AbsolutePath;
         InvokeAsync(StateHasChanged);
     }
 

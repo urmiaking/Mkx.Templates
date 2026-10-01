@@ -13,4 +13,4 @@ Respect nullable reference types and propagate `CancellationToken` through I/O. 
 
 Domain owns invariants. Infrastructure owns EF/persistence/specifications. Shared owns DTOs/contracts/routes/policies. Application owns use cases/validation/mapping. Server owns HTTP/hosting. Client owns Blazor and HTTP implementations.
 
-Never hardcode routes when `ApiRoutes`, `ApiUrls`, or `ClientRoutes` applies. Use SDK lifetime attributes and do not duplicate auto-scanned DI registrations. Non-trivial Blazor pages use markup + code-behind, `AppComponentBase`, and `SendRequestAsync`. Prefer MudBlazor, existing components, central theme-aware CSS, and MudBlazor palette variables.
+Never hardcode routes when `ApiRoutes`, `ApiUrls`, or `ClientRoutes` applies. Use SDK lifetime attributes and do not duplicate auto-scanned DI registrations. Non-trivial Blazor pages use markup + code-behind, `AppComponentBase`, and `TryRequestAsync` (explicit success; legacy `SendRequestAsync` remains for compatibility). Prefer MudBlazor, existing components, central theme-aware CSS, and MudBlazor palette variables.

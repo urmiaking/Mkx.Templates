@@ -9,14 +9,18 @@ public static class ApiUrls
 
     public static class Tests
     {
+        public static string List(RequestFilter filter) => ApiRoutes.Tests.Base.AppendQueryString(filter);
+        public static string Create() => ApiRoutes.Tests.Base;
+        public static string Delete(Guid id, Guid version) => Get(id).AppendQueryString(new { version });
         public static string Get(Guid id) => BuildUrl(ApiRoutes.Tests.Base, ApiRoutes.Tests.Get)
             .FormatRoute(new { id });
     }
 
     public static class Accounts
     {
+        public static string Antiforgery() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Antiforgery);
         public static string PerformExternalLogin() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.PerformExternalLogin);
-        public static string Logout(string? returnUrl) => 
+        public static string Logout(string? returnUrl) =>
             BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Logout).AppendQueryString(new { returnUrl });
 
         public static string Login(string? returnUrl) =>
@@ -109,7 +113,7 @@ public static class ApiUrls
 
     public static class UserManagement
     {
-        public static string GetUsers() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUsers);
+        public static string GetUsers(RequestFilter filter) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUsers).AppendQueryString(filter.Normalize());
         public static string GetUserById(Guid id) => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.GetUserById).FormatRoute(new { id });
         public static string CreateUser() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.CreateUser);
         public static string UpdateUser() => BuildUrl(ApiRoutes.UserManagement.Base, ApiRoutes.UserManagement.UpdateUser);

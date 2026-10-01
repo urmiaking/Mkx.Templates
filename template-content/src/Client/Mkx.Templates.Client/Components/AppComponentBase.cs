@@ -1,41 +1,32 @@
+using System.Net;
+using System.Security.Claims;
 using FluentValidation;
-using Mkx.Templates.Sdk.Server.Shared.Exceptions;
-using Mkx.Templates.Sdk.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Mkx.Templates.Sdk.Server.Shared.Exceptions;
+using Mkx.Templates.Sdk.Shared.Exceptions;
 using MudBlazor;
-using System.Security.Claims;
 using Severity = MudBlazor.Severity;
 
 namespace Mkx.Templates.Client.Components;
 
 public class AppComponentBase : ComponentBase, IAsyncDisposable
 {
-    private CancellationTokenSource? _cancellationTokenSource;
+    private CancellationTokenSource? _cancellation;
+    private IServiceScope? _scope;
     private int _busyCount;
-    private bool _shouldRender = true;
-    private IServiceScope? _currentScope;
-
-    protected bool IsDisposed;
-
-    private IServiceScope CurrentScope
-    {
-        get
-        {
-            _currentScope ??= CreateServiceScope();
-            return _currentScope;
-        }
-    }
-    protected CancellationToken CancellationToken
-    {
-        get
-        {
-            _cancellationTokenSource ??= new CancellationTokenSource();
-
-            return _cancellationTokenSource.Token;
-        }
-    }
+    private bool _skipRender;
+    private PersistingComponentStateSubscription _persistSubscription;
+    protected bool IsDisposed { get; private set; }
+    public bool IsBusy => _busyCount > 0;
+    protected ClaimsPrincipal? User { get; private set; }
+    protected string? LastRequestError { get; private set; }
+    protected IReadOnlyDictionary<string, string[]> ValidationErrors { get; private set; } = new Dictionary<string, string[]>();
+    protected Guid? UserId => Guid.TryParse(User?.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var id) ? id : null;
+    protected CancellationTokenSource CancellationTokenSource => _cancellation ??= new();
+    protected CancellationToken CancellationToken => CancellationTokenSource.Token;
+    private IServiceScope CurrentScope => _scope ??= CreateServiceScope();
 
     [Inject] private IServiceScopeFactory ServiceScopeFactory { get; set; } = default!;
     [Inject] protected IDialogService DialogService { get; set; } = default!;
@@ -45,465 +36,140 @@ public class AppComponentBase : ComponentBase, IAsyncDisposable
     [Inject] protected NavigationManager Navigation { get; set; } = default!;
     [Inject] private PersistentComponentState PersistentState { get; set; } = default!;
 
-    private PersistingComponentStateSubscription _persistSubscription;
-    public bool IsBusy => _busyCount > 0;
-    protected ClaimsPrincipal? User { get; private set; }
-    protected CancellationTokenSource CancellationTokenSource
-    {
-        get
-        {
-            _cancellationTokenSource ??= new CancellationTokenSource();
-
-            return _cancellationTokenSource;
-        }
-    }
-    protected Guid? UserId
-    {
-        get
-        {
-            var idClaim = User?.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-
-            if (Guid.TryParse(idClaim?.Value, out var id))
-                return id;
-
-            return null;
-
-        }
-    }
-
-    #region PersistingState
-
     protected override async Task OnInitializedAsync()
     {
-        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        User = state.User;
+        User = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
         AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateChanged;
-
         _persistSubscription = PersistentState.RegisterOnPersisting(OnPersisting);
-
         await base.OnInitializedAsync();
     }
-
-    protected virtual Task OnPersisting()
-    {
-        return Task.CompletedTask;
-    }
-
-    protected void PersistStateAsJson<TValue>(string key, TValue instance)
-    {
-        PersistentState.PersistAsJson(key, instance);
-    }
-
-    protected bool RestoreStateFromJson<TValue>(string key, out TValue? restored)
-    {
-        return PersistentState.TryTakeFromJson(key, out restored);
-    }
-
-    #endregion
-
-    #region Render
-
-    protected override bool ShouldRender()
-    {
-        // Check the flag, and if it is false, return false
-        // this is a one-time flag, and will be reset to true, for future renders.
-        if (!_shouldRender)
-        {
-            _shouldRender = true;
-            return false;
-        }
-
-        return base.ShouldRender();
-    }
-
-    protected void ShouldNotRender()
-    {
-        _shouldRender = false;
-    }
-
-    #endregion
-
-    #region Authentication
-
     private async void AuthenticationStateChanged(Task<AuthenticationState> task)
     {
-        var state = await task;
-        User = state.User;
+        try
+        {
+            var state = await task;
+            if (!IsDisposed) await InvokeAsync(() => { User = state.User; StateHasChanged(); });
+        }
+        catch (Exception ex) { if (!IsDisposed) await DispatchExceptionAsync(ex); }
     }
-
-    protected async Task<bool> HasPolicyAsync(string policy)
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var result = await AuthorizationService.AuthorizeAsync(authState.User, policy);
-
-        return result.Succeeded;
-    }
-
-    #endregion
-
-    #region Toasts
-
+    protected virtual Task OnPersisting() => Task.CompletedTask;
+    protected void PersistStateAsJson<T>(string key, T instance) => PersistentState.PersistAsJson(key, instance);
+    protected bool RestoreStateFromJson<T>(string key, out T? restored) => PersistentState.TryTakeFromJson(key, out restored);
+    protected override bool ShouldRender() { var render = !_skipRender; _skipRender = false; return render; }
+    protected void ShouldNotRender() => _skipRender = true;
+    protected async Task<bool> HasPolicyAsync(string policy) =>
+        (await AuthorizationService.AuthorizeAsync((await AuthenticationStateProvider.GetAuthenticationStateAsync()).User, policy)).Succeeded;
     protected void AddSuccessToast(string message) => ToastService.Add(message, Severity.Success);
-
     protected void AddErrorToast(string message) => ToastService.Add(message, Severity.Error);
-
     protected void AddWarningToast(string message) => ToastService.Add(message, Severity.Warning);
-
     protected void AddInfoToast(string message) => ToastService.Add(message, Severity.Info);
-
-    #endregion
-
-    #region Service Scope
-
-    protected TService GetRequiredService<TService>() where TService : notnull
-    {
-        return GetRequiredService<TService>(CurrentScope);
-    }
-
-    protected IEnumerable<TService> GetServices<TService>() where TService : notnull
-    {
-        return CurrentScope.ServiceProvider.GetServices<TService>();
-    }
-
-    protected TService GetRequiredService<TService>(IServiceScope scope) where TService : notnull
-    {
-        return scope.ServiceProvider.GetRequiredService<TService>();
-    }
-
     protected IServiceScope CreateServiceScope() => ServiceScopeFactory.CreateScope();
+    protected T GetRequiredService<T>() where T : notnull => CurrentScope.ServiceProvider.GetRequiredService<T>();
+    protected T GetRequiredService<T>(IServiceScope scope) where T : notnull => scope.ServiceProvider.GetRequiredService<T>();
+    protected IEnumerable<T> GetServices<T>() where T : notnull => CurrentScope.ServiceProvider.GetServices<T>();
+    protected void SetBusy(bool stateChanged = false) { Interlocked.Increment(ref _busyCount); if (stateChanged) StateHasChanged(); }
+    protected void SetIdeal(bool stateChanged = false) { Interlocked.Decrement(ref _busyCount); if (stateChanged && !IsDisposed) StateHasChanged(); }
+    protected void CancelToken() { _cancellation?.Cancel(); DestroyCancellationToken(); }
+    protected void DestroyCancellationToken() { _cancellation?.Dispose(); _cancellation = null; }
+    protected readonly record struct RequestResult<T>(bool Succeeded, T? Value);
 
-    #endregion
-
-    #region Busy State
-
-    protected void SetBusy(bool stateChanged = false)
+    // New data flows use this explicit result. Failure must never be mistaken for an empty page or false flag.
+    protected async Task<RequestResult<TResponse>> TryRequestAsync<TService, TResponse>(
+        Func<TService, CancellationToken, Task<TResponse>> action, bool createScope = false, bool cancelPrevious = false,
+        Func<Task>? onFailure = null, bool ignoreCancellation = false) where TService : notnull
     {
-        Interlocked.Increment(ref _busyCount);
-
-        if (stateChanged)
-            StateHasChanged();
-    }
-
-    protected void SetIdeal(bool stateChanged = false)
-    {
-        Interlocked.Decrement(ref _busyCount);
-
-        if (stateChanged)
-            StateHasChanged();
-    }
-
-    #endregion
-
-    #region Cancellation Token
-
-    protected void CancelToken()
-    {
-        if (_cancellationTokenSource != null)
-        {
-            _cancellationTokenSource.Cancel();
-
-            DestroyCancellationToken();
-        }
-    }
-
-    protected void DestroyCancellationToken()
-    {
-        if (_cancellationTokenSource != null)
-        {
-            _cancellationTokenSource.Dispose();
-            _cancellationTokenSource = null;
-        }
-    }
-
-    #endregion
-
-    #region Send Request
-
-    protected async Task<TResult> SendRequestAsync<TService, TResult, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
-                                                                                 Func<TResponse, Task<TResult>> afterSend,
-                                                                                 Func<Task>? onFailure = null
-                                                                                 , bool cancelPrevious = false)
-        where TService : notnull
-    {
-        if (IsDisposed)
-            return default!;
-
+        if (IsDisposed) return new(false, default);
+        if (cancelPrevious) CancelToken();
+        var scope = createScope ? CreateServiceScope() : CurrentScope;
+        SetBusy();
+        LastRequestError = null;
+        ValidationErrors = new Dictionary<string, string[]>();
+        await InvokeAsync(StateHasChanged);
+        var token = ignoreCancellation ? CancellationToken.None : CancellationToken;
         try
         {
-            if (cancelPrevious)
-                CancelToken();
-            SetBusy();
-            var service = GetRequiredService<TService>();
-
-            var response = await action.Invoke(service, CancellationToken);
-            return await afterSend.Invoke(response);
+            var value = await action(GetRequiredService<TService>(scope), token);
+            return IsDisposed ? new(false, default) : new(true, value);
         }
+        catch (OperationCanceledException) when (IsDisposed || token.IsCancellationRequested) { return new(false, default); }
         catch (Exception ex)
         {
-            if (onFailure != null)
+            if (!IsDisposed)
             {
-                await onFailure.Invoke();
+                HandleRequestException(ex);
+                if (onFailure is not null) await onFailure();
             }
-            HandleRequestException(ex);
-            return default!;
+            return new(false, default);
         }
         finally
         {
+            if (createScope) scope.Dispose();
             SetIdeal();
+            if (!IsDisposed) await InvokeAsync(StateHasChanged);
         }
     }
 
-    protected async Task<TResult> SendRequestAsync<TService, TResult, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
-                                                                                 Func<TResponse, TResult> afterSend,
-                                                                                 Action? onFailure = null,
-                                                                                 bool cancelPrevious = false)
-        where TService : notnull
-    {
-        if (IsDisposed)
-            return default!;
-
-        try
-        {
-            if (cancelPrevious) 
-                CancelToken();
-
-            SetBusy();
-            var service = GetRequiredService<TService>();
-
-            var response = await action.Invoke(service, CancellationToken);
-            return afterSend.Invoke(response);
-        }
-        catch (Exception ex)
-        {
-            if (onFailure != null)
-            {
-                onFailure.Invoke();
-            }
-            HandleRequestException(ex);
-            return default!;
-        }
-        finally
-        {
-            SetIdeal();
-        }
-    }
+    // Compatibility overloads centralize execution; callbacks run only after a successful request.
+    protected async Task<TResponse?> SendRequestAsync<TService, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
+        bool createScope = false, bool cancelPrevious = false) where TService : notnull =>
+        (await TryRequestAsync(action, createScope, cancelPrevious)).Value;
 
     protected async Task SendRequestAsync<TService, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
-                                                               Func<TResponse, Task> afterSend,
-                                                               Func<Task>? onFailure = null,
-                                                               bool cancelPrevious = false)
-        where TService : notnull
+        Action<TResponse> afterSend, Action? onFailure = null, bool createScope = false, bool cancelPrevious = false) where TService : notnull
     {
-        if (IsDisposed)
-            return;
-
-        try
-        {
-            if (cancelPrevious)
-                CancelToken();
-            SetBusy();
-            var service = GetRequiredService<TService>();
-
-            var response = await action.Invoke(service, CancellationToken);
-            await afterSend.Invoke(response);
-        }
-        catch (Exception ex)
-        {
-            if (onFailure != null)
-            {
-                await onFailure.Invoke();
-            }
-            HandleRequestException(ex);
-        }
-        finally
-        {
-            SetIdeal();
-        }
+        await TryRequestAsync<TService, bool>(async (service, token) => { afterSend(await action(service, token)); return true; },
+            createScope, cancelPrevious, onFailure is null ? null : () => { onFailure(); return Task.CompletedTask; });
     }
-
     protected async Task SendRequestAsync<TService, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
-                                                               Action<TResponse> afterSend,
-                                                               Action? onFailure = null,
-                                                               bool createScope = false,
-                                                               bool cancelPrevious = false)
-        where TService : notnull
+        Func<TResponse, Task> afterSend, Func<Task>? onFailure = null, bool cancelPrevious = false) where TService : notnull
     {
-        if (IsDisposed)
-            return;
-
-        var scope = createScope ? CreateServiceScope() : CurrentScope;
-        try
-        {
-            if (cancelPrevious)
-            {
-                CancelToken();
-            }
-
-            SetBusy();
-            var service = GetRequiredService<TService>(scope);
-
-            var response = await action.Invoke(service, CancellationToken);
-            afterSend.Invoke(response);
-        }
-        catch (Exception ex)
-        {
-            onFailure?.Invoke();
-            HandleRequestException(ex);
-        }
-        finally
-        {
-            if (createScope)
-                scope.Dispose();
-
-            SetIdeal();
-        }
+        await TryRequestAsync<TService, bool>(async (service, token) => { await afterSend(await action(service, token)); return true; },
+            cancelPrevious: cancelPrevious, onFailure: onFailure);
     }
-
-    protected async Task<TResult?> SendRequestAsync<TService, TResult>(Func<TService, CancellationToken, Task<TResult>> action,
-                                                                       bool createScope = false,
-                                                                       bool cancelPrevious = false)
-        where TService : notnull
+    protected async Task<TResult> SendRequestAsync<TService, TResult, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
+        Func<TResponse, TResult> afterSend, Action? onFailure = null, bool cancelPrevious = false) where TService : notnull =>
+        (await TryRequestAsync<TService, TResult>(async (service, token) => afterSend(await action(service, token)),
+            cancelPrevious: cancelPrevious, onFailure: onFailure is null ? null : () => { onFailure(); return Task.CompletedTask; })).Value!;
+    protected async Task<TResult> SendRequestAsync<TService, TResult, TResponse>(Func<TService, CancellationToken, Task<TResponse>> action,
+        Func<TResponse, Task<TResult>> afterSend, Func<Task>? onFailure = null, bool cancelPrevious = false) where TService : notnull =>
+        (await TryRequestAsync<TService, TResult>(async (service, token) => await afterSend(await action(service, token)),
+            cancelPrevious: cancelPrevious, onFailure: onFailure)).Value!;
+    protected async Task SendRequestAsync<TService>(Func<TService, CancellationToken, Task> action,
+        Func<Task>? afterSend = null, Func<Task>? onFailure = null, bool cancelPrevious = false, bool ignoreCancellation = false) where TService : notnull
     {
-        if (IsDisposed)
-            return default;
-
-        var scope = createScope ? CreateServiceScope() : CurrentScope;
-        try
-        {
-            if (cancelPrevious)
-                CancelToken();
-            SetBusy();
-            var service = GetRequiredService<TService>(scope);
-
-            return await action.Invoke(service, CancellationToken);
-        }
-        catch (Exception ex)
-        {
-            HandleRequestException(ex);
-
-            return default;
-        }
-        finally
-        {
-            if (createScope)
-                scope.Dispose();
-
-            SetIdeal();
-        }
+        await TryRequestAsync<TService, bool>(async (service, token) => { await action(service, token); if (afterSend is not null) await afterSend(); return true; },
+            cancelPrevious: cancelPrevious, onFailure: onFailure, ignoreCancellation: ignoreCancellation);
     }
-
-    protected async Task SendRequestAsync<TService>(
-        Func<TService, CancellationToken, Task> action,
-        Func<Task>? afterSend = null,
-        Func<Task>? onFailure = null,
-        bool cancelPrevious = false,
-        bool ignoreCancellation = false)
-        where TService : notnull
-    {
-        if (IsDisposed)
-            return;
-
-        try
-        {
-            if (cancelPrevious)
-                CancelToken();
-
-            SetBusy();
-            var service = GetRequiredService<TService>();
-
-            // IMPORTANT:
-            // Use CancellationToken.None if ignoreCancellation = true
-            var token = ignoreCancellation ? CancellationToken.None : CancellationToken;
-
-            await action.Invoke(service, token);
-
-            if (afterSend != null)
-                await afterSend.Invoke();
-        }
-        catch (Exception ex)
-        {
-            if (onFailure != null)
-                await onFailure.Invoke();
-
-            HandleRequestException(ex);
-        }
-        finally
-        {
-            SetIdeal();
-        }
-    }
-
-    #endregion
-
-    #region Exception handling
 
     private void HandleRequestException(Exception ex)
     {
-        switch (ex)
+        if (ex is HttpRequestValidationException validation) ValidationErrors = validation.Errors;
+        if (ex is ValidationException domainValidation)
+            ValidationErrors = domainValidation.Errors.GroupBy(e => e.PropertyName).ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
+        LastRequestError = ex switch
         {
-            case NotFoundException notFoundException:
-               AddErrorToast(string.IsNullOrEmpty(notFoundException.Message) ? "هیچ اطلاعاتی یافت نشد" : notFoundException.Message);
-                break;
-
-            case ValidationException validationException:
-                foreach (var error in validationException.Errors)
-                {
-                    AddErrorToast(error.ErrorMessage);
-                }
-                break;
-            case HttpRequestValidationException validationException:
-                if (validationException.Errors.Any())
-                {
-                    foreach (var error in validationException.Errors)
-                    {
-                        AddErrorToast(string.Join('\n', error.Value));
-                    }
-                }
-                else
-                {
-                    AddErrorToast("خطای اعتبار سنجی");
-                }
-                break;
-            case OperationCanceledException:
-                // Operation was canceled, do nothing
-                break;
-            case HttpRequestFailedException or HttpRequestException:
-                AddErrorToast("عدم امکان برقراری ارتباط با سرور");
-                break;
-            case InvalidOperationException invalidOperationException:
-                AddErrorToast($"{invalidOperationException.GetType()}. {invalidOperationException.Message}");
-                break;
-            default:
-                AddErrorToast($"{ex.GetType()}. {ex.Message}");
-                break;
-        }
+            HttpRequestAuthenticationFailedException => "نشست شما منقضی شده است. دوباره وارد شوید.",
+            HttpRequestAuthorizationFailedException => "مجوز انجام این عملیات را ندارید.",
+            HttpRequestFailedException failure when failure.StatusCode == HttpStatusCode.Conflict => "اطلاعات تغییر کرده است. صفحه را تازه کرده و دوباره تلاش کنید.",
+            HttpRequestFailedException failure when (int)failure.StatusCode == 429 => "تعداد درخواست‌ها زیاد است. یک دقیقه صبر کنید.",
+            HttpRequestValidationException or ValidationException => ValidationErrors.Count > 0 ? string.Join("\n", ValidationErrors.Values.SelectMany(e => e)) : ex.Message,
+            NotFoundException => "اطلاعات مورد نظر یافت نشد.",
+            HttpRequestFailedException failure when (int)failure.StatusCode >= 500 => "خطایی در سرور رخ داده است. دوباره تلاش کنید.",
+            HttpRequestException or HttpRequestFailedException => "ارتباط با سرور برقرار نشد. اتصال را بررسی و دوباره تلاش کنید.",
+            _ => "عملیات انجام نشد. دوباره تلاش کنید."
+        };
+        AddErrorToast(LastRequestError);
     }
 
-    #endregion
-
-    public virtual async ValueTask DisposeAsync()
+    public virtual ValueTask DisposeAsync()
     {
-        // Prevent multiple disposals
-        if (IsDisposed)
-        {
-            return;
-        }
-
-        // 1. Set the flag to true IMMEDIATELY.
-        // This stops any in-flight operations from using disposed resources.
+        if (IsDisposed) return ValueTask.CompletedTask;
         IsDisposed = true;
-
-        // 2. Unsubscribe from events
         AuthenticationStateProvider.AuthenticationStateChanged -= AuthenticationStateChanged;
         _persistSubscription.Dispose();
-
-        // 3. Dispose of managed resources
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
-        _currentScope?.Dispose();
-
-        // The 'await' here is for future-proofing in case you add async cleanup.
-        // For now, it will complete synchronously.
-        await Task.CompletedTask;
+        _cancellation?.Cancel();
+        DestroyCancellationToken();
+        _scope?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

@@ -9,6 +9,7 @@ namespace Mkx.Templates.Client.Layout.Components;
 
 public partial class Drawer : AppComponentBase
 {
+    private MudBlazor.Breakpoint _breakpoint = MudBlazor.Breakpoint.Xs;
     [Parameter] public bool IsDrawerOpen { get; set; }
     [Parameter] public EventCallback<bool> IsDrawerOpenChanged { get; set; }
     [Inject] public ThemeService ThemeService { get; set; } = default!;
@@ -50,6 +51,17 @@ public partial class Drawer : AppComponentBase
         await IsDrawerOpenChanged.InvokeAsync(false);
     }
 
+    private async Task OnDrawerOpenChanged(bool open)
+    {
+        IsDrawerOpen = open;
+        await IsDrawerOpenChanged.InvokeAsync(open);
+    }
+
+    private void OpenLogs() => Navigation.NavigateTo(ClientRoutes.Logs.Base, forceLoad: true);
+
+    private Task HandleDrawerKeyDown(Microsoft.AspNetCore.Components.Web.KeyboardEventArgs args) =>
+        args.Key == "Escape" && _breakpoint < MudBlazor.Breakpoint.Md ? CloseDrawer() : Task.CompletedTask;
+
     private void Login()
     {
         var returnUrl = Navigation.ToBaseRelativePath(Navigation.Uri);
@@ -57,10 +69,14 @@ public partial class Drawer : AppComponentBase
         Navigation.NavigateTo(loginUrl, forceLoad: true);
     }
 
-    private void Logout()
+    private async Task Logout()
     {
         // Redirect to Login page after logout to prevent landing on an authorized page
-        Navigation.NavigateTo(ApiUrls.Accounts.Logout(ClientRoutes.Accounts.Login), forceLoad: true);
+        await SendRequestAsync<HttpClient>(async (client, token) =>
+        {
+            using var response = await client.PostAsync(ApiUrls.Accounts.Logout(ClientRoutes.Accounts.Login), null, token);
+            response.EnsureSuccessStatusCode();
+        }, afterSend: () => { Navigation.NavigateTo(ClientRoutes.Accounts.Login, forceLoad: true); return Task.CompletedTask; });
     }
 
     public override async ValueTask DisposeAsync()

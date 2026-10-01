@@ -1,56 +1,28 @@
 @attribute [Route(ClientRoutes.Tests.Index)]
-@attribute [Authorize]
+@attribute [Authorize(Policy = AppPolicies.Tests.View)]
 @inherits AppComponentBase
-
 <PageTitle>تست‌ها</PageTitle>
-
 <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudBreadcrumbs Class="px-0" Items="_breadcrumbs" MaxItems="2">
-        <SeparatorTemplate>
-            <MudIcon Icon="@Icons.Material.Filled.ArrowForwardIos" Size="Size.Small" />
-        </SeparatorTemplate>
-    </MudBreadcrumbs>
-
     <MudText Typo="Typo.h4" Class="mb-4">مدیریت تست‌ها</MudText>
-
-    <MudTable Items="_tests" Hover="true" Loading="IsBusy" LoadingProgressColor="Color.Info" Elevation="2">
+    <MudStack Row="true" Class="mb-4 tests-toolbar" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
+        <MudTextField T="string" Class="tests-search" Margin="Margin.None" Label="جستجوی نام یا توضیحات" Value="_search" ValueChanged="SearchChanged" DebounceInterval="350" Clearable="true" Variant="Variant.Outlined" />
+        <AuthorizeView Policy="@AppPolicies.Tests.Manage"><MudButton Class="tests-add" OnClick="@(() => EditAsync(null))" Color="Color.Primary" Variant="Variant.Filled" Disabled="IsBusy">افزودن</MudButton></AuthorizeView>
+    </MudStack>
+    @if (_loadFailed) {
+        <MudAlert Severity="Severity.Error" Class="mb-3" role="alert">@LastRequestError <MudButton OnClick="ReloadAsync" Disabled="IsBusy">تلاش دوباره</MudButton></MudAlert>
+    }
+    <MudTable T="GetTestResponse" @ref="_table" ServerData="LoadAsync" Hover="true" RowsPerPage="25" Breakpoint="Breakpoint.Sm">
         <HeaderContent>
-            <MudTh>شناسه</MudTh>
-            <MudTh>نام</MudTh>
-            <MudTh>توضیحات</MudTh>
+            <MudTh><MudTableSortLabel SortLabel="Name" T="GetTestResponse">نام</MudTableSortLabel></MudTh><MudTh>توضیحات</MudTh><MudTh>عملیات</MudTh>
         </HeaderContent>
-        <RowTemplate Context="test">
-            <MudTd DataLabel="شناسه">@test.Id</MudTd>
-            <MudTd DataLabel="نام">@test.Name</MudTd>
-            <MudTd DataLabel="توضیحات">@test.Description</MudTd>
+        <RowTemplate>
+            <MudTd DataLabel="نام">@context.Name</MudTd><MudTd DataLabel="توضیحات">@context.Description</MudTd>
+            <MudTd DataLabel="عملیات"><AuthorizeView Policy="@AppPolicies.Tests.Manage" Context="authorization">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="ویرایش تست" OnClick="@(() => EditAsync(context))" Disabled="IsBusy" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="حذف تست" Color="Color.Error" OnClick="@(() => DeleteAsync(context))" Disabled="IsBusy" />
+            </AuthorizeView></MudTd>
         </RowTemplate>
+        <NoRecordsContent><MudText Class="pa-4">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "موردی یافت نشد.")</MudText></NoRecordsContent>
+        <PagerContent><MudTablePager PageSizeOptions="@(new[] { 10, 25, 50, 100 })" /></PagerContent>
     </MudTable>
-
 </MudContainer>
-
-@code {
-    private List<GetTestResponse> _tests = [];
-
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: Icons.Material.Filled.Home),
-        new("تست ها", href: ClientRoutes.Tests.Index, icon: Icons.Material.Filled.CheckCircle)
-    ];
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadTests();
-        await base.OnInitializedAsync();
-    }
-
-    private async Task LoadTests()
-    {
-        var result = await SendRequestAsync<ITestService, List<GetTestResponse>>(
-            action: (s, ct) => s.GetAllAsync(ct));
-
-        if (result != null)
-        {
-            _tests = result;
-        }
-    }
-}

@@ -23,7 +23,7 @@
                           Placeholder="جستجو بر اساس نام، نام کاربری و شماره تلفن ..." Adornment="Adornment.Start" Variant="Variant.Outlined" Margin="Margin.Dense"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
             <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                <MudIconButton Size="Size.Small" Variant="Variant.Filled"
+                <MudIconButton aria-label="افزودن" Size="Size.Small" Variant="Variant.Filled"
                                OnClick="OnAddAccount" Class="me-2"
                                Color="Color.Primary" Icon="@Icons.Material.Outlined.Add" />
             </MudHidden>
@@ -54,7 +54,7 @@
                                    Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit">ویرایش</MudButton>
                     </MudHidden>
                     <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                        <MudIconButton Size="Size.Small" Variant="Variant.Filled"
+                        <MudIconButton aria-label="تغییر نمایش" Size="Size.Small" Variant="Variant.Filled"
                                        OnClick="_ => OnEditAccount(context)"
                                        Color="Color.Info" Icon="@Icons.Material.Filled.Edit" />
                     </MudHidden>
@@ -67,7 +67,7 @@
                                        OnClick="@(() => LockUser(context))">غیرفعال سازی</MudButton>
                         </MudHidden>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Lock"
+                            <MudIconButton aria-label="قفل کردن" Size="Size.Small" Icon="@Icons.Material.Filled.Lock"
                                            Color="Color.Warning" Variant="Variant.Filled"
                                            OnClick="@(() => LockUser(context))" />
                         </MudHidden>
@@ -81,7 +81,7 @@
                                        OnClick="@(() => UnlockUser(context))">فعالسازی</MudButton>
                         </MudHidden>
                         <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.LockOpen"
+                            <MudIconButton aria-label="باز کردن قفل" Size="Size.Small" Icon="@Icons.Material.Filled.LockOpen"
                                            Color="Color.Success" Variant="Variant.Filled"
                                            OnClick="@(() => UnlockUser(context))" />
                         </MudHidden>
@@ -92,7 +92,7 @@
                                    Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete">حذف</MudButton>
                     </MudHidden>
                     <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                        <MudIconButton Size="Size.Small" Variant="Variant.Filled"
+                        <MudIconButton aria-label="تغییر نمایش" Size="Size.Small" Variant="Variant.Filled"
                                        OnClick="_ => OnDeleteAccount(context)"
                                        Color="Color.Error" Icon="@Icons.Material.Filled.Delete" />
                     </MudHidden>

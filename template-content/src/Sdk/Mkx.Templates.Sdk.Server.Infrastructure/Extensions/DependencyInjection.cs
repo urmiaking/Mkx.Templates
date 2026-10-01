@@ -1,4 +1,4 @@
-﻿using Mkx.Templates.Sdk.Server.Infrastructure.Common;
+using Mkx.Templates.Sdk.Server.Infrastructure.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Rebus.Bus;
@@ -17,7 +17,7 @@ public static class DependencyInjection
         Action<StandardConfigurer<IRouter>>? routing = null,
         Func<IBus, Task>? onCreated = null)
     {
-        var connectionString = configuration.GetConnectionString("Default");
+        var connectionString = configuration.GetConnectionString("Mkx.Templates");
 
         services.AddRebus(rebus =>
             {

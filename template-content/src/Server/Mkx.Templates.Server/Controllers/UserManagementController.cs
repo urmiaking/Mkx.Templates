@@ -1,3 +1,4 @@
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mkx.Templates.Shared.Abstractions;
@@ -21,9 +22,9 @@ public class UserManagementController(IUserManagementService service) : ApiContr
 
     [HttpGet(ApiRoutes.UserManagement.GetUsers)]
     [Authorize(Policy = AppPolicies.Users.View)]
-    public async Task<IActionResult> GetUsersAsync(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetUsersAsync([FromQuery] RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        var users = await service.GetUsersAsync(cancellationToken);
+        var users = await service.GetUsersAsync(filter, cancellationToken);
         return Ok(users);
     }
 

@@ -18,7 +18,7 @@ public class UserValidator : AbstractValidator<UserEditorVm>
 
         RuleFor(x => x.Password)
             .Must(NotEmptyInCreateMode).WithMessage("رمز عبور الزامی است")
-            .MinimumLength(4).WithMessage("طول رمز عبور نمی تواند کمتر از 4 کاراکتر باشد");
+            .MinimumLength(12).WithMessage("طول رمز عبور نمی تواند کمتر از 12 کاراکتر باشد");
 
         RuleFor(x => x.Email)
             .EmailAddress().WithMessage("فرمت ایمیل وارد شده اشتباه است");
@@ -27,7 +27,7 @@ public class UserValidator : AbstractValidator<UserEditorVm>
             .NotEmpty().WithMessage("نقش کاربر الزامی است");
     }
 
-    private static bool NotEmptyInCreateMode(UserEditorVm vm, string? password) => 
+    private static bool NotEmptyInCreateMode(UserEditorVm vm, string? password) =>
         vm.Id.HasValue || !string.IsNullOrEmpty(password);
 
     public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>

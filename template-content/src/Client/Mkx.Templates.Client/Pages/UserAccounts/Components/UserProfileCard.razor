@@ -32,7 +32,7 @@
                     <MudText>نام و نام خانوادگی: </MudText><MudSkeleton Height="24px" Width="80px" Animation="Animation.Wave" />
                 </div>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر نام">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeFullName" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeFullName" />
                 </MudTooltip>
             </div>
             <div class="d-flex justify-content-between align-center w-100">
@@ -40,7 +40,7 @@
                     <MudText>شماره تلفن: </MudText><MudSkeleton Height="24px" Width="80px" Animation="Animation.Wave" />
                 </div>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر شماره تلفن">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangePhoneNumber" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangePhoneNumber" />
                 </MudTooltip>
             </div>
             <div class="d-flex justify-content-between align-center w-100">
@@ -48,7 +48,7 @@
                     <MudText>آدرس ایمیل: </MudText><MudSkeleton Height="24px" Width="80px" Animation="Animation.Wave" />
                 </div>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر ایمیل">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeEmail" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeEmail" />
                 </MudTooltip>
             </div>
         </div>
@@ -82,19 +82,19 @@ else
             <div class="d-flex justify-content-between align-center w-100">
                 <MudText>نام و نام خانوادگی: @UserInfo.FullName</MudText>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر نام">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeFullName" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeFullName" />
                 </MudTooltip>
             </div>
             <div class="d-flex justify-content-between align-center w-100">
                 <MudText>شماره تلفن: @(UserInfo.PhoneNumber ?? "-")</MudText>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر شماره تلفن">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangePhoneNumber" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangePhoneNumber" />
                 </MudTooltip>
             </div>
             <div class="d-flex justify-content-between align-center w-100">
                 <MudText>آدرس ایمیل: @(UserInfo.Email ?? "-")</MudText>
                 <MudTooltip Arrow Placement="Placement.Right" Color="Color.Primary" Text="تغییر ایمیل">
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeEmail" />
+                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text" Size="Size.Small" OnClick="ChangeEmail" />
                 </MudTooltip>
             </div>
         </div>

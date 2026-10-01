@@ -1,10 +1,10 @@
-﻿using Mkx.Templates.Sdk.Server.Domain.Abstractions;
+using Mkx.Templates.Sdk.Server.Domain.Abstractions;
 
 namespace Mkx.Templates.Sdk.Server.Domain;
 
 public abstract class EntityBase : IHasDomainEvents
 {
-    public DateTime Timestamp { get; protected set; } = DateTime.Now;
+    public DateTime Timestamp { get; protected set; } = DateTime.UtcNow;
 
     private readonly List<IDomainEvent> _domainEvents = [];
     public IReadOnlyList<IDomainEvent> DomainEvents => _domainEvents;

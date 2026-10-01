@@ -1,16 +1,16 @@
 <MudAppBar Elevation="0" Class="fancy-appbar" Dense="false">
     <div class="appbar-col-left">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+        <MudIconButton aria-label="باز کردن ناوبری" Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
     </div>
-    
+
     <div class="appbar-col-center">
         <span class="appbar-title brand-text">Mkx.Templates</span>
     </div>
-    
+
     <div class="appbar-col-right">
-        <MudBadge Color="Color.Error" Dot="true" Overlap="true">
-            <MudIconButton Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Size="Size.Medium" OnClick="@ToggleNotifications" />
-        </MudBadge>
+
+            <MudIconButton aria-label="اعلان‌ها" Icon="@Icons.Material.Filled.Notifications" Color="Color.Inherit" Size="Size.Medium" OnClick="@ToggleNotifications" />
+
     </div>
 </MudAppBar>
 

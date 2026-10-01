@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Json;
@@ -7,67 +8,84 @@ using Mkx.Templates.Shared.Routes;
 
 namespace Mkx.Templates.Client.Common;
 
-// This is a client-side AuthenticationStateProvider that determines the user's authentication state by:
-// 1. Looking for data persisted in the page when it was rendered on the server (prerender mode).
-// 2. Falling back to an API call to fetch auth state (no-prerender mode).
-//
-// This dual approach ensures the migration between render modes is reversible —
-// switching the render mode in App.razor.cs is the only change needed.
-//
-// This only provides a username and email for display purposes. It does not actually include any tokens
-// that authenticate to the server when making subsequent requests. That works separately using a
-// cookie that will be included on HttpClient requests to the server.
-public class PersistentAuthenticationStateProvider : AuthenticationStateProvider
+public sealed class PersistentAuthenticationStateProvider : AuthenticationStateProvider, IAsyncDisposable
 {
-    private static readonly Task<AuthenticationState> DefaultUnauthenticatedTask =
-        Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+    private readonly HttpClient _client;
+    private readonly JsonSerializerOptions _jsonOptions;
+    private readonly CancellationTokenSource _lifetime = new();
+    private readonly SemaphoreSlim _gate = new(1);
+    private readonly Task _refreshLoop;
+    private AuthenticationState _current = new(new ClaimsPrincipal(new ClaimsIdentity()));
+    private Task<AuthenticationState> _stateTask;
+    public bool HasConnectionError { get; private set; }
 
-    private readonly Task<AuthenticationState> _authenticationStateTask;
-
-    public PersistentAuthenticationStateProvider(
-        PersistentComponentState state,
-        HttpClient httpClient,
-        JsonSerializerOptions jsonOptions)
+    public PersistentAuthenticationStateProvider(PersistentComponentState state, HttpClient client, JsonSerializerOptions jsonOptions)
     {
-        // Strategy 1: Try PersistentComponentState (available when prerendering is enabled)
+        _client = client;
+        _jsonOptions = jsonOptions;
         if (state.TryTakeFromJson<UserInfo>(nameof(UserInfo), out var userInfo) && userInfo is not null)
         {
-            _authenticationStateTask = Task.FromResult(
-                new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(userInfo.Claims,
-                    authenticationType: nameof(PersistentAuthenticationStateProvider)))));
-            return;
+            _current = CreateState(userInfo);
+            _stateTask = Task.FromResult(_current);
         }
-
-        // Strategy 2: Fetch from API endpoint (used when prerendering is disabled)
-        _authenticationStateTask = FetchAuthStateAsync(httpClient, jsonOptions);
+        else _stateTask = FetchAsync(_lifetime.Token);
+        _refreshLoop = RefreshLoopAsync();
     }
 
-    public override Task<AuthenticationState> GetAuthenticationStateAsync() => _authenticationStateTask;
+    public override Task<AuthenticationState> GetAuthenticationStateAsync() => _stateTask;
 
-    private static async Task<AuthenticationState> FetchAuthStateAsync(
-        HttpClient httpClient,
-        JsonSerializerOptions jsonOptions)
+    public async Task RefreshAsync()
     {
+        await _stateTask;
+        _stateTask = FetchAsync(_lifetime.Token);
+        NotifyAuthenticationStateChanged(_stateTask);
+        await _stateTask;
+    }
+
+    private async Task<AuthenticationState> FetchAsync(CancellationToken token)
+    {
+        await _gate.WaitAsync(token);
         try
         {
-            var response = await httpClient.GetAsync(ApiUrls.Accounts.AuthState());
-
-            if (!response.IsSuccessStatusCode)
-                return await DefaultUnauthenticatedTask;
-
-            var userInfo = await response.Content.ReadFromJsonAsync<UserInfo>(jsonOptions);
-
-            if (userInfo?.UserClaims is { Count: > 0 })
+            using var response = await _client.GetAsync(ApiUrls.Accounts.AuthState(), token);
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+                _current = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            else
             {
-                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(userInfo.Claims,
-                    authenticationType: nameof(PersistentAuthenticationStateProvider))));
+                response.EnsureSuccessStatusCode();
+                var info = await response.Content.ReadFromJsonAsync<UserInfo>(_jsonOptions, token)
+                    ?? throw new JsonException("Missing authentication state.");
+                _current = CreateState(info);
             }
+            HasConnectionError = false;
         }
-        catch
+        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
         {
-            // Silently fall back to unauthenticated on any network/parsing error
+            if (token.IsCancellationRequested) throw;
+            HasConnectionError = true; // Retain the last known principal; network failure is not logout.
         }
+        finally { _gate.Release(); }
+        return _current;
+    }
 
-        return await DefaultUnauthenticatedTask;
+    private static AuthenticationState CreateState(UserInfo info) => new(new ClaimsPrincipal(
+        info.UserClaims.Count > 0 ? new ClaimsIdentity(info.Claims, nameof(PersistentAuthenticationStateProvider)) : new ClaimsIdentity()));
+
+    private async Task RefreshLoopAsync()
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(_lifetime.Token)) await RefreshAsync();
+        }
+        catch (OperationCanceledException) when (_lifetime.IsCancellationRequested) { }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _lifetime.CancelAsync();
+        try { await _stateTask; } catch (OperationCanceledException) { }
+        await _refreshLoop;
+        _lifetime.Dispose();
     }
 }

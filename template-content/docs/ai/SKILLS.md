@@ -17,7 +17,7 @@ Use this file for high-frequency rules. Detailed guidance lives in the linked do
 ## UI Service Calls
 - Non-trivial pages use markup + code-behind.
 - Inherit from `AppComponentBase` where application requests are made.
-- Use `SendRequestAsync` rather than ad-hoc request try/catch flows.
+- Use `TryRequestAsync` (explicit success; legacy `SendRequestAsync` remains for compatibility) rather than ad-hoc request try/catch flows.
 - Propagate cancellation tokens.
 
 ## MudBlazor & Styling

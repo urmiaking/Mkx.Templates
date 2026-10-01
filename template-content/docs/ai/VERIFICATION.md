@@ -1,25 +1,25 @@
-# Verification & Definition of Done
-
-Code generation is not completion.
+# Verification and definition of done
 
 ```powershell
 dotnet build Mkx.Templates.slnx
-dotnet test
+dotnet test Mkx.Templates.slnx
+./scripts/verify.ps1
 ```
 
-| Change | Minimum verification |
+verify.ps1 builds Release, executes tests, checks TRX executed count >0 and runs dependency-free Node PWA behavior tests. Root packaging verification separately performs pack -> inspect -> isolated install -> generate Acme.Starter -> build/test. An exit code zero with zero discovered tests is a failure.
+
+| Change | Required evidence |
 |---|---|
-| Domain/business rule | Build + relevant unit tests |
-| Application/service | Build + relevant tests |
-| Shared contract | Full build; verify implementations |
-| API | Build + integration/runtime check when available |
-| EF schema | Build + create/inspect migration + persistence tests |
-| Blazor UI | Client/full build + runtime UI check |
-| Responsive UI | Desktop + mobile viewport |
-| Authorization | Authorized + unauthorized paths + registration |
-| CSS/theme | Light/dark and responsive when relevant |
-| Docker/deployment | Image/startup/health check when environment permits |
+| Business invariant | Positive/negative domain tests |
+| Use case/API | Integration tests including validation, missing records and errors |
+| Authorization | Anonymous 401, missing claim 403, correct policy allowed, typo/missing provider rejected |
+| Contract | Full solution and generated-name build |
+| EF schema | Inspected Up/Down, persistence test, no pending model changes; actual SQL deployment where available |
+| UI | Navigate real flow; loading/empty/error/retry, save failure retained, duplicate submit and dirty cancel |
+| Responsive/style | Desktop initial mini state after refresh, mobile overlay, light/dark, keyboard, OS reduced motion and dialog scroll |
+| PWA | Cache allowlist/privacy, own-prefix cleanup, offline fallback, deliberate update and dirty guard |
+| Deployment | Configuration, migration strategy, health and image startup when Docker is available |
 
-For UI, navigate the real flow and check relevant loading/success/empty/failure states. For migrations inspect Up/Down, destructive operations, nullability, FKs, indexes, precision and delete behavior. For policies verify constant, provider, server enforcement, client behavior and seeding.
+The SQLite integration suite uses actual repositories/validators/mapping and MVC middleware, with a test-only authentication scheme and a separate database per factory. It is not proof of SQL Server migration compatibility; inspect/generate the SQL migration script too.
 
-Never report an unexecuted check as passed. If blocked, name the blocker exactly.
+PWA VM tests exercise worker/helper behavior but do not substitute for real browser service-worker installation/update. Browser layout checks and real-device frame measurements have separate purposes. Do not claim mobile FPS or deployment success from compile-only checks. Record any missing environment/device/provider explicitly.

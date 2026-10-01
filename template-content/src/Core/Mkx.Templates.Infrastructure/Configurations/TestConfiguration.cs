@@ -14,6 +14,8 @@ internal sealed class TestConfiguration : IEntityTypeConfiguration<Test>
             .HasConversion(x => x.Value,
                 id => new TestId(id));
 
+        builder.Property(x => x.Version).IsConcurrencyToken();
+
         builder.Property(x => x.Name)
             .HasMaxLength(200)
             .IsRequired();

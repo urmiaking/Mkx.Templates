@@ -1,7 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Mkx",
-  "classifications": [ "Common", "Blazor" ],
+  "classifications": [
+    "Common",
+    "Blazor"
+  ],
   "identity": "Mkx.Templates.Blazor",
   "name": "Mkx Blazor Solution Template",
   "shortName": "mkx-blazor",
@@ -10,7 +13,9 @@
     "type": "solution"
   },
   "sourceName": "Mkx.Templates",
-  "guids": [ "3cb26e0d-a6a9-4679-b220-676bb6eea2ce" ],
+  "guids": [
+    "3cb26e0d-a6a9-4679-b220-676bb6eea2ce"
+  ],
   "preferNameDirectory": false,
   "symbols": {
     "HttpPort": {
@@ -23,5 +28,34 @@
       "generator": "port",
       "replaces": "7006"
     }
-  }
+  },
+  "sources": [
+    {
+      "source": "./",
+      "target": "./",
+      "exclude": [
+        "**/[Bb]in/**",
+        "**/[Oo]bj/**",
+        "**/TestResults/**",
+        "**/.vs/**",
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/artifacts/**",
+        "**/*.user",
+        "**/*.pfx",
+        "**/*.log",
+        "**/appsettings.Local.json",
+        "**/.env",
+        "**/.env.*"
+      ]
+    },
+    {
+      "source": "./",
+      "target": "./",
+      "include": [
+        ".env.example"
+      ],
+      "exclude": []
+    }
+  ]
 }

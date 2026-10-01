@@ -1,3 +1,4 @@
+using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Claims;
 using Mkx.Templates.Shared.DTOs.Roles;
@@ -19,20 +20,20 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.GetAsync(ApiUrls.UserManagement.Enabled(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<bool>(jsonOptions, cancellationToken);
         return result;
     }
 
-    public async Task<List<UserDto>> GetUsersAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedList<UserDto>> GetUsersAsync(RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        using var response = await client.GetAsync(ApiUrls.UserManagement.GetUsers(), cancellationToken);
+        using var response = await client.GetAsync(ApiUrls.UserManagement.GetUsers(filter), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
-        var result = await response.Content.ReadFromJsonAsync<List<UserDto>>(jsonOptions, cancellationToken);
+        var result = await response.Content.ReadFromJsonAsync<PagedList<UserDto>>(jsonOptions, cancellationToken);
         return result ?? throw new UnexpectedHttpResponseException();
     }
 
@@ -41,7 +42,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.GetAsync(ApiUrls.UserManagement.GetUserById(id), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return await response.Content.ReadFromJsonAsync<UserDto>(jsonOptions, cancellationToken);
     }
@@ -51,7 +52,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.PostAsJsonAsync(ApiUrls.UserManagement.CreateUser(), dto, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return true;
     }
@@ -61,7 +62,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(), dto, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return true;
     }
@@ -71,7 +72,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.DeleteAsync(ApiUrls.UserManagement.DeleteUser(id), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return true;
     }
@@ -81,7 +82,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.GetAsync(ApiUrls.UserManagement.GetUserClaimsTree(userId), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<List<PolicyTreeNodeDto>>(jsonOptions, cancellationToken);
         return result ?? throw new UnexpectedHttpResponseException();
@@ -92,7 +93,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUserClaims(userId), grantedClaimNames, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return true;
     }
@@ -102,7 +103,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.GetAsync(ApiUrls.UserManagement.GetRoles(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<List<RoleClaimsDto>>(jsonOptions, cancellationToken);
         return result ?? throw new UnexpectedHttpResponseException();
@@ -113,7 +114,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.GetAsync(ApiUrls.UserManagement.GetRoleClaimsTree(roleName), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<List<PolicyTreeNodeDto>>(jsonOptions, cancellationToken);
         return result ?? throw new UnexpectedHttpResponseException();
@@ -124,7 +125,7 @@ public class UserManagementClientService(HttpClient client, JsonSerializerOption
         using var response = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateRoleClaims(roleName), grantedClaimNames, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         return true;
     }

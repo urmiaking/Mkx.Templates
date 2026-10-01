@@ -1,8 +1,9 @@
-﻿using FluentValidation;
+using FluentValidation;
 using Mkx.Templates.Sdk.Server.Application.Exceptions;
 using Mkx.Templates.Sdk.Server.Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text.Json;
@@ -14,55 +15,27 @@ public class ExceptionHandlerMiddleware(ILogger<ExceptionHandlerMiddleware> logg
 {
     public override (HttpStatusCode code, string message) GetResponse(Exception exception)
     {
-        HttpStatusCode code;
-        var message = exception.Message;
-        switch (exception)
+        var code = exception switch
         {
-            case NotFoundException
-                or FileNotFoundException:
-                code = HttpStatusCode.NotFound;
-                break;
-
-            case UnauthorizedException
-                or UnauthorizedAccessException:
-                code = HttpStatusCode.Unauthorized;
-                break;
-
-            case ForbiddenException:
-                code = HttpStatusCode.Forbidden;
-                break;
-
-            case BadRequestException:
-                code = HttpStatusCode.BadRequest;
-                break;
-
-            case ValidationException validationException:
-                code = HttpStatusCode.BadRequest;
-                message = GetMessage(validationException);
-                break;
-            case InvalidOperationException invalidOperationException:
-                code = HttpStatusCode.BadRequest;
-                message = invalidOperationException.Message;
-                break;
-
-            default:
-                code = HttpStatusCode.InternalServerError;
-                break;
-        }
-        return (code, message);
-    }
-
-    private string GetMessage(ValidationException exception)
-    {
-        var errors = new Dictionary<string, string[]>();
-
-        foreach (var errorGroup in exception.Errors.GroupBy(x => x.PropertyName))
+            NotFoundException or FileNotFoundException => HttpStatusCode.NotFound,
+            UnauthorizedException or UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+            ForbiddenException => HttpStatusCode.Forbidden,
+            BadRequestException or ArgumentException or ValidationException => HttpStatusCode.BadRequest,
+            DbUpdateConcurrencyException => HttpStatusCode.Conflict,
+            _ => HttpStatusCode.InternalServerError
+        };
+        ProblemDetails problem = exception is ValidationException validation
+            ? new ValidationProblemDetails(validation.Errors.GroupBy(e => e.PropertyName)
+                .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()))
+            : new ProblemDetails();
+        problem.Status = (int)code;
+        problem.Title = code.ToString();
+        problem.Detail = code switch
         {
-            var errorMessages = errorGroup.Select(x => x.ErrorMessage).ToArray();
-            errors.Add(errorGroup.Key, errorMessages);
-        }
-
-        var problemDetails = new ValidationProblemDetails(errors);
-        return JsonSerializer.Serialize(problemDetails);
+            HttpStatusCode.InternalServerError => "An unexpected error occurred. Please try again or contact support.",
+            HttpStatusCode.Conflict => "This record was changed by another user. Reload it before saving.",
+            _ => exception.Message
+        };
+        return (code, JsonSerializer.Serialize(problem, problem.GetType(), new JsonSerializerOptions(JsonSerializerDefaults.Web)));
     }
 }

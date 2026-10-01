@@ -1,10 +1,23 @@
+@inject AuthenticationStateProvider AuthState
+
 <Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
             <NotAuthorized>
-                <HandleNotAuthorized />
+                @if (ClientAuthState is { HasConnectionError: true } clientAuthState)
+                {
+                    <MudAlert Severity="Severity.Warning" role="status">بررسی نشست ممکن نشد. اتصال خود را بررسی کنید.</MudAlert>
+                    <MudButton OnClick="clientAuthState.RefreshAsync">تلاش مجدد</MudButton>
+                }
+                else { <HandleNotAuthorized /> }
             </NotAuthorized>
         </AuthorizeRouteView>
-        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        <FocusOnNavigate RouteData="routeData" Selector="#main-content" />
     </Found>
 </Router>
+
+@code {
+    // Routes also renders static SSR account pages, where the server owns auth state.
+    private Mkx.Templates.Client.Common.PersistentAuthenticationStateProvider? ClientAuthState =>
+        AuthState as Mkx.Templates.Client.Common.PersistentAuthenticationStateProvider;
+}

@@ -32,6 +32,8 @@ internal sealed class UserAccountService(
     UserManager<AppUser> userManager,
     SignInManager<AppUser> signInManager,
     AccountRequestDtoValidator userAccountValidator,
+    UpdateUserFullNameRequestValidator fullNameValidator,
+    UpdateUserPhoneNumberRequestValidator phoneNumberValidator,
     IUserStore<AppUser> userStore,
     ILogger<UserAccountService> logger,
     ITransactionContext transactionContext,
@@ -60,7 +62,9 @@ internal sealed class UserAccountService(
     {
         var user = await GetRequiredUserAsync(cancellationToken);
 
-        await userManager.SetFullNameAsync(user, request.FullName);
+        await fullNameValidator.ValidateAndThrowAsync(request, cancellationToken);
+        var result = await userManager.SetFullNameAsync(user, request.FullName);
+        if (!result.Succeeded) throw new BadRequestException(string.Join(", ", result.Errors.Select(e => e.Description)));
 
         await signInManager.RefreshSignInAsync(user);
     }
@@ -70,6 +74,7 @@ internal sealed class UserAccountService(
     {
         var user = await GetRequiredUserAsync(cancellationToken);
 
+        await phoneNumberValidator.ValidateAndThrowAsync(request, cancellationToken);
         var isValid = await userManager.VerifyChangePhoneNumberTokenAsync(user, request.Token, request.NewPhoneNumber);
 
         if (!isValid)
@@ -90,27 +95,26 @@ internal sealed class UserAccountService(
     public async Task SendVerificationTokenAsync(SendVerificationCodeRequest request,
         CancellationToken cancellationToken = default)
     {
-        var cacheKey = $"phone:smsCooldown:{request.OldPhoneNumber}";
+        var user = await GetRequiredUserAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(user.PhoneNumber) || !user.PhoneNumberConfirmed || user.PhoneNumber != request.OldPhoneNumber)
+            throw new ValidationException([new ValidationFailure(nameof(request.OldPhoneNumber), "شماره فعلی تاییدشده با حساب شما مطابقت ندارد")]);
+        await phoneNumberValidator.ValidateAndThrowAsync(new UpdateUserPhoneNumberRequest(request.NewPhoneNumber, ""), cancellationToken);
+        var cacheKey = $"phone:changeCooldown:{user.Id}";
 
         if (cache.TryGetValue(cacheKey, out _))
         {
-#if !DEBUG
             throw new ValidationException([
                 new ValidationFailure(nameof(request.NewPhoneNumber),
                     $"لطفاً بعد از {_cooldown.TotalMinutes} دقیقه دوباره تلاش کنید")
             ]);
-#endif
         }
 
         if (!userManager.SupportsUserPhoneNumber)
             throw new ValidationException([new ValidationFailure(nameof(request.NewPhoneNumber), "این عملیات قابل اجرا نمی باشد")]);
 
-        var user = await userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.OldPhoneNumber, cancellationToken) ??
-                   throw new NotFoundException("کاربر یافت نشد");
-
         var code = await userManager.GenerateChangePhoneNumberTokenAsync(user, request.NewPhoneNumber);
 
-        var sent = await smsSender.SendAsync(request.OldPhoneNumber, $"کد تایید: {code}", cancellationToken);
+        var sent = await smsSender.SendAsync(user.PhoneNumber, $"کد تایید: {code}", cancellationToken);
 
         if (!sent)
             throw new ValidationException([
@@ -302,8 +306,8 @@ internal sealed class UserAccountService(
 
     public async Task<PagedList<GetUserAccountResponse>> GetAccountsListAsync(RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        var skip = filter.Skip ?? 0;
-        var take = filter.Take ?? 100;
+        var skip = Math.Max(0, filter.Skip ?? 0);
+        var take = Math.Clamp(filter.Take ?? 25, 1, 100);
 
         var query = userManager.Users.AsQueryable();
 
@@ -473,7 +477,7 @@ internal sealed class UserAccountService(
     {
         var userId = userContext.GetUserId() ?? throw new UnauthorizedAccessException();
 
-        return await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken) 
+        return await userManager.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken)
                ?? throw new NotFoundException("کاربر یافت نشد");
     }
 }

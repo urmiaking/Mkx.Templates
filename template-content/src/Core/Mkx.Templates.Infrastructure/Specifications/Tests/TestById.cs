@@ -5,10 +5,10 @@ namespace Mkx.Templates.Infrastructure.Specifications.Tests;
 
 public sealed class TestById : SingleResultSpecification<Test>
 {
-    public TestById(TestId id)
+    public TestById(TestId id, bool tracking = false)
     {
         Query
-            .Where(x => x.Id == id)
-            .AsNoTracking();
+            .Where(x => x.Id == id);
+        if (!tracking) Query.AsNoTracking();
     }
 }

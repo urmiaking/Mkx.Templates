@@ -32,7 +32,7 @@ public sealed class AccountRequestDtoValidator : AbstractValidator<UserAccountRe
 
         RuleFor(x => x.Password)
             .Must(NotEmptyInCreateMode).WithMessage("رمز عبور الزامی است")
-            .MinimumLength(4).WithMessage("طول رمز عبور نمی تواند کمتر از 4 کاراکتر باشد");
+            .MinimumLength(12).WithMessage("طول رمز عبور نمی تواند کمتر از 12 کاراکتر باشد");
 
         RuleFor(x => x.Email)
             .EmailAddress().WithMessage("فرمت ایمیل وارد شده اشتباه است")

@@ -18,10 +18,10 @@ public partial class ForgotPassword
     private EditContext _editContext = default!;
     private static readonly TimeSpan SmsCooldown = TimeSpan.FromMinutes(2);
 
-    [SupplyParameterFromForm] 
+    [SupplyParameterFromForm]
     private InputModel Input { get; set; } = default!;
 
-    [CascadingParameter] 
+    [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
     [Inject] private IAccountService AccountService { get; set; } = default!;
@@ -59,9 +59,9 @@ public partial class ForgotPassword
             }
 
             var user = await AccountService.FindUserByPhoneNumberAsync(Input.PhoneNumber);
-            if (user == null)
+            if (user == null || !user.PhoneNumberConfirmed || await UserManager.IsLockedOutAsync(user))
             {
-                _errorMessage = "کاربری با این شماره تلفن یافت نشد.";
+                _errorMessage = "بازیابی برای این حساب در حال حاضر امکان‌پذیر نیست.";
                 return;
             }
 
@@ -69,7 +69,7 @@ public partial class ForgotPassword
             {
                 var code = await UserManager.GenerateTwoFactorTokenAsync(user, "Phone");
                 var smsSent = await SmsSender.SendAsync(user.PhoneNumber!, $"کد تایید بازیابی رمز عبور: {code}");
-                
+
                 if (!smsSent)
                 {
                     _errorMessage = "خطا در ارسال پیامک تایید. لطفا مجدداً تلاش کنید.";
@@ -77,7 +77,7 @@ public partial class ForgotPassword
                 }
 
                 Cache.Set(cacheKey, true, SmsCooldown);
-                Logger.LogInformation($"Password reset code generated and sent to {Input.PhoneNumber}");
+                Logger.LogInformation("Password recovery code accepted by SMS provider.");
                 Input.Step = 2;
             }
             catch (Exception ex)
@@ -101,7 +101,7 @@ public partial class ForgotPassword
                 return;
             }
 
-            var isValid = await UserManager.VerifyTwoFactorTokenAsync(user, "Phone", Input.OtpCode);
+            var isValid = await VerifyRecoveryCodeAsync(user);
             if (!isValid)
             {
                 _errorMessage = "کد تایید وارد شده نامعتبر یا منقضی شده است.";
@@ -132,7 +132,7 @@ public partial class ForgotPassword
             }
 
             // Verify OTP code again to make sure the request is secure and authorized
-            var isValid = await UserManager.VerifyTwoFactorTokenAsync(user, "Phone", Input.OtpCode);
+            var isValid = await VerifyRecoveryCodeAsync(user);
             if (!isValid)
             {
                 _errorMessage = "اعتبار سنجی با خطا مواجه شد. لطفا دوباره فرآیند را آغاز کنید.";
@@ -150,6 +150,15 @@ public partial class ForgotPassword
                 _errorMessage = "خطا در ذخیره رمز عبور جدید. لطفا مطمئن شوید که رمز عبور جدید پیچیدگی‌های لازم را دارد.";
             }
         }
+    }
+
+    private async Task<bool> VerifyRecoveryCodeAsync(AppUser user)
+    {
+        if (!user.PhoneNumberConfirmed || await UserManager.IsLockedOutAsync(user)) return false;
+        if (await UserManager.VerifyTwoFactorTokenAsync(user, "Phone", Input.OtpCode)) return true;
+        var failed = await UserManager.AccessFailedAsync(user);
+        if (!failed.Succeeded) Logger.LogWarning("Could not record failed password recovery verification.");
+        return false;
     }
 
     private sealed class InputModel

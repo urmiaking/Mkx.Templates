@@ -21,5 +21,7 @@
     <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Infrastructure/Mkx.Templates.Sdk.Server.Infrastructure.csproj" />
     <Project Path="src/Sdk/Mkx.Templates.Sdk.Server.Shared/Mkx.Templates.Sdk.Server.Shared.csproj" />
   </Folder>
-  <Folder Name="/6. Tests/" />
+  <Folder Name="/6. Tests/">
+    <Project Path="Tests/Mkx.Templates.Tests/Mkx.Templates.Tests.csproj" />
+  </Folder>
 </Solution>

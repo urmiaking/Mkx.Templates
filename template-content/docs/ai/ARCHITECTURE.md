@@ -1,84 +1,25 @@
-# Architecture Guide: Mkx.Templates
+# Architecture
 
-This project follows **Clean Architecture** and **Domain-Driven Design (DDD)** principles to separate business logic from technical concerns (UI, databases, frameworks, APIs).
+The template uses a pragmatic layered architecture with domain models separated from EF configuration. It does not claim strict dependency inversion: Application deliberately references Infrastructure repository contracts and specifications. See decision 0006 before changing that tradeoff.
 
----
+| Project/area | Responsibility | Allowed dependencies |
+|---|---|---|
+| Core Domain | Aggregates, strong IDs, business invariants | SDK Domain (including shared Identity models); no EF context/configuration, HTTP or UI |
+| SDK Domain | Entity/event primitives and shared Identity models | .NET and Microsoft.Extensions.Identity.Stores |
+| Core/SDK Infrastructure | EF context, Identity configuration, repositories, specifications, migrations | Domain and transport-neutral SDK primitives |
+| Application | Use cases, validation, mapping, Identity management | Domain, Infrastructure, Shared, SDK Application |
+| Shared/SDK Shared | Immutable transport contracts, routes, policy definitions, paging | No EF or server persistence |
+| Server | HTTP, cookie/SignInManager adapters, SSR account flows, hosting | Application/Infrastructure and Client assets |
+| Client | WASM pages, UI state, HTTP contract implementations | Shared and client libraries; no Infrastructure or DbContext |
 
-## 1. Architectural Layers & Responsibilities
+Identity entities live in `src/Sdk/Mkx.Templates.Sdk.Server.Domain/Identity/`, the original project ownership. Core Domain can use AppUser/AppRole and their relationships through its SDK Domain reference. The explicit Identity.Stores dependency supplies model base classes; EF contexts, mapping and store implementations stay in Infrastructure. This is an intentional template tradeoff, not a strict Identity-free Domain. Preserve this ownership unless the user requests an architecture change.
 
-The system is organized into a nested concentric directory structure where dependency flow is inward toward the **Domain** layer. 
+`Server/Services/UserAccountService` remains a deliberate host adapter because its account flows use cookies, SignInManager and HttpContext. Pure business rules should still move into Application/Domain as they emerge; moving this entire adapter into Application would introduce a host dependency cycle.
 
-```
-[ Presentation (Client / Server Host) ] ──> [ Application Layer ] ──> [ Domain (Core) ]
-                                                   │
-                                                   └───> [ Infrastructure (Data Access) ]
-```
+Query intent goes into Infrastructure specifications. The complete Test feature is the reference; [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) maps every file. User/role management uses Identity's own stores with bounded pages and transaction boundaries. Do not wrap every Identity API in a second repository.
 
-### Core Layer (Business Core)
-1. **`Mkx.Templates.Domain`**
-   - **Responsibility**: Contains the core business concepts, aggregate roots, entities, value objects, domain services, domain events, and core exceptions.
-   - **Dependencies**: Depends only on `Mkx.Templates.Sdk.Server.Domain`. It has **no** knowledge of database engines, Web APIs, HTTP connections, or Blazor.
-2. **`Mkx.Templates.Infrastructure`**
-   - **Responsibility**: Manages data persistence. Houses the EF Core `AppDbContext`, database migrations, entity mappings (configurations), concrete repository implementations, and specifications.
-   - **Dependencies**: Depends on `Mkx.Templates.Domain` and `Mkx.Templates.Sdk.Server.Infrastructure`.
+DI scanning uses SDK lifetime attributes. Framework providers, authentication state and typed HTTP clients are registered explicitly. A typed client such as SmsSender must not also be decorated for scanning.
 
-### Presentation & Orchestration Layers
-3. **`Mkx.Templates.Application`**
-   - **Responsibility**: Implements the system use cases. Coordinates retrieving domain aggregates via repositories, executing domain mutations, saving changes, mapping domain models to DTOs, and validating request objects.
-   - **Dependencies**: Depends on `Mkx.Templates.Domain`, `Mkx.Templates.Infrastructure`, and `Mkx.Templates.Shared`.
-4. **`Mkx.Templates.Server` (Host)**
-   - **Responsibility**: Exposes Web APIs (Controllers) and hosts the Blazor Web App. Configures the ASP.NET Core middleware pipeline (authentication, CORS, Serilog, rate limiting) and serves static web assets (CSS/JS).
-   - **Dependencies**: Depends on `Mkx.Templates.Application` and references `Mkx.Templates.Client` (to bundle WebAssembly DLLs for client-side execution).
+Interactive pages use Interactive WebAssembly with `prerender: false`; `/Account` pages use static SSR. This boundary is intentional and tested separately. Switching render modes is an architectural change requiring auth-state, service-registration, storage/JS and SSR checks, not a one-line guarantee.
 
-### Frontend & Shared Layers
-5. **`Mkx.Templates.Client` (Blazor WASM)**
-   - **Responsibility**: Contains frontend client pages, UI components, client-side routing, and client-side implementation of services (sending HTTP requests to backend Web APIs).
-   - **Dependencies**: Depends on `Mkx.Templates.Shared` and frontend UI libraries (MudBlazor). Runs in WebAssembly.
-6. **`Mkx.Templates.Shared`**
-   - **Responsibility**: Serves as a lightweight contract library compiled for both client and server. Contains Data Transfer Objects (DTOs), service interfaces, API route constants, and routing helpers.
-   - **Dependencies**: Refered to by all presentation and application projects.
-
----
-
-## 2. Polymorphic Interface Segregation & Blazor WebAssembly
-
-Interactive pages currently run in **InteractiveWebAssembly mode without prerendering**. The shared service contract still keeps server and client implementations separate:
-
-- **Service Interfaces** (e.g., `IFeatureService`) are defined inside `Mkx.Templates.Shared/Abstractions/`.
-- **Server Implementation** is placed inside `Mkx.Templates.Application/Services/` (e.g., `FeatureService` directly querying repositories/DB).
-- **Client Implementation** is placed inside `Mkx.Templates.Client/Services/` (e.g., `FeatureClientService` making JSON API HTTP calls to backend endpoints).
-- Both implementations are registered using SDK auto-scanning attributes, allowing UI components (pages) to call the same interface without worrying about where the code executes.
-
----
-
-## 3. Route Constants & Endpoint Mapping
-
-To maintain strict alignment between backend controllers and frontend client services, routes are never hardcoded as string literals in components.
-- REST Route templates are defined in `Mkx.Templates.Shared/Routes/ApiRoutes.cs` (used by controllers for routing attributes and client services for HTTP paths).
-- Functional URL builders are defined in `Mkx.Templates.Shared/Routes/ApiUrls.cs` (to format routes with arguments like IDs or query parameters).
-- UI navigation routes are defined in `Mkx.Templates.Shared/Routes/ClientRoutes.cs` (used to navigate the client app and specify routing on Blazor component pages).
-
----
-
-## 4. Specification Pattern
-
-To prevent repository classes from bloating with custom query methods (e.g., `GetActiveProductsByCategoryId`), database queries are written as strongly-typed specifications:
-- Specifications derive from `Specification<T>` or `SingleResultSpecification<T>` (provided by `Ardalis.Specification`).
-- They encapsulate query logic (where criteria, includes, ordering, pagination) into a single, unit-testable class.
-- The Repository accepts the specification and applies it to the EF Core queryable.
-
----
-
-## 5. Users and Claims Management
-
-The administrator UI lives in `src/Client/Mkx.Templates.Client/Pages/Users/`: `Index.razor` manages users and their direct claims, `RoleClaims.razor` manages built-in role claims, and `Components/ClaimsTreeDialog.razor` edits the policy tree. This page and component layout follows the SmartPlaque dashboard's `Pages/Users` structure. The separate `Pages/UserAccounts` area retains account profile and account-list functionality.
-
-The flow crosses the same layer boundaries as other application services:
-
-```text
-Pages/Users -> IUserManagementService -> UserManagementClientService
-    -> ApiUrls.UserManagement -> UserManagementController
-    -> UserManagementService -> ASP.NET Core Identity user and role managers
-```
-
-`Mkx.Templates.Shared` owns `IUserManagementService`, the user/role/claim DTOs, and the `Users` and `UserManagement` route constants. `AppPolicies.Users` contains `View`, `Manage`, and `ManageClaims`. `AppPolicyProvider.GetPolicies()` defines the editable hierarchy; the application service marks each node from the subject's direct user claims or role claims. The tree shows only policies registered by providers, so adding a policy constant alone does not make it assignable.
+The host uses same-origin APIs; CORS is not enabled. SQL-backed log UI is enabled by default and administrator protected; Logging:UseSqlStore=false explicitly disables it. Links to /serilog-ui require full server navigation, because it is a middleware surface outside the WASM router. Rate limiting, forwarded headers, health checks and security headers are configured in the Server hosting extensions.

@@ -1,0 +1,17 @@
+@inherits AppComponentBase
+<NavigationLock ConfirmExternalNavigation="_dirty" OnBeforeInternalNavigation="ConfirmNavigationAsync" />
+<MudDialog>
+    <DialogContent>
+        <div data-unsaved="@(_dirty ? "true" : "false")"><MudForm @ref="_form">
+            <MudTextField T="string" Label="نام" Value="_name" ValueChanged="NameChanged" Required="true" MaxLength="200" Variant="Variant.Outlined"
+                          Error="@(ValidationErrors.ContainsKey("Name"))" ErrorText="@FieldError("Name")" Disabled="IsBusy" />
+            <MudTextField T="string" Label="توضیحات" Value="_description" ValueChanged="DescriptionChanged" MaxLength="500" Lines="3" Variant="Variant.Outlined"
+                          Error="@(ValidationErrors.ContainsKey("Description"))" ErrorText="@FieldError("Description")" Disabled="IsBusy" />
+            @if (LastRequestError is not null) { <MudAlert Severity="Severity.Error" role="alert">@LastRequestError</MudAlert> }
+        </MudForm></div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CancelAsync" Disabled="IsBusy">انصراف</MudButton>
+        <MudButton OnClick="SaveAsync" Disabled="IsBusy" Color="Color.Primary" Variant="Variant.Filled">@(IsBusy ? "در حال ذخیره…" : "ذخیره")</MudButton>
+    </DialogActions>
+</MudDialog>

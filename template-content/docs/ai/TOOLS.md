@@ -1,99 +1,34 @@
-# Tools & CLI Guide: Mkx.Templates
+# Commands
 
-Use this guide for repository discovery, build, test, run, and EF Core commands. Commands assume the generated repository root unless stated otherwise.
+Run from the generated root unless stated otherwise. Prefer rg/rg --files for discovery. Paths in commands point at executable reference files; inspect them before introducing equivalents.
 
-## 1. Restore & Build
 ```powershell
+dotnet tool restore
 dotnet restore Mkx.Templates.slnx
 dotnet build Mkx.Templates.slnx
+dotnet test Mkx.Templates.slnx
+./scripts/verify.ps1
 ```
 
-For a fast client-only compile while working on Blazor UI:
+Run the configured local host with `dotnet run --project src/Server/Mkx.Templates.Server`. See the generated README for database and administrator secrets. Do not infer an endpoint from source code when the launch profile prints it.
+
+EF uses the checked-in local dotnet-ef manifest:
+
 ```powershell
-dotnet build src/Client/Mkx.Templates.Client/Mkx.Templates.Client.csproj --no-restore
+dotnet ef migrations add MeaningfulName --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server
+dotnet ef migrations has-pending-model-changes --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server
+dotnet ef migrations script --idempotent --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server --output artifacts/migrations.sql
 ```
 
-The full solution build is the final compilation check.
+The design-time host needs ConnectionStrings:Mkx.Templates configured even though adding a migration does not apply it. Review migration Up/Down before applying a database update. Production startup flags are false by default; use reviewed scripts/bundles and deployment credentials.
 
-## 2. Run
+Docker is optional. From the generated root:
+
 ```powershell
-dotnet run --project src/Server/Mkx.Templates.Server/Mkx.Templates.Server.csproj
+docker compose up -d --wait
+docker build -t mkx.templates:local -f src/Server/Mkx.Templates.Server/Dockerfile .
 ```
 
-Development endpoints are configured by the project launch settings. Do not hardcode an assumed port into application code.
+Compose requires your own `.env` SQL password. The Dockerfile build context is the generated root, which contains central package files and nuget.config. Run Docker only when needed for the authorized task; do not publish an image unless requested.
 
-## 3. Repository Discovery
-Search before creating duplicate abstractions. PowerShell is always an acceptable fallback when `rg` is unavailable.
-
-Find a symbol/pattern:
-```powershell
-Get-ChildItem src -Recurse -Include *.cs,*.razor |
-    Select-String -Pattern 'IUserManagementService|SendRequestAsync'
-```
-
-Find files:
-```powershell
-Get-ChildItem src -Recurse -Filter '*Repository*.cs'
-```
-
-Find route/policy definitions:
-```powershell
-Get-ChildItem src -Recurse -Include *.cs |
-    Select-String -Pattern 'ApiRoutes|ApiUrls|ClientRoutes|AppPolicies'
-```
-
-## 4. Entity Framework Migrations
-Add:
-```powershell
-dotnet ef migrations add <MigrationName> --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server
-```
-
-Remove the latest undeployed migration:
-```powershell
-dotnet ef migrations remove --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server
-```
-
-Apply:
-```powershell
-dotnet ef database update --project src/Core/Mkx.Templates.Infrastructure --startup-project src/Server/Mkx.Templates.Server
-```
-
-Inspect generated migrations before applying them. See [DATABASE.md](DATABASE.md).
-
-The current host may apply pending migrations during startup. Verify current startup configuration before changing that behavior.
-
-## 5. Database Seeders
-System/initial metadata uses the established `IDbSeeder` scanning mechanism.
-- Put application seeders in the established Application seeders area.
-- Use the project's DI scanning convention.
-- Make seeders idempotent.
-- Use `Order` only for real dependencies between seeders.
-
-## 6. Tests
-Run all tests:
-```powershell
-dotnet test
-```
-
-Target a test/class:
-```powershell
-dotnet test --filter "FullyQualifiedName~YourTestClass"
-```
-
-Follow [VERIFICATION.md](VERIFICATION.md) for which checks are required by change type.
-
-## 7. Troubleshooting Build Locks
-If build output reports MSB3021/MSB3027 file-lock errors, identify a running server/debug host before changing source code to work around the error.
-
-Example:
-```powershell
-Get-Process Mkx.Templates.Server,dotnet -ErrorAction SilentlyContinue
-```
-
-Stop/restart only the process you intentionally own/control, then rebuild. A locked DLL is an environment issue, not evidence of a source compilation failure.
-
-## 8. Command Reporting
-Agents must report commands truthfully:
-- exit code 0 / successful output can be reported as passed;
-- blocked/not-run checks must be reported as such;
-- do not infer runtime/browser success from a compile-only check.
+When output is locked, identify only the server process you own before stopping it. Do not edit source to work around a running host's DLL lock. Report executed checks and exact blockers truthfully.

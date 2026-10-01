@@ -24,6 +24,7 @@ public static class DependencyInjection
                 .AddAuth(configuration)
                 .AddAuthOptions(configuration)
                 .AddOidcProviderOptions(configuration)
+                .AddHostingSecurity(configuration)
                 .AddSerilogUiService(configuration)
                 .DiscoverServices()
                 .AddSignalRServer();
@@ -56,7 +57,7 @@ public static class DependencyInjection
 
             authBuilder.AddOidcProviders(configuration);
 
-            services.ConfigureApplicationCookie(config =>
+            services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, config =>
             {
                 config.ExpireTimeSpan = TimeSpan.FromDays(90);
                 config.SlidingExpiration = true;
@@ -67,6 +68,7 @@ public static class DependencyInjection
 
                 config.Events = new CookieAuthenticationEvents
                 {
+                    OnValidatePrincipal = defaultEvents.OnValidatePrincipal,
                     OnRedirectToLogin = ctx =>
                     {
                         if (ctx.Request.Path.StartsWithSegments("/api"))
@@ -94,8 +96,8 @@ public static class DependencyInjection
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 4;
-                options.Password.RequiredUniqueChars = 1;
+                options.Password.RequiredLength = 12;
+                options.Password.RequiredUniqueChars = 4;
 
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
                 options.Lockout.MaxFailedAccessAttempts = 5;
@@ -131,7 +133,7 @@ public static class DependencyInjection
         {
             services.AddSignalR(options =>
             {
-                options.EnableDetailedErrors = true; // Enable for debugging
+                options.EnableDetailedErrors = false;
                 options.MaximumReceiveMessageSize = 102400;
                 options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
                 options.KeepAliveInterval = TimeSpan.FromSeconds(15);

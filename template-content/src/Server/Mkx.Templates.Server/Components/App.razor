@@ -1,11 +1,12 @@
 @inject IWebHostEnvironment Env
+@inject IConfiguration Configuration
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#2563EB" />
     <base href="/" />
      
@@ -15,6 +16,7 @@
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
 
     <ResourcePreloader />
+    <link rel="preload" href="fonts/IRANSANS/woff2/IRANSansWeb(FaNum)_Medium.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="@Assets["css/lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" />
     <link rel="stylesheet" href="@Assets["Mkx.Templates.Server.styles.css"]" />
@@ -42,7 +44,7 @@
 
     <script src="@Assets["_framework/blazor.web.js"]"></script>
     <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
-    @if (!Env.IsDevelopment())
+    @if (!Env.IsDevelopment() && Configuration.GetValue<bool>("Features:Pwa"))
     {
         <script src="@Assets["js/pwa-helper.js"]"></script>
     }

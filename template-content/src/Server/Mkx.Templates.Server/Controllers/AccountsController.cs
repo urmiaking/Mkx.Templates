@@ -7,14 +7,17 @@ using Mkx.Templates.Client.Common;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Server.Pages;
 using Mkx.Templates.Shared.Routes;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authorization;
+using Mkx.Templates.Shared.DTOs.UserAccounts;
 
 namespace Mkx.Templates.Server.Controllers;
 
-[Route(ApiRoutes.Accounts.Base)] 
+[Route(ApiRoutes.Accounts.Base)]
 public class AccountsController(
-    SignInManager<AppUser> signInManager) : ApiControllerBase
+    SignInManager<AppUser> signInManager, IAntiforgery antiforgery) : ApiControllerBase
 {
-    [HttpPost(ApiRoutes.Accounts.PerformExternalLogin)] 
+    [HttpPost(ApiRoutes.Accounts.PerformExternalLogin)]
     public IActionResult PerformExternalLogin([FromForm] string provider,
         [FromForm] string? returnUrl,
         CancellationToken cancellationToken = default)
@@ -33,17 +36,21 @@ public class AccountsController(
         return Challenge(properties, provider);
     }
 
-    [HttpGet(ApiRoutes.Accounts.Logout)]
+    [HttpPost(ApiRoutes.Accounts.Logout)]
+    [Authorize]
     public async Task<IActionResult> LogoutAsync([FromQuery] string? returnUrl = null)
     {
         await signInManager.SignOutAsync();
 
-        var localRedirectUrl = returnUrl ?? "/";
-        if (!localRedirectUrl.StartsWith('/') && !localRedirectUrl.StartsWith("~/"))
-        {
-            localRedirectUrl = "/" + localRedirectUrl;
-        }
-        return LocalRedirect(localRedirectUrl);
+        return NoContent();
+    }
+
+    [HttpGet(ApiRoutes.Accounts.Antiforgery)]
+    [AllowAnonymous]
+    public IActionResult GetAntiforgeryToken()
+    {
+        Response.Headers.CacheControl = "no-store";
+        return Ok(new AntiforgeryResponse(antiforgery.GetAndStoreTokens(HttpContext).RequestToken!));
     }
 
     /// <summary>
@@ -54,6 +61,7 @@ public class AccountsController(
     [HttpGet(ApiRoutes.Accounts.AuthState)]
     public IActionResult GetAuthState()
     {
+        Response.Headers.CacheControl = "no-store";
         var principal = HttpContext.User;
 
         if (principal.Identity?.IsAuthenticated == true)

@@ -1,97 +1,35 @@
-const CACHE_NAME = 'Mkx.Templates-pwa-cache-v2';
-
-const ASSETS_TO_CACHE = [
-  '/',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/favicon.png',
-  '/css/app.css',
-  '/_content/MudBlazor/MudBlazor.min.css',
-  '/_content/MudBlazor/MudBlazor.min.js',
-  '/_framework/blazor.web.js'
-];
-
-// Install Event
-self.addEventListener('install', event => {
-  self.skipWaiting(); // Force the waiting service worker to become the active service worker immediately during initial install if possible
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-});
-
-// Activate Event
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
-  );
-});
-
-// Fetch Event
+/* Only public static assets are cached. HTML, credentials and API data are never cached. */
+const CACHE_PREFIX = 'Mkx.Templates-static-';
+const CACHE_NAME = CACHE_PREFIX + '__BUILD_ID__';
+const OFFLINE_URL = '/offline.html';
+const PRECACHE = [OFFLINE_URL, '/icon-192.png', '/icon-512.png', '/favicon.png'];
+self.addEventListener('install', event => event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE))));
+self.addEventListener('activate', event => event.waitUntil((async () => {
+    const names = await caches.keys();
+    await Promise.all(names.filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME).map(name => caches.delete(name)));
+    await self.clients.claim();
+})()));
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Bypass API calls completely and prevent caching
-  if (url.pathname.toLowerCase().startsWith('/api')) {
-    if (event.request.method === 'GET') {
-      event.respondWith(fetch(event.request, { cache: 'no-store' }));
+    const request = event.request;
+    const url = new URL(request.url);
+    if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+    const path = url.pathname.toLowerCase();
+    if (path.startsWith('/api/') || path === '/api' || path.startsWith('/account') || path.startsWith('/health/') || path.startsWith('/logs')) return;
+    if (request.mode === 'navigate') {
+        event.respondWith(fetch(request).catch(async () => (await caches.open(CACHE_NAME)).match(OFFLINE_URL)));
+        return;
     }
-    return;
-  }
-
-  // Bypass Account pages completely (static SSR auth pages)
-  if (url.pathname.toLowerCase().startsWith('/account')) {
-    return;
-  }
-
-  // Ignore non-GET requests
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
-  // Online First: Network first, falling back to cache
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // If response is valid, clone and update cache
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline Fallback
-        return caches.match(event.request).then(cachedResponse => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          // If navigation page requests fail, fall back to cached shell
-          if (event.request.mode === 'navigate') {
-            return caches.match('/');
-          }
-        });
-      })
-  );
+    const isPublicAsset = /^\/(?:_framework|_content|css|js|fonts|assets)\//.test(path) || PRECACHE.includes(url.pathname);
+    if (!isPublicAsset || url.search) return;
+    // Start cache work while the event is active, then await it via waitUntil.
+    const network = fetch(request);
+    event.waitUntil(network.then(async response => {
+        if (response.ok && response.type === 'basic' && !/no-store|private/i.test(response.headers.get('Cache-Control') || '') && !response.headers.get('Content-Type')?.includes('text/html'))
+            await (await caches.open(CACHE_NAME)).put(request, response.clone());
+    }).catch(() => {}));
+    event.respondWith(network.catch(async () => (await (await caches.open(CACHE_NAME)).match(request)) || Response.error()));
 });
-
-// Skip Waiting
+// Waiting workers activate only after a deliberate user action.
 self.addEventListener('message', event => {
-  if (event.data && event.data.action === 'skipWaiting') {
-    self.skipWaiting();
-  }
+    if (event.data?.action === 'activateUpdate') event.waitUntil(self.skipWaiting());
 });

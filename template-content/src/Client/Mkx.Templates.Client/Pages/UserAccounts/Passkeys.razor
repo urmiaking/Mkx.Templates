@@ -20,7 +20,7 @@
         <div class="d-flex justify-space-between align-center mb-4">
             <MudText Typo="Typo.h5">کلیدهای عبور ثبت ‌شده</MudText>
             <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                <MudIconButton Variant="Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="AddNewPasskey" />
+                <MudIconButton aria-label="افزودن" Variant="Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="AddNewPasskey" />
             </MudHidden>
             <MudHidden Breakpoint="Breakpoint.SmAndDown">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="AddNewPasskey">
@@ -59,7 +59,7 @@
                                 <MudSpacer/>
 
                                 <MudTooltip Arrow="true" Color="Color.Error" Text="حذف">
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled"
+                                    <MudIconButton aria-label="حذف" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Variant="Variant.Filled"
                                                    OnClick="@(() => RemovePasskey(pk))"/>
                                 </MudTooltip>
                             </MudCardHeader>

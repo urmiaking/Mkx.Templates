@@ -1,4 +1,4 @@
-﻿@inherits AppComponentBase
+@inherits AppComponentBase
 
 <MudForm Model="this" @ref="@_form">
     <MudDialog>
@@ -22,11 +22,11 @@
                         @if (!_tokenSent)
                         {
                             <MudTooltip Arrow Text="ارسال کد فعالسازی">
-                                <MudIconButton Icon="@Icons.Material.Filled.Send"
+                                <MudIconButton aria-label="Send" Icon="@Icons.Material.Filled.Send"
                                                Variant="Variant.Filled"
                                                Size="Size.Small"
                                                OnClick="SendToken"
-                                               Disabled="@(!PhoneNumberChanged || PhoneNumber.Length != 11)"
+                                               Disabled="@(IsBusy || !PhoneNumberChanged || PhoneNumber.Length != 11)"
                                                Color="Color.Success"/>
                             </MudTooltip>
                         }
@@ -48,7 +48,7 @@
                     <MudItem xs="12" Class="d-flex justify-content-center">
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Success"
-                                   Disabled="_sendTokenDisabled"
+                                   Disabled="@(IsBusy || _sendTokenDisabled)"
                                    OnClick="SendToken"
                                    Size="Size.Small"
                                    StartIcon="@Icons.Material.Filled.Send">

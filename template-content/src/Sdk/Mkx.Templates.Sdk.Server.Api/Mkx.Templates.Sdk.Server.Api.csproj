@@ -7,13 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
-		<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-		<PackageReference Include="Serilog.Sinks.MSSqlServer" Version="10.0.0" />
-		<PackageReference Include="Serilog.UI" Version="3.2.0" />
-		<PackageReference Include="Serilog.UI.MsSqlServerProvider" Version="3.2.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
+		<PackageReference Include="Serilog.AspNetCore" />
+		<PackageReference Include="Serilog.Settings.Configuration" />
+		<PackageReference Include="Serilog.Sinks.Async" />
+		<PackageReference Include="Serilog.Sinks.MSSqlServer" />
+		<PackageReference Include="Serilog.UI" />
+		<PackageReference Include="Serilog.UI.MsSqlServerProvider" />
+		<PackageReference Include="Swashbuckle.AspNetCore" />
 	</ItemGroup>
 
 	<ItemGroup>

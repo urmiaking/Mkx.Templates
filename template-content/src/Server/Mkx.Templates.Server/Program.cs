@@ -14,25 +14,31 @@ try
 
     var app = builder.ConfigureServices();
 
-    app.ApplyDatabaseMigrations<AppDbContext>();
+    if (app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
+        app.ApplyDatabaseMigrations<AppDbContext>();
 
-    await app.SeedDatabaseAsync();
+    if (app.Configuration.GetValue<bool>("Database:SeedOnStartup"))
+        await app.SeedDatabaseAsync();
 
-    app.ConfigureSqlSerilog();
+    if (app.Configuration.GetValue<bool>("Logging:UseSqlStore"))
+        app.ConfigureSqlSerilog();
 
     app.ConfigurePipeline();
 
     app.Run();
 }
+
 catch (Exception ex) when (ex is not HostAbortedException)
 {
     Console.ForegroundColor = ConsoleColor.Red;
     Console.WriteLine("An error occurred:");
     Console.WriteLine(ex);
-    Environment.ExitCode = 1;
+    throw;
 }
 finally
 {
     Console.ResetColor();
     Console.WriteLine("Shutting down completed.");
 }
+
+public partial class Program { }

@@ -8,6 +8,7 @@ using Mkx.Templates.Server.Middlewares;
 using Mkx.Templates.Shared.Routes;
 using Serilog.Ui.Web.Extensions;
 using System.Reflection;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 
 namespace Mkx.Templates.Server.Extensions;
@@ -34,6 +35,16 @@ public static class WebHostingExtensions
     {
         public WebApplication ConfigurePipeline()
         {
+            app.UseForwardedHeaders();
+            if (!app.Environment.IsDevelopment()) app.UseHsts();
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.XContentTypeOptions = "nosniff";
+                context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+                context.Response.Headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
+                if (context.Request.Path.StartsWithSegments("/api")) context.Response.Headers.CacheControl = "no-store";
+                await next(context);
+            });
             Assembly[] additionalAssemblies = [typeof(Mkx.Templates.Client.Routes).Assembly];
 
             if (app.Environment.IsDevelopment())
@@ -45,23 +56,25 @@ public static class WebHostingExtensions
 
             app.UseMiddleware<ExceptionHandlerMiddleware>();
             app.UseHttpsRedirection();
-            app.UseStatusCodePagesWithReExecute(ClientRoutes.General.NotFound);
-            app.UseStaticFiles();
-            app.UseStaticFileCache();
+            app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api"),
+                branch => branch.UseStatusCodePagesWithReExecute(ClientRoutes.General.NotFound));
             app.UseRouting();
 
             app.UseAuthentication();
+            app.UseRateLimiter();
             app.UseAuthorization();
 
             app.UseMiddleware<PathRoleAuthorizationMiddleware>(ClientRoutes.Logs.Base, BuiltinRoles.Administrators);
 
-            app.UseAntiforgery(); 
+            app.UseAntiforgery();
 
             app.MapStaticAssets();
 
             app.MapServiceWorker();
+            app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+            app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 
-            app.UseSerilogUi();
+            if (app.Configuration.GetValue<bool>("Logging:UseSqlStore")) app.UseSerilogUi();
 
             app.MapControllers();
             app.MapRazorComponents<App>()
@@ -86,8 +99,7 @@ public static class WebHostingExtensions
                 var assemblyPath = typeof(Program).Assembly.Location;
                 var buildId = File.GetLastWriteTime(assemblyPath).Ticks.ToString();
 
-                content = content.Replace("const CACHE_NAME = 'Mkx.Templates-pwa-cache-v1';", $"const CACHE_NAME = 'Mkx.Templates-pwa-cache-{buildId}';");
-                content += $"\n// Build ID: {buildId}";
+                content = content.Replace("__BUILD_ID__", buildId);
 
                 context.Response.Headers.CacheControl = "no-cache, no-store, must-revalidate";
                 return Results.Text(content, "application/javascript");

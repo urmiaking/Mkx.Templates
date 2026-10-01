@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
 
@@ -29,7 +29,7 @@ public abstract class ExceptionHandlerMiddlewareBase(ILogger logger, RequestDele
         {
             await next(context);
         }
-        catch (TaskCanceledException)
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
             // mute
         }
@@ -37,13 +37,19 @@ public abstract class ExceptionHandlerMiddlewareBase(ILogger logger, RequestDele
         {
             // log the error
             logger.LogError(exception, "An error occured during executing '{Context}'", context.Request.Path.Value);
+            if (context.Response.HasStarted) throw;
             var response = context.Response;
-            response.ContentType = "application/json";
+            response.Clear();
+            response.ContentType = "application/problem+json";
+            response.Headers.CacheControl = "no-store";
 
             // get the response code and message
             var (status, message) = GetResponse(exception);
             response.StatusCode = (int)status;
-            await response.WriteAsync(message);
+            var problem = System.Text.Json.Nodes.JsonNode.Parse(message)!;
+            problem["traceId"] = System.Diagnostics.Activity.Current?.Id ?? context.TraceIdentifier;
+            problem["instance"] = context.Request.Path.Value;
+            await response.WriteAsync(problem.ToJsonString(), context.RequestAborted);
         }
     }
 }

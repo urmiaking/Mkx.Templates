@@ -1,3 +1,6 @@
+using Mkx.Templates.Sdk.Server.Application.Abstractions;
+using Mkx.Templates.Sdk.Server.Shared.Data;
+using Mkx.Templates.Sdk.Server.Shared.Exceptions;
 using Mkx.Templates.Application.Services.Abstractions;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Claims;
@@ -18,6 +21,7 @@ public class UserManagementService(
     UserManager<AppUser> userManager,
     RoleManager<AppRole> roleManager,
     IAccountService accountService,
+    ITransactionContext transactionContext,
     IEnumerable<IApplicationPolicyProvider> policyProviders) : IUserManagementService
 {
     public Task<bool> IsUserManagementEnabledAsync(CancellationToken cancellationToken = default)
@@ -25,25 +29,36 @@ public class UserManagementService(
         return Task.FromResult(true);
     }
 
-    public async Task<List<UserDto>> GetUsersAsync(CancellationToken cancellationToken = default)
+    public async Task<PagedList<UserDto>> GetUsersAsync(RequestFilter filter, CancellationToken cancellationToken = default)
     {
-        var users = await userManager.Users
+        filter = filter.Normalize();
+        var query = userManager.Users.AsNoTracking();
+        if (filter.Search is { } search)
+            query = query.Where(u => u.Name.Contains(search) || (u.UserName != null && u.UserName.Contains(search)) || (u.Email != null && u.Email.Contains(search)) || (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
+        var total = await query.CountAsync(cancellationToken);
+        var users = await query.OrderBy(u => u.UserName).ThenBy(u => u.Id).Skip(filter.Skip!.Value).Take(filter.Take!.Value)
             .Include(u => u.UserRoles!)
                 .ThenInclude(ur => ur.Role!)
             .Include(u => u.Claims!)
             .AsNoTracking()
             .ToListAsync(cancellationToken);
 
-        return users.Select(u => new UserDto
+        return new PagedList<UserDto>
         {
-            Id = u.Id,
-            Name = u.Name,
-            UserName = u.UserName ?? string.Empty,
-            Email = u.Email,
-            PhoneNumber = u.PhoneNumber,
-            Roles = u.UserRoles?.Select(ur => ur.Role.Name).Where(r => !string.IsNullOrEmpty(r)).Cast<string>().ToList() ?? [],
-            DirectClaimsCount = u.Claims?.Count ?? 0
-        }).ToList();
+            Total = total,
+            Skip = filter.Skip.Value,
+            Take = filter.Take.Value,
+            Data = users.Select(u => new UserDto
+            {
+                Id = u.Id,
+                Name = u.Name,
+                UserName = u.UserName ?? string.Empty,
+                Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
+                Roles = u.UserRoles?.Select(ur => ur.Role.Name).Where(r => !string.IsNullOrEmpty(r)).Cast<string>().ToList() ?? [],
+                DirectClaimsCount = u.Claims?.Count ?? 0
+            }).ToList()
+        };
     }
 
     public async Task<UserDto?> GetUserByIdAsync(Guid id, CancellationToken cancellationToken = default)
@@ -70,10 +85,13 @@ public class UserManagementService(
 
     public async Task<bool> CreateUserAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await transactionContext.BeginTransactionAsync(cancellationToken);
+        foreach (var role in dto.Roles) EnsureBuiltinRole(role);
+        if (string.IsNullOrWhiteSpace(dto.Name)) throw new BadRequestException("نام الزامی است.");
         var existing = await userManager.FindByNameAsync(dto.UserName);
         if (existing != null)
         {
-            throw new InvalidOperationException($"کاربری با نام کاربری '{dto.UserName}' قبلاً ثبت شده است.");
+            throw new BadRequestException($"کاربری با نام کاربری '{dto.UserName}' قبلاً ثبت شده است.");
         }
 
         var user = new AppUser(dto.Name, dto.UserName, dto.Email, dto.PhoneNumber);
@@ -82,7 +100,7 @@ public class UserManagementService(
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new InvalidOperationException($"خطا در ایجاد کاربر: {errors}");
+            throw new BadRequestException($"خطا در ایجاد کاربر: {errors}");
         }
 
         if (dto.Roles.Any())
@@ -91,20 +109,26 @@ public class UserManagementService(
             {
                 await accountService.EnsureRoleAsync(roleName, cancellationToken);
             }
-            await userManager.AddToRolesAsync(user, dto.Roles);
+            EnsureSucceeded(await userManager.AddToRolesAsync(user, dto.Roles));
         }
 
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
     public async Task<bool> UpdateUserAsync(UpdateUserDto dto, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await transactionContext.BeginTransactionAsync(cancellationToken);
         var user = await userManager.FindByIdAsync(dto.Id.ToString());
         if (user == null)
         {
-            throw new InvalidOperationException("کاربر مورد نظر یافت نشد.");
+            throw new BadRequestException("کاربر مورد نظر یافت نشد.");
         }
 
+        foreach (var role in dto.Roles) EnsureBuiltinRole(role);
+        if (string.IsNullOrWhiteSpace(dto.Name)) throw new BadRequestException("نام الزامی است.");
+        if (user.Email != dto.Email) user.EmailConfirmed = false;
+        if (user.PhoneNumber != dto.PhoneNumber) user.PhoneNumberConfirmed = false;
         user.SetName(dto.Name);
         user.Email = dto.Email;
         user.PhoneNumber = dto.PhoneNumber;
@@ -113,7 +137,7 @@ public class UserManagementService(
         if (!updateResult.Succeeded)
         {
             var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-            throw new InvalidOperationException($"خطا در بروزرسانی اطلاعات کاربر: {errors}");
+            throw new BadRequestException($"خطا در بروزرسانی اطلاعات کاربر: {errors}");
         }
 
         if (!string.IsNullOrWhiteSpace(dto.NewPassword))
@@ -123,17 +147,19 @@ public class UserManagementService(
             if (!passResult.Succeeded)
             {
                 var errors = string.Join(", ", passResult.Errors.Select(e => e.Description));
-                throw new InvalidOperationException($"خطا در تغییر کلمه عبور: {errors}");
+                throw new BadRequestException($"خطا در تغییر کلمه عبور: {errors}");
             }
         }
 
         var currentRoles = await userManager.GetRolesAsync(user);
+        if (currentRoles.Contains(BuiltinRoles.Administrators) && !dto.Roles.Contains(BuiltinRoles.Administrators))
+            throw new BadRequestException("نقش مدیر را از این بخش نمی‌توان حذف کرد.");
         var rolesToRemove = currentRoles.Except(dto.Roles).ToList();
         var rolesToAdd = dto.Roles.Except(currentRoles).ToList();
 
         if (rolesToRemove.Any())
         {
-            await userManager.RemoveFromRolesAsync(user, rolesToRemove);
+            EnsureSucceeded(await userManager.RemoveFromRolesAsync(user, rolesToRemove));
         }
 
         if (rolesToAdd.Any())
@@ -142,32 +168,36 @@ public class UserManagementService(
             {
                 await accountService.EnsureRoleAsync(roleName, cancellationToken);
             }
-            await userManager.AddToRolesAsync(user, rolesToAdd);
+            EnsureSucceeded(await userManager.AddToRolesAsync(user, rolesToAdd));
         }
 
+        EnsureSucceeded(await userManager.UpdateSecurityStampAsync(user));
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
     public async Task<bool> DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await transactionContext.BeginTransactionAsync(cancellationToken);
         var user = await userManager.FindByIdAsync(id.ToString());
         if (user == null)
         {
-            return false;
+            throw new NotFoundException("کاربر مورد نظر یافت نشد.");
         }
 
-        if (user.UserName?.Equals("admin", StringComparison.OrdinalIgnoreCase) == true)
+        if (await userManager.IsInRoleAsync(user, BuiltinRoles.Administrators))
         {
-            throw new InvalidOperationException("کاربر ارشد مدیر (admin) قابل حذف نمی‌باشد.");
+            throw new BadRequestException("حذف حساب مدیر از این بخش مجاز نیست.");
         }
 
         var result = await userManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new InvalidOperationException($"خطا در حذف کاربر: {errors}");
+            throw new BadRequestException($"خطا در حذف کاربر: {errors}");
         }
 
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
@@ -176,7 +206,7 @@ public class UserManagementService(
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
-            throw new InvalidOperationException("کاربر مورد نظر یافت نشد.");
+            throw new BadRequestException("کاربر مورد نظر یافت نشد.");
         }
 
         var existingClaims = await userManager.GetClaimsAsync(user);
@@ -187,10 +217,11 @@ public class UserManagementService(
 
     public async Task<bool> UpdateUserClaimsAsync(Guid userId, List<string> grantedClaimNames, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await transactionContext.BeginTransactionAsync(cancellationToken);
         var user = await userManager.FindByIdAsync(userId.ToString());
         if (user == null)
         {
-            throw new InvalidOperationException("کاربر مورد نظر یافت نشد.");
+            throw new BadRequestException("کاربر مورد نظر یافت نشد.");
         }
 
         var currentClaims = await userManager.GetClaimsAsync(user);
@@ -214,6 +245,8 @@ public class UserManagementService(
             }
         }
 
+        EnsureSucceeded(await userManager.UpdateSecurityStampAsync(user));
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
@@ -227,12 +260,12 @@ public class UserManagementService(
             var role = await roleManager.FindByNameAsync(roleName);
             if (role != null)
             {
-                var members = await userManager.GetUsersInRoleAsync(roleName);
+                var memberCount = await userManager.Users.CountAsync(user => user.UserRoles.Any(userRole => userRole.Role.Name == roleName), cancellationToken);
                 var claims = await roleManager.GetClaimsAsync(role);
                 roles.Add(new RoleClaimsDto
                 {
                     RoleName = roleName,
-                    MemberCount = members.Count,
+                    MemberCount = memberCount,
                     ClaimsCount = claims.Count,
                     IsBuiltin = true
                 });
@@ -249,7 +282,7 @@ public class UserManagementService(
         var role = await roleManager.FindByNameAsync(roleName);
         if (role == null)
         {
-            throw new InvalidOperationException($"نقش '{roleName}' یافت نشد.");
+            throw new BadRequestException($"نقش '{roleName}' یافت نشد.");
         }
 
         var existingClaims = await roleManager.GetClaimsAsync(role);
@@ -260,12 +293,13 @@ public class UserManagementService(
 
     public async Task<bool> UpdateRoleClaimsAsync(string roleName, List<string> grantedClaimNames, CancellationToken cancellationToken = default)
     {
+        await using var transaction = await transactionContext.BeginTransactionAsync(cancellationToken);
         EnsureBuiltinRole(roleName);
         await accountService.EnsureRoleAsync(roleName, cancellationToken);
         var role = await roleManager.FindByNameAsync(roleName);
         if (role == null)
         {
-            throw new InvalidOperationException($"نقش '{roleName}' یافت نشد.");
+            throw new BadRequestException($"نقش '{roleName}' یافت نشد.");
         }
 
         var currentClaims = await roleManager.GetClaimsAsync(role);
@@ -289,6 +323,9 @@ public class UserManagementService(
             }
         }
 
+        foreach (var member in await userManager.GetUsersInRoleAsync(roleName))
+            EnsureSucceeded(await userManager.UpdateSecurityStampAsync(member));
+        await transaction.CommitAsync(cancellationToken);
         return true;
     }
 
@@ -363,6 +400,6 @@ public class UserManagementService(
     private static void EnsureSucceeded(IdentityResult result)
     {
         if (!result.Succeeded)
-            throw new InvalidOperationException(string.Join(", ", result.Errors.Select(error => error.Description)));
+            throw new BadRequestException(string.Join(", ", result.Errors.Select(error => error.Description)));
     }
 }

@@ -18,7 +18,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetCurrentUser(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<GetUserAccountResponse>(jsonOptions, cancellationToken);
 
@@ -31,7 +31,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsJsonAsync(ApiUrls.UserAccounts.UpdateFullName(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task UpdateUserPhoneNumberAsync(UpdateUserPhoneNumberRequest request,
@@ -40,7 +40,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsJsonAsync(ApiUrls.UserAccounts.UpdatePhoneNumber(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task SendVerificationTokenAsync(SendVerificationCodeRequest request,
@@ -49,7 +49,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.SendVerificationToken(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task UpdateUserEmailAsync(UpdateUserEmailRequest request, CancellationToken cancellationToken = default)
@@ -57,7 +57,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsJsonAsync(ApiUrls.UserAccounts.UpdateEmail(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task UpdateUserPasswordAsync(UpdateUserPasswordRequest request, CancellationToken cancellationToken = default)
@@ -65,7 +65,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsJsonAsync(ApiUrls.UserAccounts.UpdatePassword(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task<GetTwoFactorAuthStatusResponse> GetUser2FaStatusAsync(CancellationToken cancellationToken = default)
@@ -73,7 +73,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.Get2FaStatus(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<GetTwoFactorAuthStatusResponse>(jsonOptions, cancellationToken);
 
@@ -85,7 +85,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.ForgetDevice(), new { }, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task Disable2FaAsync(CancellationToken cancellationToken = default)
@@ -93,7 +93,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.Disable2Fa(), new { }, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task<GetAuthenticatorKeyResponse> GetAuthenticatorKeyAsync(CancellationToken cancellationToken = default)
@@ -101,7 +101,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetAuthenticatorKey(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<GetAuthenticatorKeyResponse>(jsonOptions, cancellationToken);
 
@@ -113,7 +113,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.Enable2Fa(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<EnableTwoFactorAuthResponse>(jsonOptions, cancellationToken);
 
@@ -125,7 +125,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetExternalProviders(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<GetExternalProviderResponse>(jsonOptions, cancellationToken);
 
@@ -137,7 +137,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetPasskeys(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<List<GetPasskeyResponse>>(jsonOptions, cancellationToken);
 
@@ -149,7 +149,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetPasskeyCreationOptions(), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -161,7 +161,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetPasskeyRequestOptions(userName), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadAsStringAsync(cancellationToken);
 
@@ -173,7 +173,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.AddPasskey(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task RemovePasskeyAsync(string credentialId, CancellationToken cancellationToken = default)
@@ -181,7 +181,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.DeleteAsync(ApiUrls.UserAccounts.RemovePasskey(credentialId), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task<PagedList<GetUserAccountResponse>> GetAccountsListAsync(RequestFilter filter, CancellationToken cancellationToken = default)
@@ -189,7 +189,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.GetAsync(ApiUrls.UserAccounts.GetAccountsList(filter), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
 
         var result = await response.Content.ReadFromJsonAsync<PagedList<GetUserAccountResponse>>(jsonOptions, cancellationToken);
 
@@ -201,7 +201,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsync(ApiUrls.UserAccounts.LockUser(id), null, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task UnlockUserAsync(Guid id, CancellationToken cancellationToken = default)
@@ -209,7 +209,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsync(ApiUrls.UserAccounts.UnlockUser(id), null, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task CreateAccountAsync(UserAccountRequestDto request, CancellationToken cancellationToken = default)
@@ -217,7 +217,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PostAsJsonAsync(ApiUrls.UserAccounts.CreateAccount(), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task UpdateAccountAsync(Guid id, UserAccountRequestDto request, CancellationToken cancellationToken = default)
@@ -225,7 +225,7 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.PutAsJsonAsync(ApiUrls.UserAccounts.UpdateAccount(id), request, jsonOptions, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 
     public async Task DeleteAccountAsync(Guid id, CancellationToken cancellationToken = default)
@@ -233,6 +233,6 @@ public class UserAccountService(HttpClient client, JsonSerializerOptions jsonOpt
         using var response = await client.DeleteAsync(ApiUrls.UserAccounts.DeleteAccount(id), cancellationToken);
 
         if (!response.IsSuccessStatusCode)
-            throw HttpRequestFailedException.GetException(response.StatusCode, response);
+            throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
     }
 }

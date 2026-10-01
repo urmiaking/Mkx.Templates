@@ -31,6 +31,8 @@ Before creating an abstraction, service, component, route, policy, DTO, helper, 
 | [DOMAIN_KNOWLEDGE.md](docs/ai/DOMAIN_KNOWLEDGE.md) | Business glossary/invariants/workflows |
 | [VERIFICATION.md](docs/ai/VERIFICATION.md) | Definition of done |
 | [TOOLS.md](docs/ai/TOOLS.md) | Build/test/EF CLI commands |
+| [OPERATIONS.md](docs/ai/OPERATIONS.md) | Defaults, deployment and optional providers |
+| [PERFORMANCE.md](docs/ai/PERFORMANCE.md) | Mobile effects, budgets and measurement |
 | [SKILLS.md](docs/ai/SKILLS.md) | Compact high-frequency rules |
 | [decisions/](docs/ai/decisions/) | Architectural decision records |
 
@@ -42,7 +44,7 @@ Before creating an abstraction, service, component, route, policy, DTO, helper, 
 - Server: APIs, middleware and hosting.
 - Client: Blazor WASM UI and HTTP implementations of shared contracts.
 
-Business rules stay out of controllers and UI. Reusable queries use specifications. DI follows attribute scanning.
+Business rules stay out of controllers and UI. Reusable queries use specifications. Ordinary DI follows attribute scanning; framework services and typed HTTP clients are explicitly registered. Application deliberately references Infrastructure; EF persistence stays in Infrastructure; shared Identity models intentionally belong to SDK Domain and may be used by Core Domain.
 
 ## Standard Feature Path
 ```text
@@ -61,6 +63,8 @@ Use [FEATURE_CHECKLIST.md](docs/ai/FEATURE_CHECKLIST.md).
 ## UI and Render Modes
 Interactive application pages run in Interactive WebAssembly mode without prerendering. Authentication/account surfaces may use static SSR. Do not inject interactive-only client services into static SSR pages.
 
+Preserve established fonts (IRANSans and the Cinzel Decorative brand), palette sizes, theme colors and layout proportions unless the user explicitly requests a redesign. Performance improvements should target expensive effects without replacing the visual identity.
+
 Use MudBlazor and existing UI patterns. Current source code is authoritative for exact drawer/layout parameters; desktop navigation is Mini/collapsible and mobile navigation must remain overlay/temporary.
 
 ## Authorization
@@ -71,7 +75,8 @@ A task is not complete merely because code was written. Follow [VERIFICATION.md]
 
 ```powershell
 dotnet build Mkx.Templates.slnx
-dotnet test
+dotnet test Mkx.Templates.slnx
+./scripts/verify.ps1
 ```
 
 Never claim a build, test, migration, runtime or browser check passed unless actually executed. If blocked, report the exact blocker.

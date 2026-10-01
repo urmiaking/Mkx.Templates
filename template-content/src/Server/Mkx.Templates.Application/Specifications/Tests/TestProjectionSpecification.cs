@@ -10,6 +10,6 @@ public sealed class TestProjectionSpecification : Specification<Test, GetTestRes
     {
         Query
             .AsNoTracking()
-            .Select(x => new GetTestResponse(x.Id.Value, x.Name, x.Description));
+            .Select(x => new GetTestResponse(x.Id.Value, x.Name, x.Description, x.Version));
     }
 }

@@ -11,7 +11,7 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["nuget.config", "."]
+COPY ["nuget.config", "global.json", "Directory.Build.props", "Directory.Packages.props", "./"]
 COPY ["src/Server/Mkx.Templates.Server/Mkx.Templates.Server.csproj", "src/Server/Mkx.Templates.Server/"]
 COPY ["src/Sdk/Mkx.Templates.Sdk.Server.Api/Mkx.Templates.Sdk.Server.Api.csproj", "src/Sdk/Mkx.Templates.Sdk.Server.Api/"]
 COPY ["src/Sdk/Mkx.Templates.Sdk.Server.Application/Mkx.Templates.Sdk.Server.Application.csproj", "src/Sdk/Mkx.Templates.Sdk.Server.Application/"]

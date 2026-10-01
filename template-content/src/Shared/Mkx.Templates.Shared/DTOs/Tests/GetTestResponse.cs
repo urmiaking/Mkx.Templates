@@ -1,3 +1,3 @@
 namespace Mkx.Templates.Shared.DTOs.Tests;
 
-public record GetTestResponse(Guid Id, string Name, string? Description);
+public sealed record GetTestResponse(Guid Id, string Name, string? Description, Guid Version);

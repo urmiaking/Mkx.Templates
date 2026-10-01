@@ -30,10 +30,10 @@ public static class DependencyInjection
 
         internal IServiceCollection AddStorage(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("Default");
+            var connectionString = configuration.GetConnectionString("Mkx.Templates");
 
             if (string.IsNullOrEmpty(connectionString))
-                throw new Exception("'Default' connection string is not set.");
+                throw new InvalidOperationException("Set ConnectionStrings:Mkx.Templates in appsettings.json, Development user-secrets, or ConnectionStrings__Mkx.Templates. See README.md for local SQL Server setup.");
 
             services.AddSqlServer<AppDbContext>(connectionString, options =>
                 {

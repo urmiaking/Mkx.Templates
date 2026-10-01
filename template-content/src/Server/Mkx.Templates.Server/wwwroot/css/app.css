@@ -64,7 +64,9 @@ h1:focus {
 }
 
 .mud-dialog-content {
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    max-height: 75vh;
+    max-height: 75dvh;
 }
 
 .mud-picker-calendar-header-switch {
@@ -104,11 +106,11 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.18) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.12) 0%, rgba(var(--mud-palette-surface-rgb), 0.4) 50%, rgba(var(--mud-palette-surface-rgb), 0.25) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.3) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
     color: var(--mud-palette-text-primary) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Fullscreen overlay */
@@ -358,7 +360,7 @@ h1:focus {
 
 .overview-card {
     height: 100%;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
     .overview-card:hover {
@@ -378,7 +380,7 @@ h1:focus {
 
 .overview-card {
     height: 100%;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
     .overview-card:hover {
@@ -426,7 +428,7 @@ h1:focus {
     display: flex;
     flex-direction: column;
     border-radius: 12px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .mud-charts-legend {
@@ -454,7 +456,7 @@ h1:focus {
 .mud-tab {
     min-height: 52px;
     border-radius: 12px;
-    transition: all 0.2s ease;
+    transition: background-color 0.2s ease;
     padding-inline: 1rem;
 }
 
@@ -506,8 +508,8 @@ h1:focus {
 .fancy-appbar {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     border-bottom: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
@@ -561,8 +563,8 @@ h1:focus {
     height: 72px;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     box-shadow: 0px -4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     border-top: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
@@ -596,7 +598,7 @@ h1:focus {
     width: 80px;
     height: 100%;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box !important;
 }
 
@@ -611,7 +613,7 @@ h1:focus {
     color: var(--mud-palette-text-secondary);
     opacity: 0.6;
     border: 1px solid transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box !important;
 }
 
@@ -626,7 +628,7 @@ h1:focus {
     color: var(--mud-palette-text-secondary);
     opacity: 0.8;
     margin-top: 4px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     text-align: center;
     box-sizing: border-box !important;
@@ -641,8 +643,8 @@ h1:focus {
 .mobile-nav-item.active .mobile-nav-icon-wrapper {
     transform: translateY(-20px);
     background: rgba(var(--mud-palette-surface-rgb), 0.55) !important;
-    backdrop-filter: blur(10px) saturate(120%) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+
+
     box-shadow: 0px 8px 24px rgba(var(--mud-palette-primary-rgb), 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
     opacity: 1;
     color: var(--mud-palette-primary);
@@ -660,8 +662,8 @@ h1:focus {
 .mobile-nav-popover {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.3) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.25) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     border-radius: 16px !important;
@@ -672,7 +674,7 @@ h1:focus {
 
 .mobile-nav-popover .mud-list-item {
     color: var(--mud-palette-text-primary) !important;
-    transition: all 0.2s ease !important;
+    transition: background-color 0.2s ease !important;
     border-radius: 8px !important;
     margin: 4px 8px !important;
 }
@@ -698,8 +700,8 @@ h1:focus {
 .fancy-drawer.dark-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     border-inline-end: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 4px 0px 30px rgba(0, 0, 0, 0.03), inset 1px 0 0 rgba(255, 255, 255, 0.2) !important;
@@ -708,27 +710,31 @@ h1:focus {
 .fancy-drawer.light-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.06) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.4) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     border-inline-end: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     box-shadow: 4px 0px 30px rgba(0, 0, 0, 0.02), inset 1px 0 0 rgba(255, 255, 255, 0.6) !important;
 }
 
 /* --- Notifications Drawer --- */
+.notifications-drawer + .mud-drawer-overlay {
+    z-index: calc(var(--mud-zindex-appbar) + 3);
+}
+
 .notifications-drawer {
     color: var(--mud-palette-text-primary) !important;
     overflow-x: hidden !important;
     top: 0 !important;
     height: 100vh !important;
-    z-index: calc(var(--mud-zindex-appbar) + 2) !important;
+    z-index: calc(var(--mud-zindex-appbar) + 4) !important;
 }
 
 .notifications-drawer.dark-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.15) 0%, rgba(var(--mud-palette-surface-rgb), 0.25) 50%, rgba(var(--mud-palette-surface-rgb), 0.05) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.2) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     border-inline-start: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.03), inset -1px 0 0 rgba(255, 255, 255, 0.2) !important;
@@ -737,8 +743,8 @@ h1:focus {
 .notifications-drawer.light-mode {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.06) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.4) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.45) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     transform: translateZ(0);
     border-inline-start: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     box-shadow: -4px 0px 30px rgba(0, 0, 0, 0.02), inset -1px 0 0 rgba(255, 255, 255, 0.6) !important;
@@ -762,7 +768,7 @@ h1:focus {
     background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.1) !important;
     position: relative;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
     -webkit-user-select: none;
     touch-action: pan-y;
@@ -803,15 +809,15 @@ h1:focus {
 /* --- Fixed Footer & Dismiss All Button --- */
 .drawer-footer {
     background: linear-gradient(to top, var(--mud-palette-surface) 0%, rgba(var(--mud-palette-surface-rgb), 0.85) 80%, rgba(var(--mud-palette-surface-rgb), 0.0) 100%) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+
+
     border-top: 1px solid rgba(var(--mud-palette-divider-rgb), 0.08) !important;
     z-index: 10;
 }
 
 .dismiss-all-btn {
     box-shadow: 0 4px 15px rgba(var(--mud-palette-error-rgb), 0.2) !important;
-    transition: all 0.25s ease-in-out !important;
+    transition: background-color 0.25s ease-in-out !important;
 }
 
 .dismiss-all-btn:hover {
@@ -955,7 +961,7 @@ h1:focus {
 
 .shortcut-btn {
     background-color: rgba(var(--mud-palette-action-default-rgb), 0.05) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border-radius: 12px !important;
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.1) !important;
     color: var(--mud-palette-text-secondary) !important;
@@ -1001,7 +1007,7 @@ h1:focus {
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -1033,7 +1039,7 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.15) !important;
     background-color: rgba(var(--mud-palette-action-default-rgb), 0.03) !important;
     color: var(--mud-palette-text-secondary) !important;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .close-drawer-btn:hover {
@@ -1065,11 +1071,11 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.05) 0%, rgba(var(--mud-palette-surface-rgb), 0.65) 50%, rgba(var(--mud-palette-surface-rgb), 0.45) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
     color: var(--mud-palette-text-primary) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 20px !important;
 }
 
@@ -1090,8 +1096,8 @@ h1:focus {
     border: 1px solid rgba(var(--mud-palette-primary-rgb), 0.15) !important;
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.05) 0%, rgba(var(--mud-palette-surface-rgb), 0.65) 50%, rgba(var(--mud-palette-surface-rgb), 0.45) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.5) !important;
-    backdrop-filter: blur(14px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(130%) !important;
+
+
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
     color: var(--mud-palette-text-primary) !important;
     border-radius: 20px !important;
@@ -1113,8 +1119,8 @@ h1:focus {
 .mud-dialog {
     background: linear-gradient(135deg, rgba(var(--mud-palette-primary-rgb), 0.1) 0%, rgba(var(--mud-palette-surface-rgb), 0.5) 50%, rgba(var(--mud-palette-surface-rgb), 0.35) 100%) !important;
     background-color: rgba(var(--mud-palette-surface-rgb), 0.4) !important;
-    backdrop-filter: blur(16px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+
+
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 30px 60px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
@@ -1122,8 +1128,8 @@ h1:focus {
 /* Globally style popovers and dropdown menus */
 .mud-popover-provider .mud-popover:not(.mud-tooltip-popover) {
     background-color: rgba(var(--mud-palette-surface-rgb), 0.75) !important;
-    backdrop-filter: blur(12px) saturate(130%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+
+
     border: 1px solid rgba(var(--mud-palette-divider-rgb), 0.2) !important;
     box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.08) !important;
 }
@@ -1134,8 +1140,8 @@ h1:focus {
     color: var(--mud-palette-primary) !important;
     font-size: 0.8rem !important;
     font-weight: 500 !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+
+
     border: none !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
     padding: 6px 12px !important;
@@ -1222,15 +1228,15 @@ h1:focus {
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
     *, ::before, ::after {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
+
+
     }
 }
 
 /* --- Page Navigation Transition --- */
 .page-transition {
     animation: page-enter 220ms cubic-bezier(0.2, 0, 0, 1) both;
-    will-change: opacity, transform;
+
 }
 
 @keyframes page-enter {
@@ -1250,3 +1256,48 @@ h1:focus {
         animation: none;
     }
 }
+/* Targeted fixes: preserve existing typography, palette sizes and visual identity. */
+:root {
+    --app-surface: var(--mud-palette-surface, #fff);
+    --app-text: var(--mud-palette-text-primary, #111827);
+    --app-border: var(--mud-palette-divider, #d1d5db);
+    --app-radius: 16px;
+    --app-shadow: 0 4px 16px rgb(0 0 0 / .08);
+}
+:focus-visible { outline: 3px solid var(--mud-palette-primary, #2563eb); outline-offset: 3px; }
+#main-content:focus { outline: none; }
+.skip-link { position: fixed; inset-block-start: .5rem; inset-inline-start: .5rem; padding: .75rem; background: var(--mud-palette-surface, #fff); color: var(--mud-palette-text-primary, #111827); z-index: 10001; transform: translateY(-180%); }
+.skip-link:focus { transform: none; }
+.min-vh-100 { min-height: 100dvh; }
+.palette-dot { padding: 0; flex: 0 0 24px; }
+.action-card { width: 100%; text-align: start; font: inherit; cursor: pointer; }
+.action-card:disabled { cursor: not-allowed; }
+.tests-toolbar .tests-search { flex: 1; min-width: 0; margin: 0; }
+.tests-add { height: 56px; flex-shrink: 0; }
+/* Blur is restricted to one desktop surface. Gradients/radii/colors remain as designed. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    @media (min-width: 960px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+        .fancy-appbar { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    }
+}
+@media (max-width: 959.98px), (hover: none), (pointer: coarse) {
+    html body :is(.glass-card, .glassy-card, .action-card, .chart-card, .overview-card,
+    .fancy-appbar, .fancy-drawer, .notifications-drawer, .mobile-nav-container,
+    .mud-dialog, .mud-popover-provider .mud-popover:not(.mud-tooltip-popover)) {
+        background-color: var(--mud-palette-surface) !important;
+    }
+    html body *, html body *::before, html body *::after {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    .page-transition { animation: none; }
+    .mud-main-content { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
+    .mobile-nav-container { bottom: max(10px, env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+.pwa-toast { position: fixed; inset: auto 1rem calc(100px + env(safe-area-inset-bottom)); max-width: 420px; background: var(--app-surface); color: var(--app-text); border: 1px solid var(--app-border); border-radius: var(--app-radius); box-shadow: var(--app-shadow); padding: 1rem; z-index: calc(var(--mud-zindex-appbar) + 1); }
+.pwa-btn { min-height: 44px; padding: .5rem 1rem; margin-inline-end: .5rem; border: 1px solid var(--app-border); border-radius: 8px; background: var(--app-surface); color: var(--mud-palette-primary, #2563eb); cursor: pointer; }
+@media (min-width: 960px) { .pwa-toast { inset: auto auto 1rem 1rem; } }

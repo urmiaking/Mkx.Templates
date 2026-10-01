@@ -1,55 +1,30 @@
 # Mkx.Templates.Blazor
 
-This is a Visual Studio and dotnet CLI template for a Blazor solution utilizing .NET 10 and the modern `.slnx` solution format.
+A .NET 10 Blazor solution template with Persian RTL MudBlazor UI, SQL Server, Identity and a tested agent-oriented development path. Application source and durable instructions live in `template-content/`.
 
-## Template structure
-
-When instantiated, the template generates:
-- An XML-based `.slnx` solution file containing five numbered folders:
-  - `1. App`
-  - `2. Shared`
-  - `3. Core`
-  - `4. Sdk`
-  - `5. Tests`
-- A `nuget.config` file.
-- A `src/` directory containing the corresponding `App`, `Shared`, `Core`, `Sdk`, and `Tests` directories.
-
----
-
-## How to Package
-
-To build the NuGet package, run the following command from the root directory:
+## Validate the application and package
 
 ```powershell
-dotnet pack -c Release
+./scripts/verify-template.ps1
 ```
 
-This will produce the NuGet package file under `bin/Release/Mkx.Templates.Blazor.1.0.0.nupkg`.
+Requires .NET 10 SDK and Node.js 22+. The script builds/tests the source, packs the template, inspects package exclusions, installs into an isolated template hive, generates a solution named `Acme.Starter`, then builds/tests that generated solution. It never changes your normal template installation.
 
----
-
-## How to Install Locally
-
-To install the template from the generated package:
+## Package and install
 
 ```powershell
+dotnet pack Mkx.Templates.Blazor.csproj -c Release
 dotnet new install bin/Release/Mkx.Templates.Blazor.1.0.0.nupkg
 ```
 
-Alternatively, to install it in editable development mode from the local directory:
+For editable local installation, use `dotnet new install ./template-content`.
+
+## Generate
 
 ```powershell
-dotnet new install ./template-content
+dotnet new mkx-blazor -n MyCompany.MyProject -o MyCompany.MyProject
 ```
 
----
+`-o` explicitly selects the output directory. The generated solution has six numbered folders: Server, Client, Shared, Core, Sdk and Tests (13 projects). It includes its own README, agent guide, package versions, EF tool manifest and optional local SQL compose configuration. Follow the generated README to configure database and first administrator secrets; no fixed administrator credentials ship with the template.
 
-## How to Instantiate
-
-Once installed, you can create a new solution by running:
-
-```powershell
-dotnet new mkx-blazor -n MyCompany.MyProject
-```
-
-This will create a new folder named `MyCompany.MyProject` containing your `.slnx` solution and folder structure.
+Pushes to `master` run template verification and publish a versioned package to NuGet after verification succeeds. Pull requests run verification without publishing.
