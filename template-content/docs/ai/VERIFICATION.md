@@ -2,11 +2,11 @@
 
 ```powershell
 dotnet build Mkx.Templates.slnx
-dotnet test Mkx.Templates.slnx
+dotnet test --solution Mkx.Templates.slnx
 ./scripts/verify.ps1
 ```
 
-verify.ps1 builds Release, executes tests, checks TRX executed count >0 and runs dependency-free Node PWA behavior tests. Root packaging verification separately performs pack -> inspect -> isolated install -> generate Acme.Starter -> build/test. An exit code zero with zero discovered tests is a failure.
+verify.ps1 builds Release, executes tests using the Microsoft.Testing.Platform runner selected by global.json, generates TRX with xUnit's built-in reporter, checks TRX executed count >0 and runs dependency-free Node PWA behavior tests. Run these commands from the generated solution root; SDK test-runner selection depends on the current directory. Root packaging verification separately performs pack -> inspect -> isolated install -> generate Acme.Starter -> build/test. An exit code zero with zero discovered tests is a failure.
 
 | Change | Required evidence |
 |---|---|

@@ -6,9 +6,11 @@ Run from the generated root unless stated otherwise. Prefer rg/rg --files for di
 dotnet tool restore
 dotnet restore Mkx.Templates.slnx
 dotnet build Mkx.Templates.slnx
-dotnet test Mkx.Templates.slnx
+dotnet test --solution Mkx.Templates.slnx
 ./scripts/verify.ps1
 ```
+
+Run tests from this root so `global.json` selects Microsoft.Testing.Platform (MTP). xUnit package 4.x uses MTP v2, whose VSTest compatibility target is unsupported on SDK 10. Use `--solution`/`--project` to select inputs; the verification script uses xUnit's built-in `--report-xunit-trx` reporter instead of VSTest's `--logger`. Keep its TRX count check so a successful command with zero executed tests cannot pass verification.
 
 Run the configured local host with `dotnet run --project src/Server/Mkx.Templates.Server`. See the generated README for database and administrator secrets. Do not infer an endpoint from source code when the launch profile prints it.
 

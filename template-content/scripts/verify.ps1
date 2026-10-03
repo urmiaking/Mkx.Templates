@@ -6,7 +6,7 @@ try {
     dotnet build Mkx.Templates.slnx -c $Configuration
     if ($LASTEXITCODE -ne 0) { throw "Solution build failed." }
     $results = Join-Path ([IO.Path]::GetTempPath()) ("mkx-tests-" + [guid]::NewGuid().ToString("N"))
-    dotnet test Mkx.Templates.slnx -c $Configuration --no-build --results-directory $results --logger "trx;LogFileName=tests.trx"
+    dotnet test --solution Mkx.Templates.slnx -c $Configuration --no-build -- --results-directory $results --report-xunit-trx --report-xunit-trx-filename tests.trx
     if ($LASTEXITCODE -ne 0) { throw "Tests failed." }
     $reports = Get-ChildItem -LiteralPath $results -Filter *.trx -Recurse
     $executed = 0

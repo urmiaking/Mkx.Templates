@@ -14,8 +14,9 @@ For changes to the generated application, the authoritative agent entry point is
 ## Template Verification
 After modifying generated content, verify the generated solution:
 ```powershell
-dotnet build template-content/Mkx.Templates.slnx
-dotnet test template-content/Mkx.Templates.slnx
+./template-content/scripts/verify.ps1
 ```
+
+The script enters `template-content/` before invoking .NET so the generated application's SDK/test-runner settings in `global.json` are applied.
 
 For packaging/install/instantiation commands, see the root [README.md](README.md).

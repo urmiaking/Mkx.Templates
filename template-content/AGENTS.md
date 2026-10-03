@@ -75,7 +75,7 @@ A task is not complete merely because code was written. Follow [VERIFICATION.md]
 
 ```powershell
 dotnet build Mkx.Templates.slnx
-dotnet test Mkx.Templates.slnx
+dotnet test --solution Mkx.Templates.slnx
 ./scripts/verify.ps1
 ```
 

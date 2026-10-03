@@ -53,7 +53,7 @@ Use the HTTPS URL printed by the launch profile. Development applies pending mig
 ./scripts/verify.ps1
 ```
 
-This builds Release, executes .NET tests, fails when no tests run, and runs PWA behavior tests. `dotnet build Mkx.Templates.slnx` and `dotnet test Mkx.Templates.slnx` remain the quick checks. The reference starts at `src/Client/Mkx.Templates.Client/Pages/Tests.razor` and is mapped in [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md).
+This builds Release, executes .NET tests, fails when no tests run, and runs PWA behavior tests. From the generated root, `dotnet build Mkx.Templates.slnx` and `dotnet test --solution Mkx.Templates.slnx` are the quick checks. `global.json` selects Microsoft.Testing.Platform for xUnit package 4.x; VSTest runner options such as `--logger` do not apply. The reference starts at `src/Client/Mkx.Templates.Client/Pages/Tests.razor` and is mapped in [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md).
 
 ## Production configuration
 
