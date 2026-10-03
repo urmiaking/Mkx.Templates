@@ -598,7 +598,7 @@ h1:focus {
     width: 80px;
     height: 100%;
     cursor: pointer;
-    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box !important;
 }
 
@@ -613,7 +613,9 @@ h1:focus {
     color: var(--mud-palette-text-secondary);
     opacity: 0.6;
     border: 1px solid transparent;
-    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-property: transform, opacity, color, background-color, border-color, box-shadow;
+    transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     box-sizing: border-box !important;
 }
 
@@ -628,7 +630,9 @@ h1:focus {
     color: var(--mud-palette-text-secondary);
     opacity: 0.8;
     margin-top: 4px;
-    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-property: transform, opacity, color;
+    transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     text-align: center;
     box-sizing: border-box !important;
@@ -1007,7 +1011,9 @@ h1:focus {
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
-    transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition-property: transform, background-color, border-color, box-shadow;
+    transition-duration: 0.25s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
