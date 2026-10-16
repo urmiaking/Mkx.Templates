@@ -1,72 +1,31 @@
 @attribute [Route(ClientRoutes.Accounts.Login)]
 @layout EmptyBoxLayout
 
-<PageTitle>ورود به سیستم</PageTitle>
+<PageTitle>ورود به سامانه</PageTitle>
+<div class="identity-brand"><BrandLockup /></div>
+<header class="identity-heading"><h1>ورود به سامانه</h1><p>برای ادامه، اطلاعات حساب خود را وارد کنید.</p></header>
 
-<MudStack AlignItems="AlignItems.Center">
-    <span class="brand-text" dir="ltr">Mkx.Templates</span>
-    <MudText Typo="Typo.body1">سامانه Mkx.Templates</MudText>
-</MudStack>
-
-<EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-    <MudGrid Spacing="4" Class="mt-2">
-        @if (_options.AllowLocal)
-        {
-            <MudItem xs="12">
-                <MudStaticTextField For="@(() => Input.Username)" @bind-Value="Input.Username"
-                                    Label="نام کاربری / شماره تلفن همراه" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    UserAttributes="@(new Dictionary<string, object?> { { "autocomplete", "username" }, { "aria-required", "true" }, { "dir", "ltr" } })" />
-            </MudItem> 
-            <MudItem xs="12">
-                <MudStaticTextField For="@(() => Input.Password)" @bind-Value="Input.Password"
-                                    Label="رمز عبور" InputType="InputType.Password" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                    UserAttributes="@(new Dictionary<string, object?> { { "autocomplete", "password" }, { "aria-required", "true" }, { "dir", "ltr" } })" />
-            </MudItem>
-
-            @if (_options.ShowRememberMe)
-            {
-                <MudItem xs="12" Class="m-0 p-0 d-flex align-center justify-space-between">
-                    <MudStaticCheckBox For="@(() => Input.RememberMe)" @bind-Value="Input.RememberMe">مرا بخاطر بسپار</MudStaticCheckBox>
-                </MudItem>
-            }
-
-            @if (!string.IsNullOrEmpty(_errorMessage))
-            {
-                <MudItem xs="12" Class="mb-0">
-                    <StatusMessage Message="@_errorMessage" Severity="Severity.Error" />
-                </MudItem>
-            }
-
-            <MudItem xs="12" Class="mt-0">
-                <div class="d-flex align-center gap-2 w-100">
-                    <MudStaticButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                                     FormAction="FormAction.Submit" EndIcon="@Icons.Material.Filled.Login">
-                        ورود به سامانه
-                    </MudStaticButton>
-
-                    <div id="passkey-login-section" style="display: none">
-                        <PasskeySubmit Name="Input.Passkey"
-                                       Auto="true"
-                                       Username="Input.Username"/>
-                    </div>
-                </div>
-            </MudItem>
-
-            <MudItem xs="12" Class="d-flex justify-center">
-                <a href="@ClientRoutes.Accounts.ForgotPassword" class="mud-typography mud-link mud-primary-text mud-link-underline-hover mud-typography-body2">رمز عبور را فراموش کرده‌اید؟</a>
-            </MudItem>
-        }
-    </MudGrid>
+<EditForm class="identity-form" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+    @if (_options.AllowLocal)
+    {
+        <label class="ui-field"><span>نام کاربری / شماره تلفن همراه</span><InputText @bind-Value="Input.Username" autocomplete="username" required dir="ltr" /></label>
+        <label class="ui-field"><span>رمز عبور</span><InputText @bind-Value="Input.Password" type="password" autocomplete="current-password" required dir="ltr" /></label>
+        <div class="identity-options">
+            @if (_options.ShowRememberMe) { <label class="ui-checkbox"><InputCheckbox @bind-Value="Input.RememberMe" />مرا به خاطر بسپار</label> }
+            <a href="@ClientRoutes.Accounts.ForgotPassword">رمز عبور را فراموش کرده‌اید؟</a>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(_errorMessage)) { <StatusMessage Message="@_errorMessage" Severity="Severity.Error" /> }
+        <div class="d-flex align-center gap-2">
+            <button class="ui-button ui-button-filled identity-submit" type="submit">ورود <UiIcon Icon="forward" /></button>
+            <div id="passkey-login-section" style="display:none"><PasskeySubmit Name="Input.Passkey" Auto="true" Username="Input.Username" /></div>
+        </div>
+    }
 </EditForm>
-
 @if (_options.AllowExternal)
 {
-    <MudDivider Class="my-4" />
-    <div class="d-flex flex-column align-items-center mt-2 w-100">
-        <ExternalLoginPicker AutoRedirect="@(!_options.AllowLocal)" />
-    </div>
+    <div class="identity-divider"></div>
+    <ExternalLoginPicker AutoRedirect="@(!_options.AllowLocal)" />
 }
-
 <script>
     function initPasskeyAutoOpen() {
         const containerId = 'passkey-login-section';
@@ -100,4 +59,3 @@
         Blazor.addEventListener('enhancedload', initPasskeyAutoOpen);
     }
 </script>
-

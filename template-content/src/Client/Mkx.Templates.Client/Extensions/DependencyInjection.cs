@@ -7,7 +7,7 @@ using Mkx.Templates.Client.Services;
 using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Sdk.Shared.Extensions;
 using Mkx.Templates.Sdk.Shared.Utilities;
-using MudBlazor.Services;
+using Mkx.Templates.Client.Components.UI;
 using Mkx.Templates.Shared.Authorization;
 
 namespace Mkx.Templates.Client.Extensions;
@@ -33,12 +33,8 @@ public static class DependencyInjection
 
             services.InitializeDefaultCulture();
 
-            services.AddMudServices(config =>
-            {
-                config.SnackbarConfiguration.PositionClass = MudBlazor.Defaults.Classes.Position.BottomLeft;
-                config.SnackbarConfiguration.HideTransitionDuration = 150;
-                config.PopoverOptions.Duration = TimeSpan.FromMilliseconds(150);
-            });
+            services.AddScoped<DialogService>();
+            services.AddScoped<ToastService>();
 
             services.AddScoped<ThemeService>();
             services.AddScoped<WebAuthnService>();

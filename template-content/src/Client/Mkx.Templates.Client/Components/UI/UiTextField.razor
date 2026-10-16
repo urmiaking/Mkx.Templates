@@ -1,0 +1,89 @@
+@implements IDisposable
+<label class="@($"ui-field {Class}")" style="@Style" for="@_id">
+    <span>@(Label ?? Placeholder) @if (Required) { <span aria-hidden="true">*</span> }</span>
+    @if (Lines > 1)
+    {
+        <textarea @attributes="Attributes" id="@_id" rows="@Lines" value="@Value" placeholder="@Placeholder" maxlength="@MaxLength" required="@Required" disabled="@Disabled" aria-invalid="@HasError" aria-describedby="@(_id + "-error")" @oninput="ChangedAsync"></textarea>
+    }
+    else
+    {
+        <input @attributes="Attributes" id="@_id" type="@NativeType" value="@Value" placeholder="@Placeholder" maxlength="@MaxLength" required="@Required" disabled="@Disabled" aria-invalid="@HasError" aria-describedby="@(_id + "-error")" @oninput="ChangedAsync" />
+    }
+    <span id="@(_id + "-error")" class="ui-field-error" role="@(HasError ? "alert" : null)">@DisplayedError</span>
+</label>
+@code {
+    private readonly string _id = "field-" + Guid.NewGuid().ToString("N");
+    private string? _error;
+    private CancellationTokenSource? _debounce;
+    [CascadingParameter] private UiForm? Form { get; set; }
+    [CascadingParameter] private EditContext? EditContext { get; set; }
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<string?>>? For { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string? Style { get; set; }
+    [Parameter] public bool Required { get; set; }
+    [Parameter] public string RequiredError { get; set; } = "این فیلد الزامی است.";
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool Error { get; set; }
+    [Parameter] public string? ErrorText { get; set; }
+    [Parameter] public int? MaxLength { get; set; }
+    [Parameter] public int Lines { get; set; } = 1;
+    [Parameter] public int DebounceInterval { get; set; }
+    [Parameter] public InputType InputType { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? Attributes { get; set; }
+    private string? ContextError => For is null || EditContext is null ? null : string.Join(" ", EditContext.GetValidationMessages(FieldIdentifier.Create(For)));
+    private string? DisplayedError => ErrorText ?? _error ?? ContextError;
+    private bool HasError => Error || !string.IsNullOrEmpty(_error) || !string.IsNullOrEmpty(ContextError);
+    private string NativeType => InputType == InputType.Telephone ? "tel" : InputType.ToString().ToLowerInvariant();
+    protected override void OnInitialized()
+    {
+        Form?.Register(ValidateAsync);
+        if (EditContext is not null) EditContext.OnValidationStateChanged += ValidationChanged;
+    }
+    private void ValidationChanged(object? sender, ValidationStateChangedEventArgs args) => InvokeAsync(StateHasChanged);
+    private async Task ChangedAsync(ChangeEventArgs args)
+    {
+        var value = args.Value?.ToString() ?? "";
+        Value = value;
+        _debounce?.Cancel(); _debounce?.Dispose(); _debounce = new();
+        var token = _debounce.Token;
+        try
+        {
+            if (DebounceInterval > 0) await Task.Delay(DebounceInterval, token);
+            if (token.IsCancellationRequested) return;
+            await ValueChanged.InvokeAsync(value);
+            if (For is not null) EditContext?.NotifyFieldChanged(FieldIdentifier.Create(For));
+            if (_error is not null) await ValidateAsync();
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+    }
+    private async Task<bool> ValidateAsync()
+    {
+        _error = Required && string.IsNullOrWhiteSpace(Value) ? RequiredError : null;
+        if (For is not null)
+        {
+            var field = FieldIdentifier.Create(For);
+            var results = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+            System.ComponentModel.DataAnnotations.Validator.TryValidateProperty(Value,
+                new System.ComponentModel.DataAnnotations.ValidationContext(field.Model) { MemberName = field.FieldName }, results);
+            if (results.Count > 0) _error = string.Join(" ", results.Select(x => x.ErrorMessage));
+            if (Form?.Validation is not null && Form.Model is not null)
+            {
+                var errors = (await Form.Validation(Form.Model, field.FieldName)).ToArray();
+                if (errors.Length > 0) _error = string.Join(" ", errors);
+            }
+        }
+        StateHasChanged();
+        // Server errors describe the previous request; they must not prevent a corrected retry.
+        return string.IsNullOrEmpty(_error);
+    }
+    public void Dispose()
+    {
+        Form?.Unregister(ValidateAsync);
+        if (EditContext is not null) EditContext.OnValidationStateChanged -= ValidationChanged;
+        _debounce?.Cancel(); _debounce?.Dispose();
+    }
+}

@@ -3,17 +3,17 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Users;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.Users.Components;
 
 public partial class UserDialog
 {
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
     [Parameter] public bool IsEdit { get; set; }
     [Parameter] public UserModel Model { get; set; } = new();
 
-    private MudForm _form = default!;
+    private UiForm _form = default!;
 
     public class UserModel
     {
@@ -47,7 +47,7 @@ public partial class UserDialog
             var result = await TryRequestAsync<IUserManagementService, bool>((service, ct) => IsEdit
                 ? service.UpdateUserAsync(new UpdateUserDto { Id = Model.Id, Name = Model.Name, Email = Model.Email, PhoneNumber = Model.PhoneNumber, NewPassword = Model.Password, Roles = Model.SelectedRoles }, ct)
                 : service.CreateUserAsync(new CreateUserDto { Name = Model.Name, UserName = Model.UserName, Email = Model.Email, PhoneNumber = Model.PhoneNumber, Password = Model.Password ?? "", Roles = Model.SelectedRoles }, ct));
-            if (result.Succeeded && result.Value) { _originalModel = JsonSerializer.Serialize(Model); AddSuccessToast("ذخیره شد."); MudDialog.Close(DialogResult.Ok(true)); }
+            if (result.Succeeded && result.Value) { _originalModel = JsonSerializer.Serialize(Model); AddSuccessToast("ذخیره شد."); Dialog.Close(DialogResult.Ok(true)); }
         }
     }
 
@@ -59,6 +59,6 @@ public partial class UserDialog
         await base.OnInitializedAsync();
     }
     private Task<bool?> ConfirmDiscardAsync() => DialogService.ShowMessageBoxAsync("تغییرات ذخیره نشده", "تغییرات کنار گذاشته شود؟", yesText: "کنار گذاشتن", cancelText: "ادامه ویرایش");
-    private async Task CancelAsync() { if (!IsDirty || await ConfirmDiscardAsync() == true) { _originalModel = JsonSerializer.Serialize(Model); MudDialog.Cancel(); } }
+    private async Task CancelAsync() { if (!IsDirty || await ConfirmDiscardAsync() == true) { _originalModel = JsonSerializer.Serialize(Model); Dialog.Cancel(); } }
     private async Task ConfirmNavigationAsync(LocationChangingContext context) { if (IsDirty && await ConfirmDiscardAsync() != true) context.PreventNavigation(); }
 }

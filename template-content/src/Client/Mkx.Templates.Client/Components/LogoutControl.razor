@@ -1,0 +1,18 @@
+@inherits AppComponentBase
+<button type="button" class="workspace-signout" disabled="@IsBusy" aria-label="خروج از حساب" aria-busy="@IsBusy" @onclick="LogoutAsync">
+    <UiIcon Icon="log-out" /><span>@(IsBusy ? "در حال خروج…" : "خروج از حساب")</span>
+</button>
+@if (LastRequestError is not null) { <span class="ui-field-error" role="alert">@LastRequestError</span> }
+@code {
+    private async Task LogoutAsync()
+    {
+        if (IsBusy) return;
+        var result = await TryRequestAsync<HttpClient, bool>(async (client, token) =>
+        {
+            using var response = await client.PostAsync(ApiUrls.Accounts.Logout(ClientRoutes.Accounts.Login), null, token);
+            response.EnsureSuccessStatusCode();
+            return true;
+        });
+        if (result.Succeeded) Navigation.NavigateTo(ClientRoutes.Accounts.Login, forceLoad: true);
+    }
+}

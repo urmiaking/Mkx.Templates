@@ -11,181 +11,131 @@
 
 @if (_isDisabled)
 {
-    <MudContainer MaxWidth="MaxWidth.Medium" Class="pt-8 text-center">
-        <MudPaper Class="pa-6 rounded-lg my-4" Elevation="1">
-            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Large" Color="Color.Warning" Class="mb-3" />
-            <MudText Typo="Typo.h6" Class="fw-bold mb-2">مدیریت کاربران غیرفعال است</MudText>
-            <MudText Typo="Typo.body2" Color="Color.Secondary">
+    <section class="ui-container pt-8 text-center">
+        <section class="ui-panel pa-6 rounded-lg my-4">
+            <UiIcon Icon="lock" Color="Color.Warning" Class="mb-3" />
+            <h6 class="fw-bold mb-2">مدیریت کاربران غیرفعال است</h6>
+            <p class="ui-type-body2 ui-color-secondary">
                 بخش مدیریت کاربران در دسترس نمی‌باشد.
-            </MudText>
-        </MudPaper>
-    </MudContainer>
+            </p>
+        </section>
+    </section>
 }
 else
 {
-    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pb-6">
-        <MudBreadcrumbs Class="px-0" Items="_breadcrumbs" MaxItems="2">
-            <SeparatorTemplate>
-                <MudIcon Icon="@Icons.Material.Filled.ArrowForwardIos" Size="Size.Small" />
-            </SeparatorTemplate>
-        </MudBreadcrumbs>
-
-        <MudPaper Class="pa-4 mb-4 rounded-lg glassy-card" Elevation="1">
-            <div class="d-flex flex-wrap align-center justify-space-between gap-4">
-                <div class="d-flex align-center gap-3">
-                    <MudAvatar Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">
-                        <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Medium" />
-                    </MudAvatar>
-                    <div>
-                        <MudText Typo="Typo.h5">مدیریت کاربران و دسترسی‌ها</MudText>
-                        <MudText Typo="Typo.body2" Color="Color.Secondary">مدیریت حساب‌های کاربری، نقش‌ها و سطوح دسترسی سیستم</MudText>
-                    </div>
-                </div>
-
-                <div class="d-flex align-center gap-2 flex-wrap justify-center">
-                    <MudButton Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               StartIcon="@Icons.Material.Filled.AdminPanelSettings"
-                               Href="@ClientRoutes.Users.RoleClaims">
-                        مدیریت دسترسی نقش‌ها
-                    </MudButton>
-
-                    <AuthorizeView Policy="@AppPolicies.Users.Manage">
-                        <MudButton Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   StartIcon="@Icons.Material.Filled.PersonAdd"
-                                   OnClick="OpenAddUserDialog">
-                            افزودن کاربر جدید
-                        </MudButton>
-                    </AuthorizeView>
-                </div>
-            </div>
-        </MudPaper>
-
-        <MudPaper Class="pa-4 rounded-lg glassy-card" Elevation="1">
+    <AccountShell Title="کاربران و دسترسی‌ها" Description="حساب‌های کاربری، نقش‌ها و سطوح دسترسی را مدیریت کنید." Eyebrow="مدیریت سامانه">
+<Actions><UiButton Variant="Variant.Outlined" StartIcon="key" Href="@ClientRoutes.Users.RoleClaims">دسترسی نقش‌ها</UiButton><AuthorizeView Policy="@AppPolicies.Users.Manage"><UiButton Variant="Variant.Filled" StartIcon="plus" OnClick="OpenAddUserDialog">افزودن کاربر</UiButton></AuthorizeView></Actions>
+<ChildContent>
+        <section class="ui-panel pa-4 rounded-lg ">
             <div class="d-flex align-center justify-space-between mb-4 gap-4 flex-wrap">
-                <MudTextField T="string" Value="_searchQuery" ValueChanged="SearchChanged" DebounceInterval="350"
+                <UiTextField Label="جستجوی کاربران" Value="@_searchQuery" ValueChanged="SearchChanged" DebounceInterval="350"
                               Placeholder="جستجو بر اساس نام، نام کاربری یا ایمیل..."
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Small"
-                              Immediate="false"
-                              Clearable="true"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense"
                               Class="flex-grow-1"
                               Style="max-width: 400px;" />
             </div>
 
-            @if (_loadFailed) { <MudAlert Severity="Severity.Error" role="alert">@LastRequestError <MudButton OnClick="LoadUsersAsync" Disabled="IsBusy">تلاش دوباره</MudButton></MudAlert> }
-            <MudTable T="UserDto" @ref="_table" ServerData="LoadPageAsync" RowsPerPage="25"
-                      Loading="@IsBusy"
-                      Hover="true"
-                      Breakpoint="Breakpoint.Sm"
-                      Elevation="0"
-                      Dense="true">
+            @if (_loadFailed) { <div class="ui-alert ui-alert-error" role="alert">@LastRequestError <UiButton OnClick="LoadUsersAsync" Disabled="IsBusy">تلاش دوباره</UiButton></div> }
+            <UiTable T="UserDto" @ref="_table" ServerData="LoadPageAsync" RowsPerPage="25">
                 <HeaderContent>
-                    <MudTh>کاربر</MudTh>
-                    <MudTh>اطلاعات تماس</MudTh>
-                    <MudTh>نقش‌های سیستم</MudTh>
-                    <MudTh>دسترسی‌های مستقیم</MudTh>
-                    <MudTh Style="text-align: left;">عملیات</MudTh>
+                    <th>کاربر</th>
+                    <th>اطلاعات تماس</th>
+                    <th>نقش‌های سیستم</th>
+                    <th>دسترسی‌های مستقیم</th>
+                    <th style="text-align: left;">عملیات</th>
                 </HeaderContent>
                 <RowTemplate Context="user">
-                    <MudTd DataLabel="کاربر">
+                    <td data-label="کاربر">
                         <div class="d-flex align-center gap-3">
-                            <MudAvatar Color="Color.Secondary">
+                            <span class="ui-avatar ui-color-secondary">
                                 @(Mkx.Templates.Sdk.Shared.Extensions.StringExtensions.GetInitialsWithPeriods(user.Name))
-                            </MudAvatar>
+                            </span>
                             <div>
-                                <MudText Typo="Typo.subtitle2" Class="fw-bold">@user.Name</MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">@@@user.UserName</MudText>
+                                <p class="fw-bold ui-type-subtitle2">@user.Name</p>
+                                <p class="ui-type-caption ui-color-secondary">@@@user.UserName</p>
                             </div>
                         </div>
-                    </MudTd>
+                    </td>
 
-                    <MudTd DataLabel="اطلاعات تماس">
+                    <td data-label="اطلاعات تماس">
                         <div>
                             @if (!string.IsNullOrEmpty(user.Email))
                             {
                                 <div class="d-flex align-center gap-1">
-                                    <MudIcon Icon="@Icons.Material.Filled.Email" Size="Size.Small" Color="Color.Secondary" />
-                                    <MudText Typo="Typo.body2">@user.Email</MudText>
+                                    <UiIcon Icon="mail" Color="Color.Secondary" />
+                                    <p class="ui-type-body2">@user.Email</p>
                                 </div>
                             }
                             @if (!string.IsNullOrEmpty(user.PhoneNumber))
                             {
                                 <div class="d-flex align-center gap-1">
-                                    <MudIcon Icon="@Icons.Material.Filled.Phone" Size="Size.Small" Color="Color.Secondary" />
-                                    <MudText Typo="Typo.caption">@user.PhoneNumber</MudText>
+                                    <UiIcon Icon="phone" Color="Color.Secondary" />
+                                    <p class="ui-type-caption">@user.PhoneNumber</p>
                                 </div>
                             }
                             @if (string.IsNullOrEmpty(user.Email) && string.IsNullOrEmpty(user.PhoneNumber))
                             {
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">ثبت نشده</MudText>
+                                <p class="ui-type-caption ui-color-secondary">ثبت نشده</p>
                             }
                         </div>
-                    </MudTd>
+                    </td>
 
-                    <MudTd DataLabel="نقش‌های سیستم">
+                    <td data-label="نقش‌های سیستم">
                         <div class="d-flex flex-wrap gap-1">
                             @if (!user.Roles.Any())
                             {
-                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Outlined">بدون نقش</MudChip>
+                                <span class="ui-chip ui-color-secondary">بدون نقش</span>
                             }
                             else
                             {
                                 @foreach (var role in user.Roles)
                                 {
-                                    <MudChip T="string" Size="Size.Small" Color="Color.Default" Variant="Variant.Text">@role.GetRoleName()</MudChip>
+                                    <span class="ui-chip ui-color-default">@role.GetRoleName()</span>
                                 }
                             }
                         </div>
-                    </MudTd>
+                    </td>
 
-                    <MudTd DataLabel="دسترسی‌های مستقیم">
-                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Filled">
+                    <td data-label="دسترسی‌های مستقیم">
+                        <span class="ui-chip ui-color-success">
                             @user.DirectClaimsCount دسترسی اختصاصی
-                        </MudChip>
-                    </MudTd>
+                        </span>
+                    </td>
 
-                    <MudTd DataLabel="عملیات" Style="text-align: left;">
+                    <td data-label="عملیات" style="text-align: left;">
                         <div class="d-flex align-center justify-end gap-1">
                             <AuthorizeView Policy="@AppPolicies.Users.ManageClaims" Context="authCtx1">
-                                <MudTooltip Text="تنظیم دسترسی‌های کاربر">
-                                    <MudIconButton aria-label="تنظیم دسترسی" Icon="@Icons.Material.Filled.VpnKey"
+                                <span title="تنظیم دسترسی‌های کاربر">
+                                    <UiIconButton aria-label="تنظیم دسترسی" Icon="key"
                                                    Color="Color.Primary"
-                                                   Size="Size.Small"
                                                    OnClick="@(() => ManageUserClaims(user))" />
-                                </MudTooltip>
+                                </span>
                             </AuthorizeView>
 
                             <AuthorizeView Policy="@AppPolicies.Users.Manage" Context="authCtx2">
-                                <MudTooltip Text="ویرایش کاربر">
-                                    <MudIconButton aria-label="ویرایش" Icon="@Icons.Material.Filled.Edit"
+                                <span title="ویرایش کاربر">
+                                    <UiIconButton aria-label="ویرایش" Icon="edit"
                                                    Color="Color.Info"
-                                                   Size="Size.Small"
                                                    OnClick="@(() => OpenEditUserDialog(user))" />
-                                </MudTooltip>
+                                </span>
 
                                 @if (!user.Roles.Contains(BuiltinRoles.Administrators))
                                 {
-                                    <MudTooltip Text="حذف کاربر">
-                                        <MudIconButton aria-label="حذف" Icon="@Icons.Material.Filled.Delete"
+                                    <span title="حذف کاربر">
+                                        <UiIconButton aria-label="حذف" Icon="trash"
                                                        Color="Color.Error"
-                                                       Size="Size.Small"
                                                        OnClick="@(() => ConfirmDeleteUser(user))" />
-                                    </MudTooltip>
+                                    </span>
                                 }
                             </AuthorizeView>
                         </div>
-                    </MudTd>
+                    </td>
                 </RowTemplate>
                 <NoRecordsContent>
-                    <MudText Class="pa-4 text-center" Color="Color.Secondary">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "هیچ کاربری یافت نشد.")</MudText>
+                    <p class="pa-4 text-center ui-color-secondary">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "هیچ کاربری یافت نشد.")</p>
                 </NoRecordsContent>
-                <PagerContent><MudTablePager PageSizeOptions="@(new[] { 10, 25, 50, 100 })" /></PagerContent>
-            </MudTable>
-        </MudPaper>
-    </MudContainer>
+
+            </UiTable>
+        </section>
+
+</ChildContent></AccountShell>
 }

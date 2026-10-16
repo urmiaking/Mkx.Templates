@@ -1,47 +1,13 @@
 @inherits AppComponentBase
-
-<MudForm Model="this" @ref="@_form">
-    <MudDialog>
+<UiForm Model="this" @ref="_form">
+    <UiDialog>
         <DialogContent>
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudTextField @bind-Value="Email"
-                                  For="@(() => Email)"
-                                  Adornment="Adornment.End"
-                                  AdornmentIcon="@Icons.Material.Filled.Email"
-                                  Label="آدرس ایمیل جدید"
-                                  Margin="Margin.Dense"
-                                  dir="ltr"
-                                  Variant="Variant.Outlined" />
-                </MudItem>
-            </MudGrid>
+            <div class="account-edit-help"><UiIcon Icon="mail" /><p>ایمیل حساب خود را به‌روز کنید تا اطلاعات تماس شما همیشه در دسترس باشد.</p></div>
+            <UiTextField @bind-Value="Email" For="@(() => Email)" Label="نشانی ایمیل" InputType="InputType.Email" autocomplete="email" dir="ltr" Disabled="IsBusy" />
         </DialogContent>
         <DialogActions>
-            <MudButton Color="Color.Error"
-                       OnClick="Close"
-                       StartIcon="@Icons.Material.Filled.Close"
-                       Variant="Variant.Filled">انصراف</MudButton>
-
-            <MudButton Class="m-2"
-                       Color="Color.Primary"
-                       Disabled="@IsBusy"
-                       StartIcon="@Icons.Material.Filled.Save"
-                       OnClick="@(async () => await Submit())"
-                       Variant="Variant.Filled">
-                @if (IsBusy)
-                {
-                    <MudProgressCircular Class="ms-n1"
-                                         Size="Size.Small"
-                                         Indeterminate="true" />
-                    <MudText Class="ms-2">
-                        در حال ذخیره
-                    </MudText>
-                }
-                else
-                {
-                    <MudText>ذخیره</MudText>
-                }
-            </MudButton>
+            <UiButton OnClick="Close" Disabled="IsBusy">انصراف</UiButton>
+            <UiButton Variant="Variant.Filled" Disabled="IsBusy" OnClick="Submit">@if (IsBusy) { <span class="ui-spinner" aria-hidden="true"></span> } ذخیره تغییرات</UiButton>
         </DialogActions>
-    </MudDialog>
-</MudForm>
+    </UiDialog>
+</UiForm>

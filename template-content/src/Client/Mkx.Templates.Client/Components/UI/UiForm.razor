@@ -1,0 +1,18 @@
+<CascadingValue TValue="UiForm" Value="@this" IsFixed="true">
+    <div class="ui-form" aria-busy="@Busy">@ChildContent</div>
+</CascadingValue>
+@code {
+    private readonly HashSet<Func<Task<bool>>> _fields = [];
+    [Parameter] public object? Model { get; set; }
+    [Parameter] public bool Busy { get; set; }
+    [Parameter] public Func<object, string, Task<IEnumerable<string>>>? Validation { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    public bool IsValid { get; private set; }
+    public void Register(Func<Task<bool>> validate) => _fields.Add(validate);
+    public void Unregister(Func<Task<bool>> validate) => _fields.Remove(validate);
+    public async Task ValidateAsync()
+    {
+        IsValid = true;
+        foreach (var field in _fields.ToArray()) IsValid &= await field();
+    }
+}

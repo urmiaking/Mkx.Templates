@@ -1,0 +1,13 @@
+@if (Locked) { <article class="action-card is-locked" aria-disabled="true">@Content<UiIcon Icon="lock" /></article> }
+else if (!string.IsNullOrEmpty(Href)) { <a class="action-card" href="@Href">@Content<UiIcon Icon="forward" /></a> }
+else { <button class="action-card" type="button" @onclick="OnClick">@Content<UiIcon Icon="forward" /></button> }
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Description { get; set; } = "";
+    [Parameter] public string StartIcon { get; set; } = "settings";
+    [Parameter] public string? Href { get; set; }
+    [Parameter] public Color Color { get; set; }
+    [Parameter] public bool Locked { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+    private RenderFragment Content => @<span class="action-card-inner"><span class="action-symbol"><UiIcon Icon="@StartIcon" /></span><span class="action-copy"><strong>@Title</strong><small>@Description</small></span></span>;
+}

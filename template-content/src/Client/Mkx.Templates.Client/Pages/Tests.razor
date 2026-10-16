@@ -2,27 +2,26 @@
 @attribute [Authorize(Policy = AppPolicies.Tests.View)]
 @inherits AppComponentBase
 <PageTitle>تست‌ها</PageTitle>
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudText Typo="Typo.h4" Class="mb-4">مدیریت تست‌ها</MudText>
-    <MudStack Row="true" Class="mb-4 tests-toolbar" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
-        <MudTextField T="string" Class="tests-search" Margin="Margin.None" Label="جستجوی نام یا توضیحات" Value="_search" ValueChanged="SearchChanged" DebounceInterval="350" Clearable="true" Variant="Variant.Outlined" />
-        <AuthorizeView Policy="@AppPolicies.Tests.Manage"><MudButton Class="tests-add" OnClick="@(() => EditAsync(null))" Color="Color.Primary" Variant="Variant.Filled" Disabled="IsBusy">افزودن</MudButton></AuthorizeView>
-    </MudStack>
+<AccountShell Title="تست‌ها" Description="رکوردهای نمونه را جستجو، ایجاد و ویرایش کنید." Eyebrow="فضای کار">
+    <div class="ui-stack mb-4 tests-toolbar ui-row">
+        <UiTextField Class="tests-search" Label="جستجوی نام یا توضیحات" Value="@_search" ValueChanged="SearchChanged" DebounceInterval="350" />
+        <AuthorizeView Policy="@AppPolicies.Tests.Manage"><UiButton Class="tests-add" OnClick="@(() => EditAsync(null))" Color="Color.Primary" Variant="Variant.Filled" Disabled="IsBusy">افزودن</UiButton></AuthorizeView>
+    </div>
     @if (_loadFailed) {
-        <MudAlert Severity="Severity.Error" Class="mb-3" role="alert">@LastRequestError <MudButton OnClick="ReloadAsync" Disabled="IsBusy">تلاش دوباره</MudButton></MudAlert>
+        <div class="ui-alert mb-3 ui-alert-error" role="alert">@LastRequestError <UiButton OnClick="ReloadAsync" Disabled="IsBusy">تلاش دوباره</UiButton></div>
     }
-    <MudTable T="GetTestResponse" @ref="_table" ServerData="LoadAsync" Hover="true" RowsPerPage="25" Breakpoint="Breakpoint.Sm">
+    <UiTable T="GetTestResponse" @ref="_table" ServerData="LoadAsync" RowsPerPage="25">
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortLabel="Name" T="GetTestResponse">نام</MudTableSortLabel></MudTh><MudTh>توضیحات</MudTh><MudTh>عملیات</MudTh>
+            <th><UiTableSortLabel SortLabel="Name" T="GetTestResponse">نام</UiTableSortLabel></th><th>توضیحات</th><th>عملیات</th>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="نام">@context.Name</MudTd><MudTd DataLabel="توضیحات">@context.Description</MudTd>
-            <MudTd DataLabel="عملیات"><AuthorizeView Policy="@AppPolicies.Tests.Manage" Context="authorization">
-                <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="ویرایش تست" OnClick="@(() => EditAsync(context))" Disabled="IsBusy" />
-                <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="حذف تست" Color="Color.Error" OnClick="@(() => DeleteAsync(context))" Disabled="IsBusy" />
-            </AuthorizeView></MudTd>
+            <td data-label="نام">@context.Name</td><td data-label="توضیحات">@context.Description</td>
+            <td data-label="عملیات"><AuthorizeView Policy="@AppPolicies.Tests.Manage" Context="authorization">
+                <UiIconButton Icon="edit" aria-label="ویرایش تست" OnClick="@(() => EditAsync(context))" Disabled="IsBusy" />
+                <UiIconButton Icon="trash" aria-label="حذف تست" Color="Color.Error" OnClick="@(() => DeleteAsync(context))" Disabled="IsBusy" />
+            </AuthorizeView></td>
         </RowTemplate>
-        <NoRecordsContent><MudText Class="pa-4">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "موردی یافت نشد.")</MudText></NoRecordsContent>
-        <PagerContent><MudTablePager PageSizeOptions="@(new[] { 10, 25, 50, 100 })" /></PagerContent>
-    </MudTable>
-</MudContainer>
+        <NoRecordsContent><p class="pa-4">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "موردی یافت نشد.")</p></NoRecordsContent>
+
+    </UiTable>
+</AccountShell>

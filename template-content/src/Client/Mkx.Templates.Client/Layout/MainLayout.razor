@@ -1,44 +1,50 @@
 @inherits LayoutComponentBase
-@implements IDisposable
 @layout BaseLayout
 
-<MudLayout>
-    <div inert="@(_notificationsOpen ? string.Empty : null)">
-        <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
-        <AppBar @bind-DrawerOpen="_drawerOpen" @bind-NotificationsOpen="_notificationsOpen" />
-        <Drawer @bind-IsDrawerOpen="_drawerOpen" />
-        <MudMainContent Class="mt-10 mb-md-4 mb-20 pa-md-4 py-4">
-            <main id="main-content" tabindex="-1" class="page-transition" @key="_currentUri">
-                @Body
-            </main>
-            <MobileNav Class="d-md-none d-flex" />
-        </MudMainContent>
+<div class="workspace-shell" dir="rtl">
+    <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+    @if (_mobileMenuOpen)
+    {
+        <button type="button" class="workspace-menu-scrim" tabindex="-1" aria-label="بستن منوی اصلی" @onclick="CloseMenu"></button>
+    }
+    <aside id="workspace-navigation" @ref="_sidebar" class="workspace-sidebar @(_mobileMenuOpen ? "mobile-open" : "")" aria-label="ناوبری اصلی" @onkeydown="MenuKeyDown">
+        <button type="button" class="workspace-menu-close workspace-icon-button" aria-label="بستن منو" @onclick="CloseMenu"><UiIcon Icon="close" /></button>
+        <a class="workspace-brand" href="@ClientRoutes.Home.Index" @onclick="CloseMenu"><BrandLockup /></a>
+        <AuthorizeView Policy="@AppPolicies.Tests.Manage">
+            <a class="workspace-create ui-button ui-button-filled" href="@ClientRoutes.Tests.Create" @onclick="CloseMenu"><UiIcon Icon="plus" />ثبت مورد جدید</a>
+        </AuthorizeView>
+        <div class="workspace-menu-scroll" @onclick="CloseMenu"><WorkspaceNavigation /></div>
+        <div class="workspace-sidebar-bottom"><WorkspaceIdentity ShowDetails="true" /></div>
+        <AuthorizeView><div class="workspace-sidebar-signout"><LogoutControl /></div></AuthorizeView>
+    </aside>
+
+    <div class="workspace-content">
+        <header class="workspace-topbar">
+            <button type="button" class="workspace-menu-toggle workspace-icon-button" aria-label="باز کردن منوی اصلی" aria-expanded="@_mobileMenuOpen.ToString().ToLowerInvariant()" aria-controls="workspace-navigation" @onclick="OpenMenu"><UiIcon Icon="menu" /></button>
+            <a class="workspace-mobile-brand" href="@ClientRoutes.Home.Index"><BrandLockup Compact="true" /></a>
+            <span class="workspace-date"><UiIcon Icon="calendar" />@Today</span>
+            <div class="workspace-topbar-actions">
+                <AuthorizeView Policy="@AppPolicies.Tests.View"><a class="workspace-icon-button workspace-search" href="@ClientRoutes.Tests.Index" aria-label="جستجو در اطلاعات"><UiIcon Icon="search" /></a></AuthorizeView>
+                <button type="button" class="workspace-icon-button" aria-label="@(Theme.IsDarkMode ? "فعال‌سازی حالت روشن" : "فعال‌سازی حالت تاریک")" aria-pressed="@Theme.IsDarkMode.ToString().ToLowerInvariant()" @onclick="Theme.ToggleModeAsync"><UiIcon Icon="@(Theme.IsDarkMode ? "sun" : "moon")" /></button>
+                <button type="button" class="workspace-icon-button" aria-label="اعلان‌ها" aria-haspopup="dialog" @onclick="OpenNotifications"><UiIcon Icon="bell" /></button>
+                <WorkspaceIdentity Class="workspace-top-avatar" />
+            </div>
+        </header>
+        <main id="main-content" class="workspace-main" tabindex="-1">@Body</main>
     </div>
-    <NotificationsDrawer @bind-IsOpen="_notificationsOpen" />
-</MudLayout>
 
-@code
-{
-    private bool _drawerOpen = false;
-    private bool _notificationsOpen = false;
-    private string _currentUri = string.Empty;
-
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
-
-    protected override void OnInitialized()
-    {
-        _currentUri = new Uri(Navigation.Uri).AbsolutePath;
-        Navigation.LocationChanged += OnLocationChanged;
-    }
-
-    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        _currentUri = new Uri(e.Location).AbsolutePath;
-        InvokeAsync(StateHasChanged);
-    }
-
-    public void Dispose()
-    {
-        Navigation.LocationChanged -= OnLocationChanged;
-    }
-}
+    <nav class="workspace-bottom-nav" aria-label="ناوبری موبایل">
+        <NavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All"><UiIcon Icon="home" /><span>خانه</span></NavLink>
+        <AuthorizeView Policy="@AppPolicies.Tests.View"><NavLink href="@ClientRoutes.Tests.Index" Match="NavLinkMatch.All"><UiIcon Icon="list" /><span>تست‌ها</span></NavLink></AuthorizeView>
+        <AuthorizeView Policy="@AppPolicies.Tests.Manage">
+            <Authorized><NavLink class="workspace-bottom-create" href="@ClientRoutes.Tests.Create"><span class="workspace-create-circle"><UiIcon Icon="plus" /></span><span>ثبت جدید</span></NavLink></Authorized>
+            <NotAuthorized><a class="workspace-bottom-create" href="@ClientRoutes.UserAccounts.Index"><span class="workspace-create-circle"><UiIcon Icon="user" /></span><span>حساب من</span></a></NotAuthorized>
+        </AuthorizeView>
+        <AuthorizeView Policy="@AppPolicies.Users.View"><NavLink href="@ClientRoutes.Users.Index"><UiIcon Icon="users" /><span>کاربران</span></NavLink></AuthorizeView>
+        <AuthorizeView>
+            <Authorized><NavLink href="@ClientRoutes.UserAccounts.Index" Match="NavLinkMatch.All"><UiIcon Icon="settings" /><span>حساب من</span></NavLink></Authorized>
+            <NotAuthorized><a href="@ClientRoutes.Accounts.Login"><UiIcon Icon="log-in" /><span>ورود</span></a></NotAuthorized>
+        </AuthorizeView>
+    </nav>
+</div>
+<NotificationPanel @bind-Open="_notificationsOpen" />

@@ -1,6 +1,6 @@
 # Mkx.Templates.Blazor
 
-A .NET 10 Blazor solution template with Persian RTL MudBlazor UI, SQL Server, Identity and a tested agent-oriented development path. Application source and durable instructions live in `template-content/`.
+A .NET 10 Blazor solution template with Persian RTL native Blazor UI, SQL Server, Identity and a tested agent-oriented development path. Application source and durable instructions live in `template-content/`.
 
 ## Validate the application and package
 

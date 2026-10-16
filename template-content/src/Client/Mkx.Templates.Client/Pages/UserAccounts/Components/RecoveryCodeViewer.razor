@@ -1,20 +1,20 @@
 @inherits AppComponentBase
 
-<MudDialog>
+<UiDialog>
     <DialogContent>
-        
-        <MudAlert ContentAlignment="HorizontalAlignment.Start" Severity="Severity.Success" Variant="Variant.Filled" Class="mb-4">
-            رمز دو مرحله ای با موفقیت برای حساب شما فعال شد
-        </MudAlert>
 
-        <MudAlert ContentAlignment="HorizontalAlignment.Start" Severity="Severity.Info" Variant="Variant.Filled">
+        <div class="ui-alert mb-4 ui-alert-success">
+            رمز دو مرحله ای با موفقیت برای حساب شما فعال شد
+        </div>
+
+        <div class="ui-alert ui-alert-info">
             <p>
                 <strong>کدهای بازیابی زیر را در مکان امنی قرار دهید</strong>
             </p>
             <p>
                 اگر دستگاه خود را گم کنید و کدهای بازیابی را نداشته باشید، دسترسی به حساب خود را از دست خواهید داد.
             </p>
-        </MudAlert>
+        </div>
         <div class="row">
             <div class="col-md-12 mt-4 text-center">
                 @foreach (var recoveryCode in RecoveryCodes)
@@ -27,19 +27,19 @@
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton Class="m-2"
+        <UiButton Class="m-2"
                    Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.Check"
+                   StartIcon="check"
                    OnClick="Close"
                    Variant="Variant.Filled">
             متوجه شدم
-        </MudButton>
+        </UiButton>
     </DialogActions>
-</MudDialog>
+</UiDialog>
 
 @code {
     [Parameter, EditorRequired] public IEnumerable<string> RecoveryCodes { get; set; }
-    [CascadingParameter] public IMudDialogInstance Dialog { get; set; } = default!;
+    [CascadingParameter] public DialogSession Dialog { get; set; } = default!;
 
     private void Close()
     {

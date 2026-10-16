@@ -20,23 +20,23 @@ Use this file for high-frequency rules. Detailed guidance lives in the linked do
 - Use `TryRequestAsync` (explicit success; legacy `SendRequestAsync` remains for compatibility) rather than ad-hoc request try/catch flows.
 - Propagate cancellation tokens.
 
-## MudBlazor & Styling
-- Prefer MudBlazor and existing components.
+## Native UI & Styling
+- Prefer semantic HTML and existing Components/UI primitives.
 - Use the established central `app.css` for project-wide custom styling unless an existing component intentionally uses scoped CSS.
-- Use MudBlazor theme variables instead of hardcoded theme colors.
+- Use --ui-* theme tokens instead of hardcoded theme colors.
 - Static SSR pages must not depend on interactive scoped client services.
 - See [UI_GUIDE.md](UI_GUIDE.md).
 
 ## Responsive Navigation
-The source implementation in `Layout/Components/Drawer.razor` is authoritative for exact MudDrawer parameters.
-- Desktop: Mini/collapsible navigation.
+The source implementation in `Layout/MainLayout.razor` and `wwwroot/js/navigation.js` is authoritative for responsive navigation behavior.
+- Desktop: fixed 238px sidebar with full labels; no mini state or palette selector.
 - Mobile below the configured breakpoint: Temporary/overlay behavior; it must not permanently consume body width.
 - Do not copy stale parameter values from documentation.
 
 ## Mobile Input Modes
 - Decimal quantities/weights/percentages: decimal input mode and LTR numeric direction.
 - Phone: tel input mode and LTR direction.
-- OTP/2FA/security codes: numeric input mode and LTR direction.
+- OTP/2FA/security codes: reuse UiOtpField; one native numeric input, six decorative cells, LTR order and full-code paste.
 
 ## Persistence
 - Reusable queries use specifications.

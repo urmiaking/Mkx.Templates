@@ -1,0 +1,8 @@
+@typeparam T
+<button type="button" class="ui-sort" @onclick="Sort">@ChildContent <span aria-hidden="true">↕</span></button>
+@code {
+    [CascadingParameter] private ITableController? Table { get; set; }
+    [Parameter] public string SortLabel { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private Task Sort() => Table?.SortAsync(SortLabel) ?? Task.CompletedTask;
+}

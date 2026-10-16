@@ -1,0 +1,13 @@
+@implements IDisposable
+@inject DialogService Dialogs
+@foreach (var session in Dialogs.Sessions.ToArray())
+{
+    <UiModal @key="session" Title="@session.Title" Class="@($"ui-modal-{session.Options.MaxWidth.ToString().ToLowerInvariant()}")" Busy="session.IsBusy" ShowClose="session.Options.CloseButton" CloseOnEscape="session.Options.CloseOnEscapeKey" CloseOnBackdrop="session.Options.BackdropClick" OnClose="session.Cancel">
+        <CascadingValue TValue="DialogSession" Value="@session" IsFixed="true"><DynamicComponent Type="session.Component" Parameters="session.Parameters" /></CascadingValue>
+    </UiModal>
+}
+@code {
+    protected override void OnInitialized() => Dialogs.Changed += Changed;
+    private void Changed() => InvokeAsync(StateHasChanged);
+    public void Dispose() { Dialogs.Changed -= Changed; foreach (var session in Dialogs.Sessions.ToArray()) session.Cancel(); }
+}

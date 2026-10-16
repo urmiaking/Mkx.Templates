@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Mkx.Templates.Sdk.Server.Shared.Exceptions;
 using Mkx.Templates.Sdk.Shared.Exceptions;
-using MudBlazor;
-using Severity = MudBlazor.Severity;
+using Mkx.Templates.Client.Components.UI;
+using Severity = Mkx.Templates.Client.Components.UI.Severity;
+
 
 namespace Mkx.Templates.Client.Components;
 
@@ -29,12 +30,13 @@ public class AppComponentBase : ComponentBase, IAsyncDisposable
     private IServiceScope CurrentScope => _scope ??= CreateServiceScope();
 
     [Inject] private IServiceScopeFactory ServiceScopeFactory { get; set; } = default!;
-    [Inject] protected IDialogService DialogService { get; set; } = default!;
-    [Inject] protected ISnackbar ToastService { get; set; } = default!;
+    [Inject] protected DialogService DialogService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
     [Inject] protected IAuthorizationService AuthorizationService { get; set; } = default!;
     [Inject] protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
     [Inject] protected NavigationManager Navigation { get; set; } = default!;
     [Inject] private PersistentComponentState PersistentState { get; set; } = default!;
+    [CascadingParameter] private DialogSession? ActiveDialog { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -67,8 +69,8 @@ public class AppComponentBase : ComponentBase, IAsyncDisposable
     protected T GetRequiredService<T>() where T : notnull => CurrentScope.ServiceProvider.GetRequiredService<T>();
     protected T GetRequiredService<T>(IServiceScope scope) where T : notnull => scope.ServiceProvider.GetRequiredService<T>();
     protected IEnumerable<T> GetServices<T>() where T : notnull => CurrentScope.ServiceProvider.GetServices<T>();
-    protected void SetBusy(bool stateChanged = false) { Interlocked.Increment(ref _busyCount); if (stateChanged) StateHasChanged(); }
-    protected void SetIdeal(bool stateChanged = false) { Interlocked.Decrement(ref _busyCount); if (stateChanged && !IsDisposed) StateHasChanged(); }
+    protected void SetBusy(bool stateChanged = false) { Interlocked.Increment(ref _busyCount); ActiveDialog?.SetBusy(IsBusy); if (stateChanged) StateHasChanged(); }
+    protected void SetIdeal(bool stateChanged = false) { Interlocked.Decrement(ref _busyCount); ActiveDialog?.SetBusy(IsBusy); if (stateChanged && !IsDisposed) StateHasChanged(); }
     protected void CancelToken() { _cancellation?.Cancel(); DestroyCancellationToken(); }
     protected void DestroyCancellationToken() { _cancellation?.Dispose(); _cancellation = null; }
     protected readonly record struct RequestResult<T>(bool Succeeded, T? Value);

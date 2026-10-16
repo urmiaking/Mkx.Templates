@@ -27,7 +27,7 @@ Before creating an abstraction, service, component, route, policy, DTO, helper, 
 | [SERVICE_ARCHITECTURE.md](docs/ai/SERVICE_ARCHITECTURE.md) | Shared contracts, client/server services, error flow |
 | [AUTHENTICATION.md](docs/ai/AUTHENTICATION.md) | Authentication, SSR/WASM boundary and authorization |
 | [DATABASE.md](docs/ai/DATABASE.md) | EF Core, repositories, specs, migrations and seeders |
-| [UI_GUIDE.md](docs/ai/UI_GUIDE.md) | MudBlazor UX, responsive behavior, forms and styling |
+| [UI_GUIDE.md](docs/ai/UI_GUIDE.md) | Native Blazor UX, responsive behavior, forms and styling |
 | [DOMAIN_KNOWLEDGE.md](docs/ai/DOMAIN_KNOWLEDGE.md) | Business glossary/invariants/workflows |
 | [VERIFICATION.md](docs/ai/VERIFICATION.md) | Definition of done |
 | [TOOLS.md](docs/ai/TOOLS.md) | Build/test/EF CLI commands |
@@ -63,9 +63,9 @@ Use [FEATURE_CHECKLIST.md](docs/ai/FEATURE_CHECKLIST.md).
 ## UI and Render Modes
 Interactive application pages run in Interactive WebAssembly mode without prerendering. Authentication/account surfaces may use static SSR. Do not inject interactive-only client services into static SSR pages.
 
-Preserve established fonts (IRANSans and the Cinzel Decorative brand), palette sizes, theme colors and layout proportions unless the user explicitly requests a redesign. Performance improvements should target expensive effects without replacing the visual identity.
+The UI follows a calm Persian RTL workspace: Vazirmatn, navy/teal light accents and vivid jade dark accents, opaque surfaces, short interaction feedback and responsive layouts. Preserve its shared tokens and accessible interactions.
 
-Use MudBlazor and existing UI patterns. Current source code is authoritative for exact drawer/layout parameters; desktop navigation is Mini/collapsible and mobile navigation must remain overlay/temporary.
+Use semantic HTML and the native Blazor primitives in Components/UI. The desktop sidebar is permanently 238px wide. Below 960px, full-height navigation overlays content and reserves no horizontal space; the bottom bar includes a raised central action. See UI_GUIDE.md for forms, dialogs and styling.
 
 ## Authorization
 Policy-based authorization is preferred for capabilities. Adding a policy normally requires an `AppPolicies` constant, registration in `AppPolicyProvider`, server enforcement, and appropriate client behavior. Client hiding alone is never security.

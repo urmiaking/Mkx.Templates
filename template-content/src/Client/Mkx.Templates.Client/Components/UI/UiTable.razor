@@ -1,0 +1,71 @@
+@typeparam T
+@implements ITableController
+@implements IDisposable
+<CascadingValue TValue="ITableController" Value="@this" IsFixed="true">
+    <section class="ui-data-panel" aria-busy="@_loading">
+        @if (ToolBarContent is not null) { <div class="ui-toolbar">@ToolBarContent</div> }
+        <div class="ui-table-scroll" tabindex="0" aria-label="جدول اطلاعات">
+            <table class="ui-table"><thead><tr>@HeaderContent</tr></thead><tbody>
+                @foreach (var item in VisibleItems) { <tr>@RowTemplate(item)</tr> }
+            </tbody></table>
+        </div>
+        @if (_loading) { <div class="ui-empty" role="status">در حال بارگذاری…</div> }
+        else if (!VisibleItems.Any()) { <div class="ui-empty">@NoRecordsContent</div> }
+        @if (ServerData is not null)
+        {
+            <div class="ui-pagination">
+                <button type="button" class="ui-button" disabled="@(_loading || _state.Page == 0)" @onclick="() => GoAsync(_state.Page - 1)">قبلی</button>
+                <span>صفحه @(_state.Page + 1) از @Math.Max(1, (int)Math.Ceiling((double)_total / _state.PageSize)) — @_total مورد</span>
+                <button type="button" class="ui-button" disabled="@(_loading || (_state.Page + 1) * _state.PageSize >= _total)" @onclick="() => GoAsync(_state.Page + 1)">بعدی</button>
+                <label>تعداد <select value="@_state.PageSize" @onchange="SizeChanged"><option>10</option><option>25</option><option>50</option><option>100</option></select></label>
+            </div>
+        }
+    </section>
+</CascadingValue>
+@code {
+    [Parameter] public IEnumerable<T>? Items { get; set; }
+    [Parameter] public Func<TableState, CancellationToken, Task<TableData<T>>>? ServerData { get; set; }
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [Parameter, EditorRequired] public RenderFragment<T> RowTemplate { get; set; } = default!;
+    [Parameter] public RenderFragment? ToolBarContent { get; set; }
+    [Parameter] public RenderFragment? NoRecordsContent { get; set; }
+    [Parameter] public RenderFragment? LoadingContent { get; set; }
+    [Parameter] public RenderFragment? PagerContent { get; set; }
+    [Parameter] public int RowsPerPage { get; set; } = 25;
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? Attributes { get; set; }
+    private readonly TableState _state = new();
+    private IEnumerable<T> _items = [];
+    private int _total;
+    private bool _loading, _disposed;
+    private CancellationTokenSource? _request;
+    public int CurrentPage => _state.Page;
+    private IEnumerable<T> VisibleItems => ServerData is null ? Items ?? [] : _items;
+    protected override void OnInitialized() => _state.PageSize = RowsPerPage;
+    protected override async Task OnAfterRenderAsync(bool firstRender) { if (firstRender && ServerData is not null) await ReloadServerData(); }
+    public int GetFilteredItemsCount() => ServerData is null ? Items?.Count() ?? 0 : _total;
+    public void NavigateTo(int page) => _state.Page = Math.Max(0, page);
+    private async Task GoAsync(int page) { NavigateTo(page); await ReloadServerData(); }
+    private async Task SizeChanged(ChangeEventArgs e) { _state.PageSize = int.Parse(e.Value!.ToString()!, CultureInfo.InvariantCulture); await GoAsync(0); }
+    public async Task SortAsync(string label)
+    {
+        _state.SortDirection = _state.SortLabel == label && _state.SortDirection == SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending;
+        _state.SortLabel = label; await GoAsync(0);
+    }
+    public async Task ReloadServerData()
+    {
+        if (ServerData is null || _disposed) return;
+        _request?.Cancel(); _request?.Dispose(); _request = new();
+        var token = _request.Token;
+        _loading = true; StateHasChanged();
+        try
+        {
+            var result = await ServerData(_state, token);
+            if (token.IsCancellationRequested || _disposed) return;
+            _items = result.Items.ToArray(); _total = result.TotalItems;
+            if (_state.Page > 0 && _state.Page * _state.PageSize >= _total) { _state.Page--; await ReloadServerData(); }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        finally { if (!token.IsCancellationRequested && !_disposed) { _loading = false; StateHasChanged(); } }
+    }
+    public void Dispose() { _disposed = true; _request?.Cancel(); _request?.Dispose(); }
+}

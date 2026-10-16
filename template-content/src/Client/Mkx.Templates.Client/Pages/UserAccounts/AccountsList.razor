@@ -5,123 +5,95 @@
 
 <PageTitle>مدیریت کاربران</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudBreadcrumbs Class="px-0" Items="_breadcrumbs" MaxItems="2">
-        <SeparatorTemplate>
-            <MudIcon Icon="@Icons.Material.Filled.ArrowForwardIos" Size="Size.Small" />
-        </SeparatorTemplate>
-    </MudBreadcrumbs>
-
-    <div class="flex-column gap-2 align-center justify-content-center w-100 mb-6 d-md-flex d-none">
-        <MudText Typo="Typo.h4">مدیریت کاربران</MudText>
-    </div>
-
-    <MudTable @ref="_table" T="GetUserAccountResponse" ServerData="LoadUsersAsync" Hover ContainerClass="responsive-table-paginated"
-              Breakpoint="Breakpoint.Xs" Elevation="24" Dense Class="glassy-card" RowsPerPage="RowsPerPage">
+<AccountShell Title="حساب‌های کاربری" Description="وضعیت و اطلاعات حساب‌های سامانه را مدیریت کنید." Eyebrow="مدیریت سامانه">
+    <UiTable @ref="_table" T="GetUserAccountResponse" ServerData="LoadUsersAsync" Class="" RowsPerPage="RowsPerPage">
         <ToolBarContent>
-            <MudTextField T="string" Clearable="true" Immediate="true" Value="@_searchString" ValueChanged="OnSearch" DebounceInterval="500"
-                          Placeholder="جستجو بر اساس نام، نام کاربری و شماره تلفن ..." Adornment="Adornment.Start" Variant="Variant.Outlined" Margin="Margin.Dense"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"></MudTextField>
-            <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                <MudIconButton aria-label="افزودن" Size="Size.Small" Variant="Variant.Filled"
+            <UiTextField Label="جستجوی حساب‌ها" Value="@_searchString" ValueChanged="OnSearch" DebounceInterval="500"
+                          Placeholder="جستجو بر اساس نام، نام کاربری و شماره تلفن ..."></UiTextField>
+            <div class="ui-responsive ui-mobile-only">
+                <UiIconButton aria-label="افزودن" Variant="Variant.Filled"
                                OnClick="OnAddAccount" Class="me-2"
-                               Color="Color.Primary" Icon="@Icons.Material.Outlined.Add" />
-            </MudHidden>
-            <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                <MudSpacer />
-                <MudButton Size="Size.Small" Variant="Variant.Filled"
+                               Color="Color.Primary" Icon="plus" />
+            </div>
+            <div class="ui-responsive ui-desktop-only">
+                <span class="ui-spacer"></span>
+                <UiButton Variant="Variant.Filled"
                            OnClick="OnAddAccount" Class="me-2"
-                           Color="Color.Primary" StartIcon="@Icons.Material.Outlined.Add">کاربر جدید</MudButton>
-            </MudHidden>
+                           Color="Color.Primary" StartIcon="plus">کاربر جدید</UiButton>
+            </div>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh>نام کاربری</MudTh>
-            <MudTh>نام و نام خانوادگی</MudTh>
-            <MudTh>شماره تماس</MudTh>
-            <MudTh>نقش</MudTh>
-            <MudTh>عملیات</MudTh>
+            <th>نام کاربری</th>
+            <th>نام و نام خانوادگی</th>
+            <th>شماره تماس</th>
+            <th>نقش</th>
+            <th>عملیات</th>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="نام کاربری">@context.Username</MudTd>
-            <MudTd DataLabel="نام و نام خانوادگی">@context.FullName</MudTd>
-            <MudTd DataLabel="شماره تماس">@(string.IsNullOrEmpty(context.PhoneNumber) ? "-" : context.PhoneNumber)</MudTd>
-            <MudTd DataLabel="نقش">@context.Role.GetRoleName()</MudTd>
-            <MudTd DataLabel="عملیات">
+            <td data-label="نام کاربری">@context.Username</td>
+            <td data-label="نام و نام خانوادگی">@context.FullName</td>
+            <td data-label="شماره تماس">@(string.IsNullOrEmpty(context.PhoneNumber) ? "-" : context.PhoneNumber)</td>
+            <td data-label="نقش">@context.Role.GetRoleName()</td>
+            <td data-label="عملیات">
                 <div class="d-flex gap-2">
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                    <div class="ui-responsive ui-desktop-only">
+                        <UiButton Variant="Variant.Outlined"
                                    OnClick="_ => OnEditAccount(context)"
-                                   Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit">ویرایش</MudButton>
-                    </MudHidden>
-                    <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                        <MudIconButton aria-label="تغییر نمایش" Size="Size.Small" Variant="Variant.Filled"
+                                   Color="Color.Info" StartIcon="edit">ویرایش</UiButton>
+                    </div>
+                    <div class="ui-responsive ui-mobile-only">
+                        <UiIconButton aria-label="تغییر نمایش" Variant="Variant.Filled"
                                        OnClick="_ => OnEditAccount(context)"
-                                       Color="Color.Info" Icon="@Icons.Material.Filled.Edit" />
-                    </MudHidden>
+                                       Color="Color.Info" Icon="edit" />
+                    </div>
 
                     @if (context.IsActive)
                     {
-                        <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                            <MudButton Size="Size.Small" StartIcon="@Icons.Material.Filled.Lock"
+                        <div class="ui-responsive ui-desktop-only">
+                            <UiButton StartIcon="lock"
                                        Color="Color.Warning" Variant="Variant.Outlined"
-                                       OnClick="@(() => LockUser(context))">غیرفعال سازی</MudButton>
-                        </MudHidden>
-                        <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                            <MudIconButton aria-label="قفل کردن" Size="Size.Small" Icon="@Icons.Material.Filled.Lock"
+                                       OnClick="@(() => LockUser(context))">غیرفعال سازی</UiButton>
+                        </div>
+                        <div class="ui-responsive ui-mobile-only">
+                            <UiIconButton aria-label="قفل کردن" Icon="lock"
                                            Color="Color.Warning" Variant="Variant.Filled"
                                            OnClick="@(() => LockUser(context))" />
-                        </MudHidden>
+                        </div>
 
                     }
                     else
                     {
-                        <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                            <MudButton Size="Size.Small" StartIcon="@Icons.Material.Filled.LockOpen"
+                        <div class="ui-responsive ui-desktop-only">
+                            <UiButton StartIcon="unlock"
                                        Color="Color.Success" Variant="Variant.Outlined"
-                                       OnClick="@(() => UnlockUser(context))">فعالسازی</MudButton>
-                        </MudHidden>
-                        <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                            <MudIconButton aria-label="باز کردن قفل" Size="Size.Small" Icon="@Icons.Material.Filled.LockOpen"
+                                       OnClick="@(() => UnlockUser(context))">فعالسازی</UiButton>
+                        </div>
+                        <div class="ui-responsive ui-mobile-only">
+                            <UiIconButton aria-label="باز کردن قفل" Icon="unlock"
                                            Color="Color.Success" Variant="Variant.Filled"
                                            OnClick="@(() => UnlockUser(context))" />
-                        </MudHidden>
+                        </div>
                     }
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton Size="Size.Small" Variant="Variant.Outlined"
+                    <div class="ui-responsive ui-desktop-only">
+                        <UiButton Variant="Variant.Outlined"
                                    OnClick="_ => OnDeleteAccount(context)"
-                                   Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete">حذف</MudButton>
-                    </MudHidden>
-                    <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                        <MudIconButton aria-label="تغییر نمایش" Size="Size.Small" Variant="Variant.Filled"
+                                   Color="Color.Error" StartIcon="trash">حذف</UiButton>
+                    </div>
+                    <div class="ui-responsive ui-mobile-only">
+                        <UiIconButton aria-label="تغییر نمایش" Variant="Variant.Filled"
                                        OnClick="_ => OnDeleteAccount(context)"
-                                       Color="Color.Error" Icon="@Icons.Material.Filled.Delete" />
-                    </MudHidden>
+                                       Color="Color.Error" Icon="trash" />
+                    </div>
 
                 </div>
-            </MudTd>
+            </td>
         </RowTemplate>
         <NoRecordsContent>
-            <MudText>هیچ کاربری ثبت نشده است!</MudText>
+            <p>هیچ کاربری ثبت نشده است!</p>
         </NoRecordsContent>
         <LoadingContent>
-            <MudText>در حال بارگیری</MudText>
+            <p>در حال بارگیری</p>
         </LoadingContent>
-        <PagerContent>
-            <div class="d-flex flex-column flex-md-row align-center justify-md-space-between w-100 py-4" style="gap: 1rem;">
-                <div class="mud-table-pagination-caption">
-                    @InfoText
-                </div>
-                <MudPagination SelectedChanged="PageChanged"
-                               Selected="@(_currentPage + 1)"
-                               Color="Color.Primary"
-                               Count="@PageCount"
-                               Class="justify-center"
-                               BoundaryCount="1"
-                               MiddleCount="3" />
-                <div class="d-none d-md-block mud-table-pagination-caption" style="visibility: hidden; pointer-events: none;">
-                    @InfoText
-                </div>
-            </div>
-        </PagerContent>
-    </MudTable>
-</MudContainer>
+
+    </UiTable>
+</AccountShell>

@@ -1,24 +1,25 @@
 using Mkx.Templates.Shared.DTOs.UserAccounts;
 using Mkx.Templates.Shared.Abstractions;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.UserAccounts.Components.Editors;
 
 public partial class EmailEditor
 {
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
     [Parameter] public string? Email { get; set; }
 
-    private MudForm _form = default!;
+    private UiForm _form = default!;
 
-    private void Close() => MudDialog.Cancel();
+    private void Close() => Dialog.Cancel();
 
     private async Task Submit()
     {
+        if (IsBusy) return;
         await _form.ValidateAsync();
 
-        if (!_form.IsValid)
+        if (IsBusy || !_form.IsValid)
             return;
 
         var request = new UpdateUserEmailRequest(Email ?? string.Empty);
@@ -27,7 +28,7 @@ public partial class EmailEditor
             action: (s, ct) => s.UpdateUserEmailAsync(request, ct),
             afterSend: () =>
             {
-                MudDialog.Close(DialogResult.Ok(true));
+                Dialog.Close(DialogResult.Ok(true));
                 return Task.CompletedTask;
             });
     }

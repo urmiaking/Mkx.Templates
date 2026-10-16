@@ -2,15 +2,15 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Tests;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Components.Tests;
 
 public partial class TestEditor
 {
-    [CascadingParameter] private IMudDialogInstance Dialog { get; set; } = default!;
+    [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
     [Parameter] public GetTestResponse? Item { get; set; }
-    private MudForm _form = default!;
+    private UiForm _form = default!;
     private string _name = "";
     private string? _description;
     private bool _dirty;

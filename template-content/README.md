@@ -1,6 +1,6 @@
 # Mkx.Templates
 
-.NET 10 Blazor template with a Persian RTL interface, MudBlazor, SQL Server, Identity, policies and a tested CRUD reference. Start agent work at [AGENTS.md](AGENTS.md). The solution contains 12 application/SDK projects and one executable test project.
+.NET 10 Blazor template with a Persian RTL interface, native Blazor components, SQL Server, Identity, policies and a tested CRUD reference. Start agent work at [AGENTS.md](AGENTS.md). The solution contains 12 application/SDK projects and one executable test project.
 
 ## Prerequisites
 
@@ -61,6 +61,6 @@ Override the local SQL connection for the deployment host, using `ConnectionStri
 
 PWA registration is production-only and controlled by `Features:Pwa`. It caches public static assets and shows an offline information page; authenticated workflows require a connection. Updates wait for a user action. The UI defaults to opaque surfaces on phones and automatically respects the operating system reduced-motion preference.
 
-The original default font is IRANSans (FaNum) Medium; its local assets and the Google font assets used by the Cinzel Decorative brand are included in generated content and published assets. Typography, palette sizes and theme identity should be preserved when optimizing performance. Vazirmatn remains a fallback; its SIL OFL license is bundled under `wwwroot/fonts/vazir/OFL.txt`.
+The workspace uses local Vazirmatn with IRANSans as fallback. Its light theme follows the navy/teal reference; dark mode uses charcoal surfaces and saturated jade accents. The fixed desktop sidebar, mobile central action, full-height notification panel and centered authentication card share the same tokens. `UiOtpField` provides the reference’s six-cell presentation for recovery, phone verification and authenticator setup. Vazirmatn’s SIL OFL license is bundled under `wwwroot/fonts/vazir/OFL.txt`.
 
 SQL logging and the administrator-only `/serilog-ui` page are enabled by default (`Logging:UseSqlStore=true`). Navigate to this page with a full server load. Set the flag to false only when deliberately disabling this feature.

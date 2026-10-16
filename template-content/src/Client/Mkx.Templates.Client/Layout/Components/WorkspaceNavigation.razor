@@ -1,0 +1,19 @@
+<nav class="workspace-menu" aria-label="بخش‌های اصلی">
+    <NavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All"><UiIcon Icon="home" /><span>خانه</span></NavLink>
+    <AuthorizeView Policy="@AppPolicies.Tests.View">
+        <NavLink href="@ClientRoutes.Tests.Index"><UiIcon Icon="check-circle" /><span>مدیریت تست‌ها</span></NavLink>
+    </AuthorizeView>
+    <AuthorizeView Policy="@AppPolicies.Users.View">
+        <NavLink href="@ClientRoutes.Users.Index" Match="NavLinkMatch.All"><UiIcon Icon="users" /><span>کاربران</span></NavLink>
+        <NavLink href="@ClientRoutes.Users.RoleClaims"><UiIcon Icon="key" /><span>نقش‌ها و دسترسی‌ها</span></NavLink>
+    </AuthorizeView>
+    <AuthorizeView>
+        <Authorized>
+            <NavLink href="@ClientRoutes.UserAccounts.Index" Match="NavLinkMatch.All"><UiIcon Icon="user" /><span>حساب کاربری</span></NavLink>
+            <NavLink href="@ClientRoutes.UserAccounts.TwoFactorAuthentication"><UiIcon Icon="security" /><span>امنیت حساب</span></NavLink>
+        </Authorized>
+        <NotAuthorized>
+            <a href="@ClientRoutes.Accounts.Login"><UiIcon Icon="log-in" /><span>ورود به حساب</span></a>
+        </NotAuthorized>
+    </AuthorizeView>
+</nav>

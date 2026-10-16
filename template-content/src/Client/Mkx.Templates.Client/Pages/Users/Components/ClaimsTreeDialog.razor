@@ -1,51 +1,43 @@
 @using Mkx.Templates.Shared.DTOs.Claims
 @inherits AppComponentBase
 
-<MudDialog>
+<UiDialog>
     <DialogContent>
         <div style="max-height: 60vh; overflow-y: auto;" class="d-flex flex-column gap-3 py-2 px-1">
-            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true" Class="mb-1">
+            <div class="ui-alert mb-1 ui-alert-info">
                 برای تغییر دسترسی‌ها، گزینه‌های مورد نظر را علامت بزنید. با علامت زدن هر بخش، تمامی زیرمجموعه‌های آن به طور خودکار تغییر می‌یابند.
-            </MudAlert>
-
-            <div class="d-flex align-center justify-space-between gap-2">
-                <MudTextField @bind-Value="_searchQuery"
-                              Placeholder="جستجو در دسترسی‌ها..."
-                              Adornment="Adornment.Start"
-                              AdornmentIcon="@Icons.Material.Filled.Search"
-                              IconSize="Size.Small"
-                              Immediate="true"
-                              Clearable="true"
-                              Class="flex-grow-1"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
-
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" OnClick="@SelectAll">
-                    انتخاب همه
-                </MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Small" OnClick="@DeselectAll">
-                    لغو همه
-                </MudButton>
             </div>
 
-            <MudDivider Class="my-1" />
+            <div class="d-flex align-center justify-space-between gap-2">
+                <UiTextField @bind-Value="_searchQuery"
+                              Placeholder="جستجو در دسترسی‌ها..."
+                              Class="flex-grow-1" />
+
+                <UiButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@SelectAll">
+                    انتخاب همه
+                </UiButton>
+                <UiButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@DeselectAll">
+                    لغو همه
+                </UiButton>
+            </div>
+
+            <hr class="ui-divider my-1" />
 
             <div class="d-flex flex-column gap-3 pb-8">
                 @foreach (var category in FilteredTree)
                 {
-                    <MudPaper Class="pa-3 border-solid border border-primary-lighten-4" Elevation="0" Style="border-radius: 8px; background-color: var(--mud-palette-background-grey);">
+                    <section class="ui-panel pa-3 border-solid border border-primary-lighten-4" style="border-radius: 8px; background-color: var(--ui-background-grey);">
                         <div class="d-flex align-center justify-space-between mb-2">
                             <div class="d-flex align-center gap-2">
-                                <MudIcon Icon="@Icons.Material.Filled.FolderSpecial" Color="Color.Primary" Size="Size.Small" />
-                                <MudText Typo="Typo.subtitle1" Class="fw-bold color-primary">@category.Description</MudText>
+                                <UiIcon Icon="folder" Color="Color.Primary" />
+                                <p class="fw-bold color-primary ui-type-subtitle1">@category.Description</p>
                             </div>
-                            <MudCheckBox T="bool"
+                            <UiCheckBox T="bool"
                                          Value="@category.IsGranted"
                                          ValueChanged="@(val => ToggleNode(category, val))"
-                                         Color="Color.Primary"
-                                         Dense="true">
+                                         Color="Color.Primary">
                                 <span class="text-caption font-weight-medium">انتخاب این گروه</span>
-                            </MudCheckBox>
+                            </UiCheckBox>
                         </div>
 
                         @if (category.Children.Any())
@@ -57,21 +49,21 @@
                                 }
                             </div>
                         }
-                    </MudPaper>
+                    </section>
                 }
             </div>
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel" Variant="Variant.Text">انصراف</MudButton>
-        <MudButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">
+        <UiButton OnClick="Cancel" Variant="Variant.Text">انصراف</UiButton>
+        <UiButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="check">
             ذخیره دسترسی‌ها
-        </MudButton>
+        </UiButton>
     </DialogActions>
-</MudDialog>
+</UiDialog>
 
 @code {
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
     [Parameter] public List<PolicyTreeNodeDto> InitialTree { get; set; } = [];
 
     private List<PolicyTreeNodeDto> _tree = [];
@@ -101,25 +93,24 @@
         var indentStyle = level switch
         {
             1 => "margin-right: 8px;",
-            2 => "margin-right: 24px; border-right: 2px solid var(--mud-palette-primary); padding-right: 12px;",
-            _ => "margin-right: 36px; border-right: 2px solid var(--mud-palette-secondary); padding-right: 12px;"
+            2 => "margin-right: 24px; border-right: 2px solid var(--ui-primary); padding-right: 12px;",
+            _ => "margin-right: 36px; border-right: 2px solid var(--ui-secondary); padding-right: 12px;"
         };
 
         <div class="my-1" style="@indentStyle">
             <div class="d-flex align-center justify-space-between py-1 px-2 rounded hover-light">
                 <div class="d-flex align-center gap-2">
-                    <MudIcon Icon="@(node.Children.Any() ? Icons.Material.Filled.AccountTree : Icons.Material.Filled.VpnKey)" Size="Size.Small" Color="Color.Default" />
+                    <UiIcon Icon="@(node.Children.Any() ? "list" : "key")" Color="Color.Default" />
                     <div>
-                        <MudText Typo="Typo.body2" Class="fw-medium">@node.Description</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary" Style="font-size: 0.75rem;">@node.Name</MudText>
+                        <p class="fw-medium ui-type-body2">@node.Description</p>
+                        <p class="ui-type-caption ui-color-secondary" style="font-size: 0.75rem;">@node.Name</p>
                     </div>
                 </div>
 
-                <MudCheckBox T="bool"
+                <UiCheckBox T="bool"
                              Value="@node.IsGranted"
                              ValueChanged="@(val => ToggleNode(node, val))"
-                             Color="Color.Success"
-                             Dense="true" />
+                             Color="Color.Success" />
             </div>
 
             @if (node.Children.Any())
@@ -177,7 +168,7 @@
     {
         var grantedClaimNames = new List<string>();
         CollectGrantedClaims(_tree, grantedClaimNames);
-        MudDialog.Close(DialogResult.Ok(grantedClaimNames));
+        Dialog.Close(DialogResult.Ok(grantedClaimNames));
     }
 
     private void CollectGrantedClaims(List<PolicyTreeNodeDto> nodes, List<string> list)
@@ -195,5 +186,5 @@
         }
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel() => Dialog.Cancel();
 }

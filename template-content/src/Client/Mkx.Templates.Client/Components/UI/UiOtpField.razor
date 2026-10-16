@@ -1,0 +1,61 @@
+@using Mkx.Templates.Shared.Utilities
+@implements IDisposable
+@inject IJSRuntime JS
+
+<div class="otp-field" aria-invalid="@(_invalid ? "true" : "false")">
+    <label class="sms-login-label" for="@_id">@Label</label>
+    <div class="sms-otp-input-wrap" dir="ltr" data-otp-input data-otp-auto-submit="@AutoSubmit.ToString().ToLowerInvariant()" data-otp-sms="@Sms.ToString().ToLowerInvariant()">
+        @for (var i = 0; i < 6; i++)
+        {
+            var digit = i;
+            <span class="sms-otp-digit @(digit < Code.Length ? "filled" : "")" aria-hidden="true">@(digit < Code.Length ? Code[digit].ToString() : "")</span>
+        }
+        <input id="@_id" name="@Name" value="@Code" type="text" inputmode="numeric" pattern="[0-9۰-۹٠-٩]{6}" autocomplete="one-time-code" enterkeyhint="done" maxlength="6" required="@Required" disabled="@Disabled" aria-label="@Label" aria-invalid="@(_invalid ? "true" : "false")" aria-describedby="@(_id + "-hint")" data-otp-real @oninput="ChangeAsync" />
+    </div>
+    <p class="identity-hint" id="@(_id + "-hint")">@(_invalid ? "کد تأیید باید شش رقم باشد." : Hint)</p>
+</div>
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+    [Parameter] public EventCallback OnCompleted { get; set; }
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public string Label { get; set; } = "کد تأیید شش‌رقمی";
+    [Parameter] public string Hint { get; set; } = "می‌توانید کد را تایپ یا یکجا جای‌گذاری کنید.";
+    [Parameter] public bool Required { get; set; } = true;
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public bool AutoSubmit { get; set; }
+    [Parameter] public bool Sms { get; set; } = true;
+    [CascadingParameter] private UiForm? Form { get; set; }
+    private readonly string _id = "otp-" + Guid.NewGuid().ToString("N");
+    private string? _lastCompleted;
+    private bool _invalid;
+    private string Code => OtpCode.Normalize(Value);
+    protected override void OnInitialized() => Form?.Register(ValidateAsync);
+    protected override void OnParametersSet() { if (Code.Length < 6) _lastCompleted = null; }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // SSR runs the same initializer on DOMContentLoaded; interactive dialogs initialize when rendered.
+        if (firstRender) await JS.InvokeVoidAsync("Mkx.otp.initialize");
+    }
+    private async Task ChangeAsync(ChangeEventArgs args)
+    {
+        if (Disabled) return;
+        Value = OtpCode.Normalize(args.Value?.ToString());
+        _invalid = false;
+        await ValueChanged.InvokeAsync(Value);
+        if (Value.Length < 6) _lastCompleted = null;
+        else if (Value != _lastCompleted && OnCompleted.HasDelegate)
+        {
+            _lastCompleted = Value;
+            await OnCompleted.InvokeAsync();
+        }
+    }
+    private Task<bool> ValidateAsync()
+    {
+        _invalid = Required && Code.Length != 6;
+        StateHasChanged();
+        return Task.FromResult(!_invalid);
+    }
+    public void Dispose() => Form?.Unregister(ValidateAsync);
+}

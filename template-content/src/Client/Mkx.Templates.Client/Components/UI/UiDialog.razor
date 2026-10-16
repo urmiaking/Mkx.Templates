@@ -1,0 +1,6 @@
+<div class="ui-dialog-content">@DialogContent</div>
+<footer class="ui-dialog-actions">@DialogActions</footer>
+@code {
+    [Parameter] public RenderFragment? DialogContent { get; set; }
+    [Parameter] public RenderFragment? DialogActions { get; set; }
+}

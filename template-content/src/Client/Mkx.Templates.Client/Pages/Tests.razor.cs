@@ -3,17 +3,30 @@ using Mkx.Templates.Client.Components.Tests;
 using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Tests;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages;
 
 public partial class Tests
 {
-    private MudTable<GetTestResponse>? _table;
+    private UiTable<GetTestResponse>? _table;
     private string? _search;
     private bool _loadFailed;
     [SupplyParameterFromQuery(Name = "search")] public string? Search { get; set; }
-    protected override void OnParametersSet() => _search = Search;
+    [SupplyParameterFromQuery(Name = "create")] public bool Create { get; set; }
+    private bool _createHandled;
+    protected override void OnParametersSet()
+    {
+        _search = Search;
+        if (!Create) _createHandled = false;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Create || _createHandled) return;
+        _createHandled = true;
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("create", (bool?)null), replace: true);
+        if (await HasPolicyAsync(Shared.Authorization.AppPolicies.Tests.Manage)) await EditAsync(null);
+    }
     private async Task<TableData<GetTestResponse>> LoadAsync(TableState state, CancellationToken token)
     {
         var filter = new RequestFilter(state.Page * state.PageSize, state.PageSize, _search, state.SortLabel,

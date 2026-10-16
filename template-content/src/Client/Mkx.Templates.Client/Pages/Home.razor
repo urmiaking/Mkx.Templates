@@ -1,17 +1,22 @@
 @attribute [Route(ClientRoutes.Home.Index)]
-
-<PageTitle>صفحه اصلی</PageTitle>
-
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudBreadcrumbs Class="px-0" Items="_breadcrumbs" MaxItems="2">
-        <SeparatorTemplate>
-            <MudIcon Icon="@Icons.Material.Filled.ArrowForwardIos" Size="Size.Small" />
-        </SeparatorTemplate>
-    </MudBreadcrumbs>
-
-    <MudText Typo="Typo.h3" GutterBottom="true">خوش آمدید</MudText>
-    <MudText Typo="Typo.body1" Class="mb-8">به قالب پروژه Blazor خوش آمدید. این پروژه با استفاده از MudBlazor و ساختار Clean Architecture طراحی شده است.</MudText>
-
+<PageTitle>خانه</PageTitle>
+<section class="ui-container">
+    <header class="home-intro"><div><span class="home-kicker">فضای کاری شما</span><h1>روزتان بخیر</h1><p>از اینجا به کارها، حساب و دسترسی‌های خود برسید.</p></div><AuthorizeView Policy="@AppPolicies.Tests.Manage"><a class="ui-button ui-button-filled" href="@ClientRoutes.Tests.Create"><UiIcon Icon="plus" />ثبت جدید</a></AuthorizeView></header>
+    <div class="home-layout">
+        <div class="home-main">
+            <section class="home-feature">
+                <div class="home-feature-meta"><span class="ui-chip">حساب و فضای کاری</span><UiIcon Icon="security" /></div>
+                <h2>یک حساب، دسترسی‌های یکپارچه</h2><p>اطلاعات شخصی و روش‌های ورود خود را مدیریت کنید؛ کارها و اطلاعات مورد نیازتان از همین فضای کاری در دسترس‌اند.</p>
+                <AuthorizeView><Authorized><a class="ui-button ui-button-filled" href="@ClientRoutes.UserAccounts.Index">مشاهده حساب کاربری <UiIcon Icon="forward" /></a></Authorized><NotAuthorized><a class="ui-button ui-button-filled" href="@ClientRoutes.Accounts.Login">ورود به حساب <UiIcon Icon="forward" /></a></NotAuthorized></AuthorizeView>
+            </section>
+            <div class="home-section-head"><h2>بخش‌های پرکاربرد</h2><span>دسترسی سریع</span></div>
+            <div class="home-links">
+                <AuthorizeView Policy="@AppPolicies.Tests.View"><ActionCard Title="مدیریت تست‌ها" Description="مشاهده، جستجو و ثبت اطلاعات" StartIcon="check-circle" Href="@ClientRoutes.Tests.Index" /></AuthorizeView>
+                <AuthorizeView Policy="@AppPolicies.Users.View"><ActionCard Title="کاربران و دسترسی‌ها" Description="مدیریت اعضا، نقش‌ها و مجوزها" StartIcon="users" Href="@ClientRoutes.Users.Index" /></AuthorizeView>
+                <AuthorizeView><Authorized><ActionCard Title="امنیت حساب" Description="رمز دومرحله‌ای، کلید عبور و سرویس‌های متصل" StartIcon="key" Href="@ClientRoutes.UserAccounts.TwoFactorAuthentication" /></Authorized><NotAuthorized><ActionCard Title="بازیابی حساب" Description="بازنشانی رمز عبور با کد تأیید موبایل" StartIcon="key" Href="@ClientRoutes.Accounts.ForgotPassword" /></NotAuthorized></AuthorizeView>
+            </div>
+        </div>
+        <aside class="home-aside"><h2>شروع یک روز منظم</h2><ul class="home-checklist"><li><UiIcon Icon="user" /><div><strong>اطلاعات حساب</strong><small>مشخصات و راه‌های ارتباطی خود را به‌روز نگه دارید.</small></div></li><li><UiIcon Icon="security" /><div><strong>ورود امن‌تر</strong><small>از رمز دومرحله‌ای یا کلید عبور استفاده کنید.</small></div></li><li><UiIcon Icon="grid" /><div><strong>دسترسی به بخش‌ها</strong><small>منوی اصلی، بخش‌های مجاز حساب شما را نمایش می‌دهد.</small></div></li></ul></aside>
+    </div>
     <QuickGuide />
-
-</MudContainer>
+</section>

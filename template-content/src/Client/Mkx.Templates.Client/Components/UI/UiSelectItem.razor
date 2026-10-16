@@ -1,0 +1,6 @@
+@typeparam T
+<option value="@Value">@ChildContent</option>
+@code {
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

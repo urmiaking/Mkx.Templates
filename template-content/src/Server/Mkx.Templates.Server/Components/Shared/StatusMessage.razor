@@ -1,10 +1,10 @@
 @using Microsoft.AspNetCore.Http
 @using Mkx.Templates.Server.Services
-@using MudBlazor
+@using Mkx.Templates.Client.Components.UI
 
 @if (!string.IsNullOrEmpty(DisplayMessage))
 {
-    <MudAlert Class="mb-2" Variant="Variant.Outlined" Severity="@Severity" ContentAlignment="HorizontalAlignment.Start" Dense="true">@DisplayMessage</MudAlert>
+    <div class="ui-alert mb-2 ui-alert-@(Severity.ToString().ToLowerInvariant())">@DisplayMessage</div>
 }
 
 @code {

@@ -1,0 +1,13 @@
+@implements IDisposable
+@inject ToastService Toasts
+<div class="ui-toasts" aria-live="polite" aria-atomic="false">
+    @foreach (var toast in Toasts.Messages.ToArray())
+    {
+        <div class="@($"ui-toast ui-alert-{toast.Severity.ToString().ToLowerInvariant()}")" @key="toast.Id"><span>@toast.Message</span><UiIconButton Icon="close" aria-label="بستن پیام" OnClick="() => Toasts.Dismiss(toast.Id)" /></div>
+    }
+</div>
+@code {
+    protected override void OnInitialized() => Toasts.Changed += Changed;
+    private void Changed() => InvokeAsync(StateHasChanged);
+    public void Dispose() => Toasts.Changed -= Changed;
+}

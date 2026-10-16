@@ -4,68 +4,57 @@
 @inherits AppComponentBase
 
 <NavigationLock ConfirmExternalNavigation="IsDirty" OnBeforeInternalNavigation="ConfirmNavigationAsync" />
-<div data-unsaved="@(IsDirty ? "true" : "false")"><MudForm Model="Model" @ref="@_form">
-    <MudDialog>
+<div data-unsaved="@(IsDirty ? "true" : "false")"><UiForm Model="Model" @ref="@_form">
+    <UiDialog>
         <DialogContent>
-            @if (LastRequestError is not null) { <MudAlert Severity="Severity.Error" role="alert">@LastRequestError</MudAlert> }
+            @if (LastRequestError is not null) { <div class="ui-alert ui-alert-error" role="alert">@LastRequestError</div> }
             <div class="d-flex flex-column gap-3 py-2">
-                <MudTextField @bind-Value="Model.Name"
+                <UiTextField @bind-Value="Model.Name"
                               Label="نام و نام خانوادگی"
                               Required="true"
-                              RequiredError="نام و نام خانوادگی الزامی است"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              RequiredError="نام و نام خانوادگی الزامی است" />
 
-                <MudTextField @bind-Value="Model.UserName"
+                <UiTextField @bind-Value="Model.UserName"
                               Label="نام کاربری"
                               Disabled="@IsEdit"
                               Required="true"
-                              RequiredError="نام کاربری الزامی است"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              RequiredError="نام کاربری الزامی است" />
 
-                <MudTextField @bind-Value="Model.Email"
+                <UiTextField @bind-Value="Model.Email"
                               Label="ایمیل"
-                              InputType="InputType.Email"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              InputType="InputType.Email" />
 
-                <MudTextField @bind-Value="Model.PhoneNumber"
+                <UiTextField @bind-Value="Model.PhoneNumber"
                               Label="شماره همراه"
-                              InputType="InputType.Telephone"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              InputType="InputType.Telephone" />
 
-                <MudTextField @bind-Value="Model.Password"
+                <UiTextField @bind-Value="Model.Password"
                               Label="@(IsEdit ? "کلمه عبور جدید (در صورت عدم تغییر خالی بگذارید)" : "کلمه عبور")"
                               InputType="InputType.Password"
                               Required="@(!IsEdit)"
-                              RequiredError="کلمه عبور الزامی است"
-                              Variant="Variant.Outlined"
-                              Margin="Margin.Dense" />
+                              RequiredError="کلمه عبور الزامی است" />
 
                 <div>
-                    <MudText Typo="Typo.body2" Class="mb-1">نقش‌های سیستم:</MudText>
+                    <p class="mb-1 ui-type-body2">نقش‌های سیستم:</p>
                     <div class="d-flex flex-wrap gap-2">
                         @foreach (var role in BuiltinRoles.Roles)
                         {
-                            <MudCheckBox T="bool"
+                            <UiCheckBox T="bool"
                                          Value="@Model.SelectedRoles.Contains(role)"
                                          ValueChanged="@(val => ToggleRole(role, val))"
-                                         Color="Color.Primary"
-                                         Dense="true">
+                                         Color="Color.Primary">
                                 @role.GetRoleName()
-                            </MudCheckBox>
+                            </UiCheckBox>
                         }
                     </div>
                 </div>
             </div>
         </DialogContent>
         <DialogActions>
-            <MudButton OnClick="CancelAsync" Disabled="IsBusy" Variant="Variant.Text">انصراف</MudButton>
-            <MudButton OnClick="Submit" Disabled="IsBusy" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">
+            <UiButton OnClick="CancelAsync" Disabled="IsBusy" Variant="Variant.Text">انصراف</UiButton>
+            <UiButton OnClick="Submit" Disabled="IsBusy" Color="Color.Primary" Variant="Variant.Filled" StartIcon="check">
                 ذخیره
-            </MudButton>
+            </UiButton>
         </DialogActions>
-    </MudDialog>
-</MudForm></div>
+    </UiDialog>
+</UiForm></div>

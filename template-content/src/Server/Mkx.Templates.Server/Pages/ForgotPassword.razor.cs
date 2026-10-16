@@ -9,12 +9,16 @@ using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Mkx.Templates.Shared.Routes;
 using Microsoft.Extensions.Caching.Memory;
+using Mkx.Templates.Shared.Utilities;
+using Mkx.Templates.Sdk.Shared.Extensions;
 
 namespace Mkx.Templates.Server.Pages;
 
 public partial class ForgotPassword
 {
     private string? _errorMessage;
+    private string? _infoMessage;
+    private int _resendSeconds;
     private EditContext _editContext = default!;
     private static readonly TimeSpan SmsCooldown = TimeSpan.FromMinutes(2);
 
@@ -35,6 +39,7 @@ public partial class ForgotPassword
     {
         Input ??= new InputModel();
         _editContext = new EditContext(Input);
+        if (Input.Step == 2) _resendSeconds = GetResendSeconds();
 
         base.OnInitialized();
     }
@@ -42,6 +47,14 @@ public partial class ForgotPassword
     private async Task HandleSubmit()
     {
         _errorMessage = null;
+        _infoMessage = null;
+        if (Input.Step == 2 && Input.Action == "resend")
+        {
+            if (GetResendSeconds() > 0) { _errorMessage = "برای ارسال مجدد، شمارش معکوس را به پایان برسانید."; return; }
+            Input.Step = 1;
+            Input.OtpCode = "";
+        }
+        Input.PhoneNumber = (Input.PhoneNumber ?? "").Trim().ToEnglishNumericsChars().Replace(" ", "");
 
         if (Input.Step == 1)
         {
@@ -52,9 +65,11 @@ public partial class ForgotPassword
             }
 
             var cacheKey = $"phone:smsCooldown:{Input.PhoneNumber}";
-            if (Cache.TryGetValue(cacheKey, out _))
+            if (GetResendSeconds() > 0)
             {
-                _errorMessage = "لطفاً برای ارسال مجدد کد تایید ۲ دقیقه صبر کنید.";
+                _errorMessage = "برای ارسال مجدد، شمارش معکوس را به پایان برسانید.";
+                Input.Step = 2;
+                _resendSeconds = GetResendSeconds();
                 return;
             }
 
@@ -76,9 +91,11 @@ public partial class ForgotPassword
                     return;
                 }
 
-                Cache.Set(cacheKey, true, SmsCooldown);
+                Cache.Set(cacheKey, DateTimeOffset.UtcNow.Add(SmsCooldown), SmsCooldown);
                 Logger.LogInformation("Password recovery code accepted by SMS provider.");
                 Input.Step = 2;
+                _resendSeconds = GetResendSeconds();
+                if (Input.Action == "resend") _infoMessage = "درخواست ارسال مجدد کد ثبت شد.";
             }
             catch (Exception ex)
             {
@@ -88,6 +105,7 @@ public partial class ForgotPassword
         }
         else if (Input.Step == 2)
         {
+            Input.OtpCode = OtpCode.Normalize(Input.OtpCode);
             if (string.IsNullOrWhiteSpace(Input.OtpCode))
             {
                 _errorMessage = "لطفاً کد تایید را وارد کنید.";
@@ -105,6 +123,7 @@ public partial class ForgotPassword
             if (!isValid)
             {
                 _errorMessage = "کد تایید وارد شده نامعتبر یا منقضی شده است.";
+                Input.OtpCode = "";
                 return;
             }
 
@@ -161,9 +180,14 @@ public partial class ForgotPassword
         return false;
     }
 
+    private int GetResendSeconds() => Cache.TryGetValue<DateTimeOffset>($"phone:smsCooldown:{Input.PhoneNumber}", out var until)
+        ? Math.Max(0, (int)Math.Ceiling((until - DateTimeOffset.UtcNow).TotalSeconds)) : 0;
+    private static string MaskPhone(string phone) => phone.Length == 11 ? phone[..4] + "•••" + phone[^4..] : phone;
+
     private sealed class InputModel
     {
         public int Step { get; set; } = 1;
+        public string Action { get; set; } = "";
 
         [Phone]
         public string PhoneNumber { get; set; } = "";

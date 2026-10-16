@@ -3,7 +3,7 @@ using Mkx.Templates.Shared.Enums;
 using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.UserAccounts;
 
@@ -13,9 +13,9 @@ public partial class ExternalLogins
 
     private readonly List<BreadcrumbItem> _breadcrumbs =
     [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: Icons.Material.Filled.Home),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: Icons.Material.Filled.ManageAccounts),
-        new("احراز هویت خارجی", href: ClientRoutes.UserAccounts.ExternalLogins, icon: Icons.Material.Filled.AddLink)
+        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
+        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
+        new("احراز هویت خارجی", href: ClientRoutes.UserAccounts.ExternalLogins, icon: "link")
     ];
 
     private GetExternalProviderResponse? _externalLogins;
@@ -39,6 +39,7 @@ public partial class ExternalLogins
             return;
 
         var success = Enum.TryParse<ExternalLoginResult>(LinkResult, true, out var result);
+        LinkResult = null;
 
         if (!success)
         {
@@ -69,10 +70,10 @@ public partial class ExternalLogins
     {
         return provider.ToLower() switch
         {
-            "google" => Icons.Custom.Brands.Google,
-            "microsoft" => Icons.Custom.Brands.Microsoft,
-            "github" => Icons.Custom.Brands.GitHub,
-            _ => Icons.Material.Filled.AccountCircle
+            "google" => "globe",
+            "microsoft" => "globe",
+            "github" => "globe",
+            _ => "user"
         };
     }
 

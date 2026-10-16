@@ -6,8 +6,8 @@
             <NotAuthorized>
                 @if (ClientAuthState is { HasConnectionError: true } clientAuthState)
                 {
-                    <MudAlert Severity="Severity.Warning" role="status">بررسی نشست ممکن نشد. اتصال خود را بررسی کنید.</MudAlert>
-                    <MudButton OnClick="clientAuthState.RefreshAsync">تلاش مجدد</MudButton>
+                    <div class="ui-alert ui-alert-warning" role="status">بررسی نشست ممکن نشد. اتصال خود را بررسی کنید.</div>
+                    <UiButton OnClick="clientAuthState.RefreshAsync">تلاش مجدد</UiButton>
                 }
                 else { <HandleNotAuthorized /> }
             </NotAuthorized>

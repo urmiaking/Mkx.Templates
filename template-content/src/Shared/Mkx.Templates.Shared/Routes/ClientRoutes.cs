@@ -55,6 +55,6 @@ public static class ClientRoutes
     public static class Tests
     {
         public const string Index = "/tests";
+        public const string Create = Index + "?create=true";
     }
 }
-

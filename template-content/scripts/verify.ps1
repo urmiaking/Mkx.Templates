@@ -15,7 +15,7 @@ try {
         $executed += [int]$trx.TestRun.ResultSummary.Counters.executed
     }
     if ($executed -eq 0) { throw "No tests executed." }
-    node --test Tests/browser/pwa.test.mjs
-    if ($LASTEXITCODE -ne 0) { throw "PWA behavior tests failed." }
-    Write-Host "Verified $executed .NET tests and PWA behavior tests. Results: $results"
+    node --test Tests/browser/pwa.test.mjs Tests/browser/otp-request-lock.test.mjs
+    if ($LASTEXITCODE -ne 0) { throw "PWA/OTP behavior tests failed." }
+    Write-Host "Verified $executed .NET tests and PWA/OTP behavior tests. Results: $results"
 } finally { Pop-Location }

@@ -1,10 +1,10 @@
 @using Microsoft.AspNetCore.Antiforgery
-@using MudBlazor
-@using MudBlazor.StaticInput
+@using Mkx.Templates.Client.Components.UI
+
 @inject IServiceProvider Services
 
-<MudIconButton aria-label="Fingerprint" ButtonType="ButtonType.Submit" name="__passkeySubmit"
-               Icon="@Icons.Material.Filled.Fingerprint" Variant="Variant.Filled" Color="Color.Primary" />
+<UiIconButton aria-label="ورود با کلید عبور" ButtonType="ButtonType.Submit" name="__passkeySubmit"
+               Icon="fingerprint" Variant="Variant.Filled" Color="Color.Primary" />
 
 <passkey-submit
     name="@Name"

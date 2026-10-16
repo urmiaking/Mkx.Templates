@@ -1,84 +1,32 @@
 using Blazored.LocalStorage;
+using Microsoft.JSInterop;
 using Mkx.Templates.Client.Common;
-using Mkx.Templates.Client.Layout.Themes;
-using MudBlazor;
 
 namespace Mkx.Templates.Client.Services;
 
-public class ThemeService(ILocalStorageService localStorage)
+public sealed class ThemeService(ILocalStorageService storage)
 {
-    private string _currentPalette = BuiltInThemes.OceanBlue;
-    private bool _isDarkMode;
-
-    public bool IsDarkMode => _isDarkMode;
-    public string CurrentPalette => _currentPalette;
-    public MudTheme CurrentTheme => ColorPalettes.Palettes[_currentPalette];
-
+    public bool IsDarkMode { get; private set; }
     public event EventHandler? OnToggleMode;
-    public event EventHandler? OnPaletteChanged;
-
-    public async Task ToggleModeAsync()
+    public Task ToggleModeAsync() => SetDarkModeAsync(!IsDarkMode);
+    public async Task SetDarkModeAsync(bool value, bool saveToStorage = true)
     {
-        await SetDarkModeAsync(!_isDarkMode, saveToStorage: true);
-    }
-
-    public async Task SetDarkModeAsync(bool isDarkMode, bool saveToStorage = true)
-    {
-        _isDarkMode = isDarkMode;
-
+        IsDarkMode = value;
         if (saveToStorage)
         {
-            try
-            {
-                await localStorage.SetItemAsStringAsync(LocalStorageKeys.IsDarkMode, _isDarkMode.ToString());
-            }
-            catch (InvalidOperationException)
-            {
-                // JSInterop not available (prerendering)
-            }
+            try { await storage.SetItemAsStringAsync(LocalStorageKeys.IsDarkMode, value.ToString()); }
+            catch (JSException) { /* The selected appearance still works without browser storage. */ }
         }
-
         OnToggleMode?.Invoke(this, EventArgs.Empty);
     }
-
-    public async Task SetPaletteAsync(string paletteName)
+    public async Task LoadSettingsAsync(bool systemDark)
     {
-        if (ColorPalettes.Palettes.ContainsKey(paletteName))
-        {
-            _currentPalette = paletteName;
-
-            try
-            {
-                await localStorage.SetItemAsStringAsync(LocalStorageKeys.SelectedPalette, paletteName);
-            }
-            catch (InvalidOperationException)
-            {
-                // JSInterop not available (prerendering)
-            }
-
-            OnPaletteChanged?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    public async Task LoadSettingsAsync()
-    {
+        IsDarkMode = systemDark;
         try
         {
-            var savedPalette = await localStorage.GetItemAsStringAsync(LocalStorageKeys.SelectedPalette);
-            if (!string.IsNullOrEmpty(savedPalette) && ColorPalettes.Palettes.ContainsKey(savedPalette))
-            {
-                _currentPalette = savedPalette;
-            }
-
-            var savedDarkMode = await localStorage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
-            if (!string.IsNullOrEmpty(savedDarkMode) && bool.TryParse(savedDarkMode, out var isDarkMode))
-            {
-                _isDarkMode = isDarkMode;
-            }
+            var saved = await storage.GetItemAsStringAsync(LocalStorageKeys.IsDarkMode);
+            if (bool.TryParse(saved, out var dark)) IsDarkMode = dark;
         }
-        catch (InvalidOperationException)
-        {
-            // JSInterop not available (prerendering), fallback to defaults
-        }
+        catch (JSException) { }
     }
 }

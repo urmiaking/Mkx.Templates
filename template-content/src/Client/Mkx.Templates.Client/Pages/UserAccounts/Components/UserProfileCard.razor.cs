@@ -3,7 +3,7 @@ using Mkx.Templates.Shared.DTOs.UserAccounts;
 using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
 using Microsoft.AspNetCore.Components;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.UserAccounts.Components;
 
@@ -11,7 +11,7 @@ public partial class UserProfileCard
 {
     public GetUserAccountResponse? UserInfo { get; set; }
 
-    private readonly DialogOptions _dialogOptions = new() { CloseButton = true, FullWidth = true, FullScreen = false, MaxWidth = MaxWidth.ExtraSmall };
+    private readonly DialogOptions _dialogOptions = new() { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.Small };
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,8 +45,7 @@ public partial class UserProfileCard
         if (result is { Canceled: false })
         {
             AddSuccessToast("اطلاعات فردی با موفقیت ویرایش شد.");
-            await Task.Delay(1500);
-            Navigation.NavigateTo(ClientRoutes.UserAccounts.Index, true);
+            await LoadUserInfoAsync();
         }
     }
 
@@ -57,7 +56,7 @@ public partial class UserProfileCard
 
         var parameters = new DialogParameters<PhoneNumberEditor>
         {
-            { x => x.PhoneNumber, UserInfo.PhoneNumber }
+            { x => x.PhoneNumber, UserInfo.PhoneNumber ?? "" }
         };
 
         var dialog = await DialogService.ShowAsync<PhoneNumberEditor>("ویرایش شماره تلفن", parameters, _dialogOptions);
@@ -67,8 +66,7 @@ public partial class UserProfileCard
         if (result is { Canceled: false })
         {
             AddSuccessToast("شماره تلفن با موفقیت ویرایش شد.");
-            await Task.Delay(1500);
-            Navigation.NavigateTo(ClientRoutes.UserAccounts.Index, true);
+            await LoadUserInfoAsync();
         }
     }
 
@@ -102,8 +100,7 @@ public partial class UserProfileCard
         if (result is { Canceled: false })
         {
             AddSuccessToast("رمز عبور با موفقیت ویرایش شد.");
-            await Task.Delay(1500);
-            Navigation.NavigateTo(ClientRoutes.UserAccounts.Index, true);
+            await LoadUserInfoAsync();
         }
     }
 }

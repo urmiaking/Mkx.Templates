@@ -1,0 +1,22 @@
+@if (Open)
+{
+    <UiModal Title="اعلان‌ها" Class="notification-panel" OnClose="Close">
+        <div class="notification-shell">
+            <div class="notification-summary"><span class="notification-channel"><UiIcon Icon="bell" /></span><div><strong>پیام‌های حساب شما</strong><p>تغییرات و پیام‌های مهم را اینجا دنبال کنید.</p></div></div>
+            <section class="notification-list" aria-label="فهرست اعلان‌ها" aria-live="polite">
+                @if (ChildContent is not null) { @ChildContent }
+                else
+                {
+                    <div class="notification-empty"><span><UiIcon Icon="bell" /></span><h3>همه‌چیز را مرور کرده‌اید</h3><p>در حال حاضر اعلانی برای نمایش وجود ندارد.</p></div>
+                }
+            </section>
+            <footer class="notification-footer"><UiIcon Icon="check-circle" /><span>اعلان خوانده‌نشده‌ای ندارید</span></footer>
+        </div>
+    </UiModal>
+}
+@code {
+    [Parameter] public bool Open { get; set; }
+    [Parameter] public EventCallback<bool> OpenChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private Task Close() => OpenChanged.InvokeAsync(false);
+}

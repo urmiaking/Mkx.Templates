@@ -1,0 +1,10 @@
+<UiDialog><DialogContent><p>@Message</p></DialogContent><DialogActions>
+    <UiButton OnClick="Session.Cancel">@CancelText</UiButton>
+    <UiButton Variant="Variant.Filled" OnClick="() => Session.Close(DialogResult.Ok(true))">@YesText</UiButton>
+</DialogActions></UiDialog>
+@code {
+    [CascadingParameter] public DialogSession Session { get; set; } = default!;
+    [Parameter] public string Message { get; set; } = "";
+    [Parameter] public string YesText { get; set; } = "تأیید";
+    [Parameter] public string CancelText { get; set; } = "انصراف";
+}

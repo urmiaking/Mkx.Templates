@@ -1,0 +1,22 @@
+@typeparam T
+@implements IDisposable
+<label class="ui-field" for="@_id"><span>@Label</span><select id="@_id" value="@Value" @onchange="Changed" aria-invalid="@(!string.IsNullOrEmpty(_error))" aria-describedby="@(_id + "-error")"><option value="">انتخاب کنید</option>@ChildContent</select><span class="ui-field-error" id="@(_id + "-error")">@_error</span></label>
+@code {
+    private readonly string _id = "select-" + Guid.NewGuid().ToString("N");
+    private string? _error;
+    [CascadingParameter] private UiForm? Form { get; set; }
+    [Parameter] public T? Value { get; set; }
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<T>>? For { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    protected override void OnInitialized() => Form?.Register(ValidateAsync);
+    private Task Changed(ChangeEventArgs e) => ValueChanged.InvokeAsync((T)(object)(e.Value?.ToString() ?? ""));
+    private async Task<bool> ValidateAsync()
+    {
+        if (Form?.Validation is not null && Form.Model is not null && For is not null)
+            _error = string.Join(" ", await Form.Validation(Form.Model, FieldIdentifier.Create(For).FieldName));
+        StateHasChanged(); return string.IsNullOrEmpty(_error);
+    }
+    public void Dispose() => Form?.Unregister(ValidateAsync);
+}

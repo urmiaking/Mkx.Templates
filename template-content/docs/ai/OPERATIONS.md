@@ -16,7 +16,7 @@
 
 All SQL consumers (EF, optional SQL logs/UI and Rebus) use the project-named connection key. There is no fallback to `Default`, which could silently select unrelated shared configuration. Base appsettings supplies a password-free local SQL example even when the environment is Production; deployment configuration should override it. User-secrets load automatically in Development. Database isolation depends on the database name/SQL server, while secret isolation depends on the generated UserSecretsId; the configuration key alone is not a global isolation boundary.
 
-No CORS is needed for this same-origin template. If adding a separate frontend, define explicit origins, cookie/CSRF strategy and tests rather than permissive wildcard credentialed CORS. Use TLS at the edge and configure proxy trust before relying on client IP rate limiting. The host adds nosniff, referrer and permissions headers, HSTS outside Development and no-store on API responses. A strict CSP is product/deployment specific because Blazor/WebAssembly, import maps and MudBlazor have script/style requirements.
+No CORS is needed for this same-origin template. If adding a separate frontend, define explicit origins, cookie/CSRF strategy and tests rather than permissive wildcard credentialed CORS. Use TLS at the edge and configure proxy trust before relying on client IP rate limiting. The host adds nosniff, referrer and permissions headers, HSTS outside Development and no-store on API responses. A strict CSP is product/deployment specific because Blazor/WebAssembly and import maps have script/style requirements.
 
 Auth/verification mutations are limited to 20 per minute per client IP; other mutations to 100. Safe reads are unthrottled. Rejections return 429 and Retry-After. These in-process limits and SMS cooldowns are single-instance defaults; multiple replicas require a shared limiter/cooldown mechanism. Never log request bodies, passwords, OTPs, passkey challenges or provider API keys.
 
@@ -34,6 +34,6 @@ ProblemDetails includes traceId/instance; ASP.NET Core supplies Activity-based r
 
 ## Product-specific extension seams
 
-NotificationsDrawer intentionally ships empty. Add a Shared notification contract, bounded list/read APIs, per-user persistent records, server enforcement, a single client state service and count-based badge; test cross-user access. Drag visuals, if introduced, should run in DOM pointer events/requestAnimationFrame and send one completed action to Blazor, not render on every touchmove.
+NotificationPanel intentionally ships an empty list with the full-height reference presentation. Add a Shared notification contract, bounded list/read APIs, per-user persistent records, server enforcement, a single client state service and count-based badge; test cross-user access. Drag visuals, if introduced, should run in DOM pointer events/requestAnimationFrame and send one completed action to Blazor, not render on every touchmove.
 
 Email/provider delivery, upload/storage, exports, durable jobs, tenancy and Outbox are optional product modules. Choose them only when the product requires their permissions, quotas, storage/retention and delivery semantics. Reuse the tested CRUD path and document the choice in an ADR. They are not hidden mandatory dependencies of this template.

@@ -2,9 +2,10 @@ using Mkx.Templates.Client.Pages.UserAccounts.Components;
 using Mkx.Templates.Shared.DTOs.UserAccounts;
 using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
-using MudBlazor;
+using Mkx.Templates.Client.Components.UI;
 using Net.Codecrete.QrCodeGenerator;
 using System.Globalization;
+using Mkx.Templates.Shared.Utilities;
 using System.Text;
 using System.Text.Encodings.Web;
 
@@ -16,33 +17,35 @@ public partial class EnableAuthenticator
 
     private readonly List<BreadcrumbItem> _breadcrumbs =
     [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: Icons.Material.Filled.Home),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: Icons.Material.Filled.ManageAccounts),
-        new("رمز دو مرحله ای", href: ClientRoutes.UserAccounts.TwoFactorAuthentication, icon: Icons.Material.Filled.Password),
-        new("فعالسازی", href: ClientRoutes.UserAccounts.EnableAuthenticator, icon: Icons.Material.Filled.Check),
+        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
+        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
+        new("رمز دو مرحله ای", href: ClientRoutes.UserAccounts.TwoFactorAuthentication, icon: "key"),
+        new("فعالسازی", href: ClientRoutes.UserAccounts.EnableAuthenticator, icon: "check"),
     ];
 
     private GetAuthenticatorKeyResponse? _authenticatorKey;
     private string? _svgGraphicsPath;
     private string? _code;
     private string? _formattedKey;
+    private int _qrSize = 40;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadSharedKeyAndQrCodeUriAsync();
         await base.OnInitializedAsync();
+        await LoadSharedKeyAndQrCodeUriAsync();
     }
 
     private async Task LoadSharedKeyAndQrCodeUriAsync()
     { 
-        _authenticatorKey = await SendRequestAsync<IUserAccountService, GetAuthenticatorKeyResponse>(
-            action: (s, ct) => s.GetAuthenticatorKeyAsync(ct));
-
-        _formattedKey = FormatKey(_authenticatorKey!.Key);
-
-        var authenticatorUri = GenerateQrCodeUri(_authenticatorKey!.Key);
+        var result = await TryRequestAsync<IUserAccountService, GetAuthenticatorKeyResponse>(
+            (s, ct) => s.GetAuthenticatorKeyAsync(ct));
+        if (!result.Succeeded || result.Value is null) return;
+        _authenticatorKey = result.Value;
+        _formattedKey = FormatKey(_authenticatorKey.Key);
+        var authenticatorUri = GenerateQrCodeUri(_authenticatorKey.Key);
         var qr = QrCode.EncodeText(authenticatorUri, QrCode.Ecc.Medium);
         _svgGraphicsPath = qr.ToGraphicsPath();
+        _qrSize = qr.Size;
     }
 
     private static string FormatKey(string unformattedKey)
@@ -73,7 +76,8 @@ public partial class EnableAuthenticator
 
     private async Task OnEnable()
     {
-        if (string.IsNullOrEmpty(_code))
+        _code = OtpCode.Normalize(_code);
+        if (IsBusy || _authenticatorKey is null || _code.Length != 6)
             return;
 
         await SendRequestAsync<IUserAccountService, EnableTwoFactorAuthResponse>(

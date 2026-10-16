@@ -1,0 +1,11 @@
+<nav class="ui-breadcrumbs" aria-label="مسیر صفحه">
+    @foreach (var item in Items)
+    {
+        <a href="@item.Href">@item.Text</a>
+    }
+</nav>
+@code {
+    [Parameter] public IEnumerable<BreadcrumbItem> Items { get; set; } = [];
+    [Parameter] public RenderFragment? SeparatorTemplate { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? Attributes { get; set; }
+}

@@ -1,0 +1,315 @@
+/* Calm, compact identity pages. OTP keeps one accessible native input. */
+.otp-brand {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin:0 0 24px
+}
+.otp-brand .auth-brand-mark {
+    display:grid;
+    place-items:center;
+    width:42px;
+    height:42px;
+    background:var(--ui-soft);
+    color:var(--ui-link);
+    border:1px solid var(--ui-border);
+    border-radius:12px
+}
+.otp-brand .auth-brand-mark .ui-icon {
+    font-size:23px
+}
+.otp-brand>div {
+    display:grid;
+    gap:1px;
+    text-align:start
+}
+.otp-brand strong {
+    font-size:1.12rem;
+    color:var(--ui-heading);
+    font-weight:800
+}
+.otp-brand div span {
+    font-size:.7rem;
+    color:var(--ui-text-secondary)
+}
+.sms-login-header {
+    text-align:center;
+    margin-bottom:25px
+}
+.sms-login-header h1 {
+    font-size:1.17rem;
+    font-weight:800;
+    margin:0 0 8px;
+    color:var(--ui-heading)
+}
+.sms-login-header p {
+    max-width:340px;
+    margin:0 auto;
+    font-size:.75rem;
+    line-height:1.85;
+    color:var(--ui-text-secondary)
+}
+.sms-login-label {
+    display:block;
+    color:var(--ui-text-secondary);
+    font-weight:650;
+    font-size:.76rem;
+    margin-bottom:9px
+}
+.sms-login-phonefield {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 14px;
+    min-height:51px;
+    border:1px solid var(--ui-input-border);
+    border-radius:11px;
+    background:var(--ui-surface);
+    transition:border-color .16s,box-shadow .16s
+}
+.sms-login-phonefield:focus-within {
+    border-color:var(--ui-secondary);
+    box-shadow:0 0 0 3px #1b7b8b14
+}
+.sms-login-phonefield .ui-icon {
+    font-size:20px;
+    color:var(--ui-text-secondary)
+}
+.sms-login-phonefield input[type=tel] {
+    flex:1;
+    min-width:0;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    background:transparent!important;
+    outline:0;
+    font-size:.95rem;
+    letter-spacing:.08em;
+    text-align:left;
+    color:var(--ui-text-primary);
+    padding:13px 0
+}
+.sms-login-primary {
+    margin-top:19px;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:7px;
+    border:0;
+    border-radius:11px;
+    min-height:48px;
+    background:var(--ui-primary);
+    color:var(--ui-surface)!important;
+    font:inherit;
+    font-size:.82rem;
+    font-weight:750;
+    cursor:pointer;
+    transition:background .16s
+}
+.sms-login-primary:hover:not(:disabled) {
+    background:var(--ui-primary)
+}
+.sms-login-primary.is-pending,.sms-login-primary:disabled {
+    background:var(--ui-primary);
+    cursor:wait;
+    opacity:.88
+}
+.sms-login-primary.is-pending {
+    pointer-events:none
+}
+.sms-request-spinner {
+    display:none;
+    width:17px;
+    height:17px;
+    border:2px solid #ffffff55;
+    border-top-color:var(--ui-surface);
+    border-radius:50%
+}
+.sms-login-primary.is-pending .sms-request-spinner {
+    display:inline-block;
+    animation:sms-request-spin .65s linear infinite
+}
+.sms-login-primary.is-pending .sms-request-arrow {
+    display:none
+}
+@keyframes sms-request-spin {
+    to {
+        transform:rotate(360deg)
+    }
+}
+.sms-login-primary .ui-icon {
+    font-size:21px
+}
+.sms-login-secondary {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    text-align:center;
+    margin:20px auto 0;
+    color:var(--ui-link)!important;
+    font-weight:700;
+    font-size:.74rem;
+    text-decoration:none
+}
+.sms-login-secondary:hover {
+    text-decoration:underline
+}
+.sms-login-destination {
+    font-size:.72rem;
+    color:var(--ui-text-secondary);
+    text-align:center;
+    margin:5px 0 22px
+}
+.sms-login-destination bdi {
+    font-weight:750;
+    color:var(--ui-text-primary);
+    letter-spacing:.03em
+}
+.sms-login-destination a {
+    display:inline-block;
+    margin-inline-start:7px;
+    color:var(--ui-link);
+    text-decoration:none;
+    font-weight:700
+}
+.sms-otp-input-wrap {
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:8px;
+    position:relative;
+    isolation:isolate;
+    width:100%;
+    cursor:text
+}
+.sms-otp-digit {
+    display:grid;
+    place-items:center;
+    min-width:0;
+    height:55px;
+    background:var(--ui-surface);
+    color:var(--ui-text-primary);
+    border:1px solid var(--ui-input-border);
+    border-radius:10px;
+    font-size:1.38rem;
+    font-weight:750;
+    line-height:1;
+    transition:border-color .15s,background .15s
+}
+.sms-otp-digit.filled {
+    background:var(--ui-teal-soft);
+    border-color:var(--ui-secondary)
+}
+.sms-otp-digit.next {
+    border-color:var(--ui-secondary);
+    box-shadow:0 0 0 2px #2c898e19
+}
+.sms-otp-input-wrap input {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    opacity:.01;
+    cursor:text;
+    direction:ltr;
+    z-index:2
+}
+.sms-login-hint {
+    font-size:.69rem;
+    color:var(--ui-text-secondary);
+    text-align:center;
+    margin:12px 0 0
+}
+.sms-login-resend {
+    display:flex;
+    justify-content:center;
+    margin:17px 0 0
+}
+.sms-login-resend-button {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:8px 12px;
+    border:1px solid var(--ui-border);
+    border-radius:10px;
+    background:var(--ui-surface);
+    color:var(--ui-link);
+    font:inherit;
+    font-size:.74rem;
+    font-weight:700;
+    cursor:pointer;
+    min-height:41px;
+    transition:background .15s
+}
+.sms-login-resend-button:disabled {
+    background:var(--ui-soft);
+    color:var(--ui-text-secondary);
+    cursor:not-allowed
+}
+.sms-login-resend-button:not(:disabled):hover {
+    background:var(--ui-soft)
+}
+.sms-login-resend-button .ui-icon {
+    font-size:19px
+}
+.sms-resend-count {
+    font-size:.71rem;
+    min-width:36px;
+    font-variant-numeric:tabular-nums
+}
+.sms-resend-count:empty {
+    display:none
+}
+.sms-login-message {
+    padding:11px 12px;
+    margin-top:16px;
+    border-radius:10px;
+    background:var(--ui-teal-soft);
+    color:var(--ui-link);
+    text-align:center;
+    font-size:.73rem;
+    line-height:1.8
+}
+.sms-login-message.error {
+    background:var(--ui-danger-soft);
+    border:1px solid var(--ui-border);
+    color:var(--ui-error)
+}
+@media(max-width:420px) {
+    .sms-otp-input-wrap {
+        gap:6px
+    }
+    .sms-otp-digit {
+        height:49px;
+        font-size:1.22rem
+    }
+}
+@media(prefers-reduced-motion:reduce) {
+    .sms-otp-digit,.sms-login-primary,.sms-login-phonefield,.sms-login-resend-button {
+        transition:none!important
+    }
+    .sms-request-spinner {
+        animation-duration:1.6s
+    }
+}
+.sms-login-primary {
+    color:#fff!important
+}
+.sms-otp-input-wrap input {
+    min-height:0!important;
+    padding:0!important;
+    border:0!important;
+    box-shadow:none!important
+}
+.sms-otp-input-wrap:focus-within {
+    outline:none
+}
+.sms-otp-input-wrap:focus-within .sms-otp-digit.next {
+    border-color:var(--ui-secondary)
+}
+.otp-field[aria-invalid=true] .sms-otp-digit {
+    border-color:var(--ui-error)
+}

@@ -97,6 +97,53 @@ public sealed class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions>
 }
 public class ApiTests
 {
+    [Fact]
+    public async Task RecoveryFormPreservesNativeOtpMappingCooldownAndVerification()
+    {
+        using var host = new TestHost();
+        using var client = host.Client();
+        await CreatePhoneUserAsync(host);
+        var html = await client.GetStringAsync(ClientRoutes.Accounts.ForgotPassword, Token);
+        async Task<string> SubmitAsync(int step, string action, string code = "")
+        {
+            var csrf = System.Text.RegularExpressions.Regex.Match(html, "name=\"__RequestVerificationToken\" value=\"([^\"]+)\"").Groups[1].Value;
+            Assert.NotEmpty(csrf);
+            using var response = await client.PostAsync(ClientRoutes.Accounts.ForgotPassword, new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["_handler"] = "forgotPassword",
+                ["__RequestVerificationToken"] = WebUtility.HtmlDecode(csrf),
+                ["Input.Step"] = step.ToString(),
+                ["Input.Action"] = action,
+                ["Input.PhoneNumber"] = "09123456789",
+                ["Input.OtpCode"] = code
+            }), Token);
+            html = await response.Content.ReadAsStringAsync(Token);
+            Assert.True(response.IsSuccessStatusCode, html);
+            return WebUtility.HtmlDecode(html);
+        }
+        var otpPage = await SubmitAsync(1, "request");
+        Assert.Contains("name=\"Input.Step\" value=\"2\"", otpPage);
+        Assert.Contains("name=\"Input.OtpCode\"", otpPage);
+        Assert.Contains("autocomplete=\"one-time-code\"", otpPage);
+        Assert.Equal(6, System.Text.RegularExpressions.Regex.Matches(otpPage, "class=\"sms-otp-digit").Count);
+        Assert.Single(host.Sms.Recipients);
+        await SubmitAsync(2, "resend");
+        Assert.Single(host.Sms.Recipients);
+        string code;
+        using (var scope = host.Services.CreateScope())
+        {
+            var manager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var user = await manager.FindByNameAsync("phone-owner");
+            code = await manager.GenerateTwoFactorTokenAsync(user!, "Phone");
+        }
+        // The UI supports Persian digits; the server must accept them too.
+        var persianCode = string.Concat(code.Select(digit => (char)('\u06f0' + digit - '0')));
+        var passwordPage = await SubmitAsync(2, "verify", persianCode);
+        Assert.Contains("name=\"Input.Step\" value=\"3\"", passwordPage);
+        Assert.Contains("name=\"Input.NewPassword\"", passwordPage);
+        Assert.Contains($"name=\"Input.OtpCode\" value=\"{code}\"", passwordPage);
+    }
+
     private static CancellationToken Token => TestContext.Current.CancellationToken;
     private static async Task CsrfAsync(HttpClient client) { using var response = await client.GetAsync(ApiUrls.Accounts.Antiforgery(), Token); var body = await response.Content.ReadAsStringAsync(Token); Assert.True(response.IsSuccessStatusCode, body); var token = await response.Content.ReadFromJsonAsync<AntiforgeryResponse>(Token); client.DefaultRequestHeaders.Remove("X-CSRF-TOKEN"); client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", token!.RequestToken); }
     private static async Task CreatePhoneUserAsync(TestHost host)
@@ -155,6 +202,14 @@ public class ApiTests
         Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
         Assert.Contains("<form", html);
         Assert.Contains("__RequestVerificationToken", html);
+        if (path.EndsWith("/Login", StringComparison.Ordinal))
+        {
+            Assert.Contains("name=\"Input.Username\"", html);
+            Assert.Contains("name=\"Input.Password\"", html);
+            Assert.Contains("name=\"Input.RememberMe\"", html);
+            Assert.Contains("autocomplete=\"username\"", html);
+        }
+        else Assert.Contains("name=\"Input.PhoneNumber\"", html);
     }
     [Fact]
     public async Task AdministratorCanOpenSqlLogUi()
