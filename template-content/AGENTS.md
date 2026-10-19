@@ -21,6 +21,7 @@ Before creating an abstraction, service, component, route, policy, DTO, helper, 
 |---|---|
 | [ARCHITECTURE.md](docs/ai/ARCHITECTURE.md) | Layer boundaries and dependency flow |
 | [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md) | End-to-end feature implementation |
+| [PROJECT_SETUP.md](docs/ai/PROJECT_SETUP.md) | New-project branding, icons and optional CRUD sample |
 | [CONVENTIONS.md](docs/ai/CONVENTIONS.md) | Naming, placement and coding conventions |
 | [GUARDRAILS.md](docs/ai/GUARDRAILS.md) | Architectural prohibitions and change constraints |
 | [FEATURE_CHECKLIST.md](docs/ai/FEATURE_CHECKLIST.md) | Checklist for adding a business feature |
@@ -65,7 +66,14 @@ Interactive application pages run in Interactive WebAssembly mode without preren
 
 The UI follows a calm Persian RTL workspace: Vazirmatn, navy/teal light accents and vivid jade dark accents, opaque surfaces, short interaction feedback and responsive layouts. Preserve its shared tokens and accessible interactions.
 
+Jade is the default palette; ocean, iris and amber also have paired light/dark tokens. Preserve the independent persisted palette and mode preferences and the draggable edge appearance control described in UI_GUIDE.md.
+
 Use semantic HTML and the native Blazor primitives in Components/UI. The desktop sidebar is permanently 238px wide. Below 960px, full-height navigation overlays content and reserves no horizontal space; the bottom bar includes a raised central action. See UI_GUIDE.md for forms, dialogs and styling.
+
+Page-entry motion applies on phones, tablets and desktop, including headers, grouped bodies/tables and identity cards. Preserve the operating system's reduced-motion preference; do not disable motion based only on viewport size.
+
+## Starting a Generated Product
+When creating a new product from this template, replace its default application icon and brand mark with an identity appropriate to that product before reporting completion. Update favicon, PWA/Apple icons, manifest and visible branding together; follow [PROJECT_SETUP.md](docs/ai/PROJECT_SETUP.md). Preserve the executable SampleItem reference until a real, tested business feature replaces it, unless the user chooses generation without the sample.
 
 ## Authorization
 Policy-based authorization is preferred for capabilities. Adding a policy normally requires an `AppPolicies` constant, registration in `AppPolicyProvider`, server enforcement, and appropriate client behavior. Client hiding alone is never security.

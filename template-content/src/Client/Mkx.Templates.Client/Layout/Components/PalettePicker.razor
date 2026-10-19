@@ -1,0 +1,82 @@
+@implements IAsyncDisposable
+@inject ThemeService Theme
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="palette-picker-floating">
+    <button @ref="_trigger" type="button" class="palette-edge-tab"
+            popovertarget="@_id" aria-controls="@_id" aria-haspopup="dialog" aria-expanded="false"
+            aria-label="انتخاب رنگ از کنار صفحه" aria-describedby="@(_id + "-hint")"
+            title="رنگ فضای کار؛ برای جابه‌جایی بالا و پایین بکشید">
+        <UiIcon Icon="palette" />
+    </button>
+    <span id="@(_id + "-hint")" class="palette-drag-hint">برای جابه‌جایی بکشید یا از کلیدهای بالا و پایین استفاده کنید.</span>
+    <section @ref="_popover" id="@_id" popover="auto" role="dialog" aria-label="رنگ فضای کار"
+             aria-busy="@_changing.ToString().ToLowerInvariant()" class="palette-popover" dir="rtl">
+        <svg class="palette-sheet-shape" aria-hidden="true"><path /></svg>
+        <span class="palette-sheet-mark" aria-hidden="true"><UiIcon Icon="palette" /></span>
+        <div class="palette-popover-content">
+            <header class="palette-popover-heading">
+                <div><strong>رنگ فضای کار</strong><p>یک رنگ، در روشنایی و تاریکی</p></div>
+                <button type="button" class="palette-dismiss" popovertarget="@_id" popovertargetaction="hide" aria-label="بستن انتخاب رنگ"><UiIcon Icon="close" /></button>
+            </header>
+            <div class="palette-options" role="group" aria-label="پالت‌های رنگ">
+                @foreach (var palette in ThemeService.Palettes)
+                {
+                    var selected = Theme.Palette == palette.Id;
+                    <button type="button" class="palette-option" data-palette-choice="@palette.Id" aria-label="@palette.Name"
+                            disabled="@_changing" aria-pressed="@selected.ToString().ToLowerInvariant()" @onclick="() => SelectPaletteAsync(palette.Id)">
+                        <span class="palette-preview" aria-hidden="true">
+                            <span class="palette-preview-light"><i></i><i></i><i></i></span>
+                            <span class="palette-preview-dark"><i></i><i></i><i></i></span>
+                        </span>
+                        <span class="palette-option-name">@palette.Name @if (selected) { <UiIcon Icon="check" /> }</span>
+                    </button>
+                }
+            </div>
+            <span role="status">رنگ انتخاب‌شده: @ThemeService.Palettes.First(item => item.Id == Theme.Palette).Name</span>
+        </div>
+    </section>
+</div>
+
+@code {
+    private bool _changing;
+    private readonly string _id = $"palette-{Guid.NewGuid():N}";
+    private ElementReference _trigger, _popover;
+    private IJSObjectReference? _module, _binding;
+    private async Task SelectPaletteAsync(string palette)
+    {
+        if (_changing) return;
+        _changing = true;
+        try { await Theme.SetPaletteAsync(palette, _trigger); }
+        finally { _changing = false; }
+    }
+    protected override void OnInitialized()
+    {
+        Theme.OnToggleMode += AppearanceChanged;
+        Navigation.LocationChanged += LocationChanged;
+    }
+    private void AppearanceChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    private async void LocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs args)
+    {
+        try { if (_binding is not null) await _binding.InvokeVoidAsync("close"); }
+        catch (JSDisconnectedException) { }
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/palette-picker.js");
+        _binding = await _module.InvokeAsync<IJSObjectReference>("bind", _trigger, _popover);
+    }
+    public async ValueTask DisposeAsync()
+    {
+        Theme.OnToggleMode -= AppearanceChanged;
+        Navigation.LocationChanged -= LocationChanged;
+        try
+        {
+            if (_binding is not null) { await _binding.InvokeVoidAsync("dispose"); await _binding.DisposeAsync(); }
+            if (_module is not null) await _module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+    }
+}

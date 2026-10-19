@@ -7,14 +7,16 @@ public static class ApiUrls
 {
     private static string BuildUrl(params string[] segments) => string.Join("/", segments);
 
-    public static class Tests
+#if (IncludeSample)
+    public static class SampleItems
     {
-        public static string List(RequestFilter filter) => ApiRoutes.Tests.Base.AppendQueryString(filter);
-        public static string Create() => ApiRoutes.Tests.Base;
+        public static string List(RequestFilter filter) => ApiRoutes.SampleItems.Base.AppendQueryString(filter);
+        public static string Create() => ApiRoutes.SampleItems.Base;
         public static string Delete(Guid id, Guid version) => Get(id).AppendQueryString(new { version });
-        public static string Get(Guid id) => BuildUrl(ApiRoutes.Tests.Base, ApiRoutes.Tests.Get)
+        public static string Get(Guid id) => BuildUrl(ApiRoutes.SampleItems.Base, ApiRoutes.SampleItems.Get)
             .FormatRoute(new { id });
     }
+#endif
 
     public static class Accounts
     {

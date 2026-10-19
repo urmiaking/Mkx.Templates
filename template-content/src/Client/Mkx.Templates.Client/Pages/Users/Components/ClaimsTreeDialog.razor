@@ -1,190 +1,100 @@
 @using Mkx.Templates.Shared.DTOs.Claims
+@using Mkx.Templates.Shared.Abstractions
 @inherits AppComponentBase
 
 <UiDialog>
     <DialogContent>
-        <div style="max-height: 60vh; overflow-y: auto;" class="d-flex flex-column gap-3 py-2 px-1">
-            <div class="ui-alert mb-1 ui-alert-info">
-                برای تغییر دسترسی‌ها، گزینه‌های مورد نظر را علامت بزنید. با علامت زدن هر بخش، تمامی زیرمجموعه‌های آن به طور خودکار تغییر می‌یابند.
+        <div class="claims-editor">
+            <p class="claims-hint">انتخاب هر بخش، دسترسی‌های زیرمجموعهٔ آن را هم تغییر می‌دهد.</p>
+            <div class="claims-toolbar">
+                <UiTextField @bind-Value="_searchQuery" Label="جستجوی دسترسی‌ها" Placeholder="نام دسترسی…" Class="claims-search" DebounceInterval="150" Disabled="IsBusy" />
+                <div class="claims-bulk"><UiButton Variant="Variant.Outlined" OnClick="SelectAll" Disabled="IsBusy">انتخاب همه</UiButton><UiButton Variant="Variant.Outlined" OnClick="DeselectAll" Disabled="IsBusy">لغو همه</UiButton></div>
             </div>
-
-            <div class="d-flex align-center justify-space-between gap-2">
-                <UiTextField @bind-Value="_searchQuery"
-                              Placeholder="جستجو در دسترسی‌ها..."
-                              Class="flex-grow-1" />
-
-                <UiButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@SelectAll">
-                    انتخاب همه
-                </UiButton>
-                <UiButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@DeselectAll">
-                    لغو همه
-                </UiButton>
-            </div>
-
-            <hr class="ui-divider my-1" />
-
-            <div class="d-flex flex-column gap-3 pb-8">
-                @foreach (var category in FilteredTree)
-                {
-                    <section class="ui-panel pa-3 border-solid border border-primary-lighten-4" style="border-radius: 8px; background-color: var(--ui-background-grey);">
-                        <div class="d-flex align-center justify-space-between mb-2">
-                            <div class="d-flex align-center gap-2">
-                                <UiIcon Icon="folder" Color="Color.Primary" />
-                                <p class="fw-bold color-primary ui-type-subtitle1">@category.Description</p>
-                            </div>
-                            <UiCheckBox T="bool"
-                                         Value="@category.IsGranted"
-                                         ValueChanged="@(val => ToggleNode(category, val))"
-                                         Color="Color.Primary">
-                                <span class="text-caption font-weight-medium">انتخاب این گروه</span>
-                            </UiCheckBox>
-                        </div>
-
-                        @if (category.Children.Any())
-                        {
-                            <div class="d-flex flex-column gap-1 pl-4 mt-2">
-                                @foreach (var child in category.Children)
-                                {
-                                    @RenderPolicyNode(child, 1, MatchesSelf(category, _searchQuery))
-                                }
-                            </div>
-                        }
-                    </section>
-                }
-            </div>
+            <div class="claims-summary"><span role="status">@CountGranted(_tree) از @CountPermissions(_tree) دسترسی انتخاب شده</span><span>انتخاب‌ها با ذخیره اعمال می‌شوند</span></div>
+            @if (!string.IsNullOrEmpty(LastRequestError)) { <div class="ui-alert ui-alert-error" role="alert">@LastRequestError</div> }
+            @if (!FilteredTree.Any())
+            {
+                <p class="ui-empty">دسترسی‌ای با این عبارت پیدا نشد.</p>
+            }
+            else
+            {
+                <div class="claims-groups">
+                    @foreach (var category in FilteredTree)
+                    {
+                        <fieldset class="claims-group" @key="category.Name" disabled="@IsBusy">
+                            <legend><UiCheckBox T="bool" Value="@(category.Children.Count > 0 ? category.Children.All(IsFullyGranted) : category.IsGranted)" ValueChanged="@(value => ToggleNode(category, value))" Disabled="IsBusy"><span>@category.Description</span></UiCheckBox></legend>
+                            @if (category.Children.Count > 0)
+                            {
+                                <ul class="claims-tree">
+                                    @foreach (var child in category.Children) { @RenderPolicyNode(child, MatchesSelf(category, _searchQuery)) }
+                                </ul>
+                            }
+                        </fieldset>
+                    }
+                </div>
+            }
         </div>
     </DialogContent>
     <DialogActions>
-        <UiButton OnClick="Cancel" Variant="Variant.Text">انصراف</UiButton>
-        <UiButton OnClick="Submit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="check">
-            ذخیره دسترسی‌ها
-        </UiButton>
+        <UiButton OnClick="Cancel" Variant="Variant.Text" Disabled="IsBusy">انصراف</UiButton>
+        <UiButton OnClick="SubmitAsync" Variant="Variant.Filled" StartIcon="check" Disabled="IsBusy">@(IsBusy ? "در حال ذخیره…" : "ذخیره دسترسی‌ها")</UiButton>
     </DialogActions>
 </UiDialog>
 
 @code {
     [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
     [Parameter] public List<PolicyTreeNodeDto> InitialTree { get; set; } = [];
-
+    [Parameter] public Func<IUserManagementService, List<string>, CancellationToken, Task>? SaveChanges { get; set; }
     private List<PolicyTreeNodeDto> _tree = [];
     private string _searchQuery = string.Empty;
+    protected override void OnInitialized() => _tree = InitialTree;
+    private IEnumerable<PolicyTreeNodeDto> FilteredTree => _tree.Where(node => MatchesNode(node, _searchQuery));
+    private static bool MatchesSelf(PolicyTreeNodeDto node, string query) => string.IsNullOrWhiteSpace(query)
+        || node.Description.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase) || node.Name.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase);
+    private static bool MatchesNode(PolicyTreeNodeDto node, string query) => MatchesSelf(node, query) || node.Children.Any(child => MatchesNode(child, query));
+    private static bool IsFullyGranted(PolicyTreeNodeDto node) => node.IsGranted && node.Children.All(IsFullyGranted);
+    private static int CountPermissions(IEnumerable<PolicyTreeNodeDto> nodes) => nodes.Sum(node => (node.Name.StartsWith("Category_", StringComparison.Ordinal) ? 0 : 1) + CountPermissions(node.Children));
+    private static int CountGranted(IEnumerable<PolicyTreeNodeDto> nodes) => nodes.Sum(node => (node.IsGranted && !node.Name.StartsWith("Category_", StringComparison.Ordinal) ? 1 : 0) + CountGranted(node.Children));
 
-    protected override void OnInitialized()
+    private RenderFragment RenderPolicyNode(PolicyTreeNodeDto node, bool showAll = false) => __builder =>
     {
-        _tree = InitialTree;
-    }
-
-    private IEnumerable<PolicyTreeNodeDto> FilteredTree =>
-        _tree.Where(node => MatchesNode(node, _searchQuery));
-
-    private static bool MatchesSelf(PolicyTreeNodeDto node, string query) =>
-        string.IsNullOrWhiteSpace(query) ||
-        node.Description.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase) ||
-        node.Name.Contains(query.Trim(), StringComparison.OrdinalIgnoreCase);
-
-    private static bool MatchesNode(PolicyTreeNodeDto node, string query) =>
-        MatchesSelf(node, query) || node.Children.Any(child => MatchesNode(child, query));
-
-    private RenderFragment RenderPolicyNode(PolicyTreeNodeDto node, int level, bool showAll = false) => __builder =>
-    {
-        if (!showAll && !MatchesNode(node, _searchQuery))
-            return;
-
-        var indentStyle = level switch
-        {
-            1 => "margin-right: 8px;",
-            2 => "margin-right: 24px; border-right: 2px solid var(--ui-primary); padding-right: 12px;",
-            _ => "margin-right: 36px; border-right: 2px solid var(--ui-secondary); padding-right: 12px;"
-        };
-
-        <div class="my-1" style="@indentStyle">
-            <div class="d-flex align-center justify-space-between py-1 px-2 rounded hover-light">
-                <div class="d-flex align-center gap-2">
-                    <UiIcon Icon="@(node.Children.Any() ? "list" : "key")" Color="Color.Default" />
-                    <div>
-                        <p class="fw-medium ui-type-body2">@node.Description</p>
-                        <p class="ui-type-caption ui-color-secondary" style="font-size: 0.75rem;">@node.Name</p>
-                    </div>
-                </div>
-
-                <UiCheckBox T="bool"
-                             Value="@node.IsGranted"
-                             ValueChanged="@(val => ToggleNode(node, val))"
-                             Color="Color.Success" />
-            </div>
-
-            @if (node.Children.Any())
+        if (!showAll && !MatchesNode(node, _searchQuery)) return;
+        <li class="claim-node" @key="node.Name">
+            <label class="claim-choice" title="@node.Name"><input type="checkbox" checked="@node.IsGranted" disabled="@IsBusy" @onchange="@(args => ToggleNode(node, args.Value is true))" /><span>@node.Description</span></label>
+            @if (node.Children.Count > 0)
             {
-                <div class="d-flex flex-column gap-1">
-                    @foreach (var childNode in node.Children)
-                    {
-                        @RenderPolicyNode(childNode, level + 1, showAll || MatchesSelf(node, _searchQuery))
-                    }
-                </div>
+                <ul class="claims-children">
+                    @foreach (var child in node.Children) { @RenderPolicyNode(child, showAll || MatchesSelf(node, _searchQuery)) }
+                </ul>
             }
-        </div>
+        </li>
     };
-
-    private void ToggleNode(PolicyTreeNodeDto node, bool value)
+    private void ToggleNode(PolicyTreeNodeDto node, bool value) { node.IsGranted = value; SetChildrenState(node.Children, value); }
+    private static void SetChildrenState(IEnumerable<PolicyTreeNodeDto> nodes, bool value)
     {
-        node.IsGranted = value;
-        SetChildrenState(node.Children, value);
-        StateHasChanged();
+        foreach (var node in nodes) { node.IsGranted = value; SetChildrenState(node.Children, value); }
     }
-
-    private void SetChildrenState(List<PolicyTreeNodeDto> children, bool value)
+    private void SelectAll() => SetChildrenState(_tree, true);
+    private void DeselectAll() => SetChildrenState(_tree, false);
+    private async Task SubmitAsync()
     {
-        foreach (var child in children)
+        if (IsBusy) return;
+        var names = new List<string>();
+        CollectGrantedClaims(_tree, names);
+        if (SaveChanges is not null)
         {
-            child.IsGranted = value;
-            if (child.Children.Any())
-            {
-                SetChildrenState(child.Children, value);
-            }
+            var saved = await TryRequestAsync<IUserManagementService, bool>(async (service, token) => { await SaveChanges(service, names, token); return true; });
+            if (!saved.Succeeded) return;
         }
+        Dialog.Close(DialogResult.Ok(names));
     }
-
-    private void SelectAll()
-    {
-        SetChildrenState(_tree, true);
-        foreach (var cat in _tree)
-        {
-            cat.IsGranted = true;
-        }
-        StateHasChanged();
-    }
-
-    private void DeselectAll()
-    {
-        SetChildrenState(_tree, false);
-        foreach (var cat in _tree)
-        {
-            cat.IsGranted = false;
-        }
-        StateHasChanged();
-    }
-
-    private void Submit()
-    {
-        var grantedClaimNames = new List<string>();
-        CollectGrantedClaims(_tree, grantedClaimNames);
-        Dialog.Close(DialogResult.Ok(grantedClaimNames));
-    }
-
-    private void CollectGrantedClaims(List<PolicyTreeNodeDto> nodes, List<string> list)
+    private static void CollectGrantedClaims(IEnumerable<PolicyTreeNodeDto> nodes, List<string> names)
     {
         foreach (var node in nodes)
         {
-            if (node.IsGranted && !node.Name.StartsWith("Category_"))
-            {
-                list.Add(node.Name);
-            }
-            if (node.Children.Any())
-            {
-                CollectGrantedClaims(node.Children, list);
-            }
+            if (node.IsGranted && !node.Name.StartsWith("Category_", StringComparison.Ordinal)) names.Add(node.Name);
+            CollectGrantedClaims(node.Children, names);
         }
     }
-
-    private void Cancel() => Dialog.Cancel();
+    private void Cancel() { if (!IsBusy) Dialog.Cancel(); }
 }

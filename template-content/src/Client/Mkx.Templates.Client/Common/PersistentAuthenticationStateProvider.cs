@@ -37,36 +37,53 @@ public sealed class PersistentAuthenticationStateProvider : AuthenticationStateP
     public async Task RefreshAsync()
     {
         await _stateTask;
-        _stateTask = FetchAsync(_lifetime.Token);
-        NotifyAuthenticationStateChanged(_stateTask);
-        await _stateTask;
+        await FetchAsync(_lifetime.Token, notify: true);
     }
 
-    private async Task<AuthenticationState> FetchAsync(CancellationToken token)
+    private async Task<AuthenticationState> FetchAsync(CancellationToken token, bool notify = false)
     {
         await _gate.WaitAsync(token);
         try
         {
-            using var response = await _client.GetAsync(ApiUrls.Accounts.AuthState(), token);
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-                _current = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-            else
+            var previous = _current;
+            var hadConnectionError = HasConnectionError;
+            try
             {
-                response.EnsureSuccessStatusCode();
-                var info = await response.Content.ReadFromJsonAsync<UserInfo>(_jsonOptions, token)
-                    ?? throw new JsonException("Missing authentication state.");
-                _current = CreateState(info);
+                using var response = await _client.GetAsync(ApiUrls.Accounts.AuthState(), token);
+                AuthenticationState next;
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    next = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+                else
+                {
+                    response.EnsureSuccessStatusCode();
+                    var info = await response.Content.ReadFromJsonAsync<UserInfo>(_jsonOptions, token)
+                        ?? throw new JsonException("Missing authentication state.");
+                    next = CreateState(info);
+                }
+                if (!SamePrincipal(_current, next)) _current = next;
+                HasConnectionError = false;
             }
-            HasConnectionError = false;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
-        {
-            if (token.IsCancellationRequested) throw;
-            HasConnectionError = true; // Retain the last known principal; network failure is not logout.
+            catch (Exception ex) when (ex is HttpRequestException or JsonException or OperationCanceledException)
+            {
+                if (token.IsCancellationRequested) throw;
+                HasConnectionError = true; // Retain the last known principal; network failure is not logout.
+            }
+            if (notify && (!ReferenceEquals(previous, _current) || hadConnectionError != HasConnectionError))
+            {
+                _stateTask = Task.FromResult(_current);
+                NotifyAuthenticationStateChanged(_stateTask);
+            }
+            return _current;
         }
         finally { _gate.Release(); }
-        return _current;
     }
+
+    private static bool SamePrincipal(AuthenticationState left, AuthenticationState right) =>
+        left.User.Identity?.IsAuthenticated == right.User.Identity?.IsAuthenticated &&
+        left.User.Claims.Select(claim => (claim.Type, claim.Value)).OrderBy(claim => claim.Type, StringComparer.Ordinal)
+            .ThenBy(claim => claim.Value, StringComparer.Ordinal).SequenceEqual(
+                right.User.Claims.Select(claim => (claim.Type, claim.Value)).OrderBy(claim => claim.Type, StringComparer.Ordinal)
+                    .ThenBy(claim => claim.Value, StringComparer.Ordinal));
 
     private static AuthenticationState CreateState(UserInfo info) => new(new ClaimsPrincipal(
         info.UserClaims.Count > 0 ? new ClaimsIdentity(info.Claims, nameof(PersistentAuthenticationStateProvider)) : new ClaimsIdentity()));

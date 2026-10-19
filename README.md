@@ -8,7 +8,7 @@ A .NET 10 Blazor solution template with Persian RTL native Blazor UI, SQL Server
 ./scripts/verify-template.ps1
 ```
 
-Requires .NET 10 SDK and Node.js 22+. The script builds/tests the source, packs the template, inspects package exclusions, installs into an isolated template hive, generates a solution named `Acme.Starter`, then builds/tests that generated solution. It never changes your normal template installation.
+Requires .NET 10 SDK and Node.js 22+. The script builds/tests the source, packs the template, inspects package exclusions, installs into an isolated template hive, then generates and builds/tests `Acme.Starter` with the sample and `Acme.Minimal` without it. It never changes your normal template installation.
 
 ## Package and install
 
@@ -24,6 +24,14 @@ For editable local installation, use `dotnet new install ./template-content`.
 ```powershell
 dotnet new mkx-blazor -n MyCompany.MyProject -o MyCompany.MyProject
 ```
+
+The tested `SampleItem` CRUD reference is included by default. For a product without the demonstration feature:
+
+```powershell
+dotnet new mkx-blazor -n MyCompany.MyProject -o MyCompany.MyProject --IncludeSample false
+```
+
+Both variants retain the test project and shared infrastructure. Agents setting up a new product must replace the default application icons and branding; see the generated `docs/ai/PROJECT_SETUP.md`.
 
 `-o` explicitly selects the output directory. The generated solution has six numbered folders: Server, Client, Shared, Core, Sdk and Tests (13 projects). It includes its own README, agent guide, package versions, EF tool manifest and optional local SQL compose configuration. Follow the generated README to configure database and first administrator secrets; no fixed administrator credentials ship with the template.
 

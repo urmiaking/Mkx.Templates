@@ -20,8 +20,11 @@ using Microsoft.AspNetCore.Identity;
 using Mkx.Templates.Application.Abstractions;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Infrastructure;
+using Mkx.Templates.Infrastructure.Extensions;
 using Mkx.Templates.Shared.Authorization;
-using Mkx.Templates.Shared.DTOs.Tests;
+#if (IncludeSample)
+using Mkx.Templates.Shared.DTOs.SampleItems;
+#endif
 using Mkx.Templates.Shared.DTOs.UserAccounts;
 using Mkx.Templates.Shared.DTOs.Users;
 using Mkx.Templates.Shared.Routes;
@@ -97,6 +100,25 @@ public sealed class TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions>
 }
 public class ApiTests
 {
+    [Fact]
+    public void SqlServerMigrationsMatchTheModelWithoutConnectingToADatabase()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:Mkx.Templates"] = "Server=localhost;Database=unused;Integrated Security=true;TrustServerCertificate=true"
+        }).Build();
+        using var services = new ServiceCollection().AddLogging().AddInfrastructure(configuration).BuildServiceProvider();
+        using var scope = services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        Assert.False(database.Database.HasPendingModelChanges());
+        var sql = database.GetService<Microsoft.EntityFrameworkCore.Migrations.IMigrator>().GenerateScript();
+#if (IncludeSample)
+        Assert.Contains("CREATE TABLE [Tests]", sql);
+#else
+        Assert.DoesNotContain("CREATE TABLE [Tests]", sql);
+#endif
+    }
+
     [Fact]
     public async Task RecoveryFormPreservesNativeOtpMappingCooldownAndVerification()
     {
@@ -236,30 +258,32 @@ public class ApiTests
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Equal(ClientRoutes.Accounts.AccessDenied, response.Headers.Location?.OriginalString);
     }
-    [Fact] public async Task AnonymousApiReturns401WithoutHtmlRedirect() { using var host = new TestHost(); using var client = host.Client(); using var response = await client.GetAsync(ApiUrls.Tests.List(new()), Token); Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode); Assert.Null(response.Headers.Location); }
-    [Fact] public async Task AuthenticatedUserWithoutPolicyGets403() { using var host = new TestHost(); using var client = host.Client("Unrelated"); using var response = await client.GetAsync(ApiUrls.Tests.List(new()), Token); Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); }
-    [Fact] public async Task ReadPolicyDoesNotGrantWrite() { using var host = new TestHost(); using var client = host.Client(AppPolicies.Tests.View); await CsrfAsync(client); using var response = await client.PostAsJsonAsync(ApiUrls.Tests.Create(), new CreateTestRequest("name", null), Token); Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); }
-    [Fact] public async Task MutationRequiresAntiforgeryToken() { using var host = new TestHost(); using var client = host.Client(AppPolicies.Tests.View, AppPolicies.Tests.Manage); using var response = await client.PostAsJsonAsync(ApiUrls.Tests.Create(), new CreateTestRequest("name", null), Token); Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode); }
+#if (IncludeSample)
+    [Fact] public async Task AnonymousApiReturns401WithoutHtmlRedirect() { using var host = new TestHost(); using var client = host.Client(); using var response = await client.GetAsync(ApiUrls.SampleItems.List(new()), Token); Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode); Assert.Null(response.Headers.Location); }
+    [Fact] public async Task AuthenticatedUserWithoutPolicyGets403() { using var host = new TestHost(); using var client = host.Client("Unrelated"); using var response = await client.GetAsync(ApiUrls.SampleItems.List(new()), Token); Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); }
+    [Fact] public async Task ReadPolicyDoesNotGrantWrite() { using var host = new TestHost(); using var client = host.Client(AppPolicies.SampleItems.View); await CsrfAsync(client); using var response = await client.PostAsJsonAsync(ApiUrls.SampleItems.Create(), new CreateSampleItemRequest("name", null), Token); Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode); }
+    [Fact] public async Task MutationRequiresAntiforgeryToken() { using var host = new TestHost(); using var client = host.Client(AppPolicies.SampleItems.View, AppPolicies.SampleItems.Manage); using var response = await client.PostAsJsonAsync(ApiUrls.SampleItems.Create(), new CreateSampleItemRequest("name", null), Token); Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode); }
     [Fact]
     public async Task CrudPagingAndConcurrencyAreRealDatabaseOperations()
     {
-        using var host = new TestHost(); using var client = host.Client(AppPolicies.Tests.View, AppPolicies.Tests.Manage); await CsrfAsync(client);
-        using var created = await client.PostAsJsonAsync(ApiUrls.Tests.Create(), new CreateTestRequest("alpha", "description"), Token); Assert.Equal(HttpStatusCode.Created, created.StatusCode);
-        var item = (await created.Content.ReadFromJsonAsync<GetTestResponse>(Token))!;
-        var page = (await client.GetFromJsonAsync<PagedList<GetTestResponse>>(ApiUrls.Tests.List(new(Take: 1, Search: "alpha")), Token))!; Assert.Equal(1, page.Total); Assert.Single(page.Data);
-        using var updated = await client.PutAsJsonAsync(ApiUrls.Tests.Get(item.Id), new UpdateTestRequest("beta", null, item.Version), Token); Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
-        var next = (await updated.Content.ReadFromJsonAsync<GetTestResponse>(Token))!; Assert.NotEqual(item.Version, next.Version);
-        using var stale = await client.PutAsJsonAsync(ApiUrls.Tests.Get(item.Id), new UpdateTestRequest("stale", null, item.Version), Token); Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode); Assert.Equal("application/problem+json", stale.Content.Headers.ContentType!.MediaType);
-        using var deleted = await client.DeleteAsync(ApiUrls.Tests.Delete(item.Id, next.Version), Token); Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
-        using var missing = await client.GetAsync(ApiUrls.Tests.Get(item.Id), Token); Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
+        using var host = new TestHost(); using var client = host.Client(AppPolicies.SampleItems.View, AppPolicies.SampleItems.Manage); await CsrfAsync(client);
+        using var created = await client.PostAsJsonAsync(ApiUrls.SampleItems.Create(), new CreateSampleItemRequest("alpha", "description"), Token); Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var item = (await created.Content.ReadFromJsonAsync<GetSampleItemResponse>(Token))!;
+        var page = (await client.GetFromJsonAsync<PagedList<GetSampleItemResponse>>(ApiUrls.SampleItems.List(new(Take: 1, Search: "alpha")), Token))!; Assert.Equal(1, page.Total); Assert.Single(page.Data);
+        using var updated = await client.PutAsJsonAsync(ApiUrls.SampleItems.Get(item.Id), new UpdateSampleItemRequest("beta", null, item.Version), Token); Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
+        var next = (await updated.Content.ReadFromJsonAsync<GetSampleItemResponse>(Token))!; Assert.NotEqual(item.Version, next.Version);
+        using var stale = await client.PutAsJsonAsync(ApiUrls.SampleItems.Get(item.Id), new UpdateSampleItemRequest("stale", null, item.Version), Token); Assert.Equal(HttpStatusCode.Conflict, stale.StatusCode); Assert.Equal("application/problem+json", stale.Content.Headers.ContentType!.MediaType);
+        using var deleted = await client.DeleteAsync(ApiUrls.SampleItems.Delete(item.Id, next.Version), Token); Assert.Equal(HttpStatusCode.NoContent, deleted.StatusCode);
+        using var missing = await client.GetAsync(ApiUrls.SampleItems.Get(item.Id), Token); Assert.Equal(HttpStatusCode.NotFound, missing.StatusCode);
     }
     [Fact]
     public async Task ValidationReturnsFieldErrorsAndTraceId()
     {
-        using var host = new TestHost(); using var client = host.Client(AppPolicies.Tests.View, AppPolicies.Tests.Manage); await CsrfAsync(client);
-        using var response = await client.PostAsJsonAsync(ApiUrls.Tests.Create(), new CreateTestRequest("", null), Token); Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        using var host = new TestHost(); using var client = host.Client(AppPolicies.SampleItems.View, AppPolicies.SampleItems.Manage); await CsrfAsync(client);
+        using var response = await client.PostAsJsonAsync(ApiUrls.SampleItems.Create(), new CreateSampleItemRequest("", null), Token); Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var json = await response.Content.ReadAsStringAsync(Token); Assert.Contains("errors", json); Assert.Contains("Name", json); Assert.Contains("traceId", json);
     }
+#endif
     [Fact] public async Task HealthAndAuthStateAreNoStore() { using var host = new TestHost(); using var client = host.Client(); using var health = await client.GetAsync("/health/live", Token); Assert.Equal(HttpStatusCode.OK, health.StatusCode); using var auth = await client.GetAsync(ApiUrls.Accounts.AuthState(), Token); Assert.True(auth.Headers.CacheControl!.NoStore); }
     [Fact]
     public async Task IdentityPasswordFailureRollsBackAnEarlierProfileUpdate()

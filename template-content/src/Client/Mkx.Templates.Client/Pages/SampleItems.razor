@@ -1,0 +1,27 @@
+@attribute [Route(ClientRoutes.SampleItems.Index)]
+@attribute [Authorize(Policy = AppPolicies.SampleItems.View)]
+@inherits AppComponentBase
+<PageTitle>نمونه‌ها</PageTitle>
+<AccountShell Title="نمونه‌ها" Description="رکوردهای نمونه را جستجو، ایجاد و ویرایش کنید." Eyebrow="فضای کار">
+    <div class="ui-stack mb-4 sample-items-toolbar ui-row">
+        <UiTextField Class="sample-items-search" Label="جستجوی نام یا توضیحات" Value="@_search" ValueChanged="SearchChanged" DebounceInterval="350" />
+        <AuthorizeView Policy="@AppPolicies.SampleItems.Manage"><UiButton Class="sample-items-add" OnClick="@(() => EditAsync(null))" Color="Color.Primary" Variant="Variant.Filled" Disabled="IsBusy">افزودن</UiButton></AuthorizeView>
+    </div>
+    @if (_loadFailed) {
+        <div class="ui-alert mb-3 ui-alert-error" role="alert">@LastRequestError <UiButton OnClick="ReloadAsync" Disabled="IsBusy">تلاش دوباره</UiButton></div>
+    }
+    <UiTable T="GetSampleItemResponse" @ref="_table" ServerData="LoadAsync" RowsPerPage="25">
+        <HeaderContent>
+            <th><UiTableSortLabel SortLabel="Name" T="GetSampleItemResponse">نام</UiTableSortLabel></th><th>توضیحات</th><th>عملیات</th>
+        </HeaderContent>
+        <RowTemplate>
+            <td data-label="نام">@context.Name</td><td data-label="توضیحات">@context.Description</td>
+            <td data-label="عملیات"><AuthorizeView Policy="@AppPolicies.SampleItems.Manage" Context="authorization">
+                <UiIconButton Icon="edit" aria-label="ویرایش نمونه" OnClick="@(() => EditAsync(context))" Disabled="IsBusy" />
+                <UiIconButton Icon="trash" aria-label="حذف نمونه" Color="Color.Error" OnClick="@(() => DeleteAsync(context))" Disabled="IsBusy" />
+            </AuthorizeView></td>
+        </RowTemplate>
+        <NoRecordsContent><p class="pa-4">@(_loadFailed ? "دریافت اطلاعات انجام نشد." : "موردی یافت نشد.")</p></NoRecordsContent>
+
+    </UiTable>
+</AccountShell>

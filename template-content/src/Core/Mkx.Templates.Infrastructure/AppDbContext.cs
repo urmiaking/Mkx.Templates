@@ -1,4 +1,3 @@
-using Mkx.Templates.Infrastructure.Configurations;
 using Mkx.Templates.Sdk.Server.Domain.Identity;
 using Mkx.Templates.Sdk.Server.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +11,7 @@ public class AppDbContext(
 {
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        builder.ApplyConfigurationsFromAssembly(typeof(TestConfiguration).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
         base.OnModelCreating(builder);
     }

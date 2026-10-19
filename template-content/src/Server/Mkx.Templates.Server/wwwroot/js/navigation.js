@@ -3,7 +3,7 @@ export function bind(panel) {
     const mobile = matchMedia('(max-width: 959.98px)');
     let previous = null;
     let expanded = false;
-    const blocked = () => [...document.querySelectorAll('.workspace-main,.workspace-bottom-nav,.workspace-topbar')];
+    const blocked = () => [...document.querySelectorAll('.workspace-main,.workspace-bottom-nav,.workspace-topbar,.palette-picker-floating')];
     const controls = () => [...panel.querySelectorAll('a[href],button:not([disabled])')].filter(x => x.getClientRects().length);
     const sync = () => {
         const modal = expanded && mobile.matches;

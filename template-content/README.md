@@ -53,7 +53,7 @@ Use the HTTPS URL printed by the launch profile. Development applies pending mig
 ./scripts/verify.ps1
 ```
 
-This builds Release, executes .NET tests, fails when no tests run, and runs PWA behavior tests. From the generated root, `dotnet build Mkx.Templates.slnx` and `dotnet test --solution Mkx.Templates.slnx` are the quick checks. `global.json` selects Microsoft.Testing.Platform for xUnit package 4.x; VSTest runner options such as `--logger` do not apply. The reference starts at `src/Client/Mkx.Templates.Client/Pages/Tests.razor` and is mapped in [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md).
+This builds Release, executes .NET tests, fails when no tests run, and runs PWA behavior tests. From the generated root, `dotnet build Mkx.Templates.slnx` and `dotnet test --solution Mkx.Templates.slnx` are the quick checks. `global.json` selects Microsoft.Testing.Platform for xUnit package 4.x; VSTest runner options such as `--logger` do not apply. The reference starts at `src/Client/Mkx.Templates.Client/Pages/SampleItems.razor` and is mapped in [DEVELOPMENT_GUIDE.md](docs/ai/DEVELOPMENT_GUIDE.md).
 
 ## Production configuration
 
@@ -64,3 +64,7 @@ PWA registration is production-only and controlled by `Features:Pwa`. It caches 
 The workspace uses local Vazirmatn with IRANSans as fallback. Its light theme follows the navy/teal reference; dark mode uses charcoal surfaces and saturated jade accents. The fixed desktop sidebar, mobile central action, full-height notification panel and centered authentication card share the same tokens. `UiOtpField` provides the reference’s six-cell presentation for recovery, phone verification and authenticator setup. Vazirmatn’s SIL OFL license is bundled under `wwwroot/fonts/vazir/OFL.txt`.
 
 SQL logging and the administrator-only `/serilog-ui` page are enabled by default (`Logging:UseSqlStore=true`). Navigate to this page with a full server load. Set the flag to false only when deliberately disabling this feature.
+
+## Product setup
+
+The optional CRUD reference is named `SampleItem` and appears at `/sample-items`. The template includes it by default; `--IncludeSample false` omits it during project generation while preserving the test project and shared infrastructure. Follow [PROJECT_SETUP.md](docs/ai/PROJECT_SETUP.md) to replace the default favicon, PWA icons and visible branding when starting a product.

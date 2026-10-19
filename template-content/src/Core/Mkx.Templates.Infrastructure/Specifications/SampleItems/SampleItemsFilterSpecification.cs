@@ -1,13 +1,13 @@
 using Ardalis.Specification;
-using Mkx.Templates.Domain.TestAggregate;
+using Mkx.Templates.Domain.SampleItemAggregate;
 using Mkx.Templates.Sdk.Server.Shared.Data;
 using SortDirection = Mkx.Templates.Sdk.Server.Shared.Enums.SortDirection;
 
-namespace Mkx.Templates.Infrastructure.Specifications.Tests;
+namespace Mkx.Templates.Infrastructure.Specifications.SampleItems;
 
-public sealed class TestsFilterSpecification : Specification<Test>
+public sealed class SampleItemsFilterSpecification : Specification<SampleItem>
 {
-    public TestsFilterSpecification(RequestFilter filter, bool paginate = true)
+    public SampleItemsFilterSpecification(RequestFilter filter, bool paginate = true)
     {
         filter = filter.Normalize();
         Query.AsNoTracking();

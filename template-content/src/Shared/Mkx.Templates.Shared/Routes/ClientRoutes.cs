@@ -52,9 +52,11 @@ public static class ClientRoutes
         public const string RoleClaims = $"{UsersPrefix}/role-claims";
     }
 
-    public static class Tests
+#if (IncludeSample)
+    public static class SampleItems
     {
-        public const string Index = "/tests";
+        public const string Index = "/sample-items";
         public const string Create = Index + "?create=true";
     }
+#endif
 }

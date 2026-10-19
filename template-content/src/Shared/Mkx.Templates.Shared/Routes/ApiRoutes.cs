@@ -2,12 +2,14 @@ namespace Mkx.Templates.Shared.Routes;
 
 public static class ApiRoutes
 {
-    public class Tests
+#if (IncludeSample)
+    public class SampleItems
     {
-        public const string Base = "/api/tests";
+        public const string Base = "/api/sample-items";
         public const string Create = "";
         public const string Get = "{id}";
     }
+#endif
 
     public class Accounts
     {

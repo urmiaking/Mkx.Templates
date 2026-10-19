@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -39,6 +39,7 @@ namespace Mkx.Templates.Infrastructure.Migrations
                     table.PrimaryKey("PK_Roles", x => x.Id);
                 });
 
+#if (IncludeSample)
             migrationBuilder.CreateTable(
                 name: "Tests",
                 columns: table => new
@@ -52,6 +53,7 @@ namespace Mkx.Templates.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Tests", x => x.Id);
                 });
+#endif
 
             migrationBuilder.CreateTable(
                 name: "Users",
@@ -261,8 +263,10 @@ namespace Mkx.Templates.Infrastructure.Migrations
             migrationBuilder.DropTable(
                 name: "RoleClaims");
 
+#if (IncludeSample)
             migrationBuilder.DropTable(
                 name: "Tests");
+#endif
 
             migrationBuilder.DropTable(
                 name: "UserClaims");

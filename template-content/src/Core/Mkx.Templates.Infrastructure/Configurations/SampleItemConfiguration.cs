@@ -1,18 +1,18 @@
-using Mkx.Templates.Domain.TestAggregate;
+using Mkx.Templates.Domain.SampleItemAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Mkx.Templates.Infrastructure.Configurations;
 
-internal sealed class TestConfiguration : IEntityTypeConfiguration<Test>
+internal sealed class SampleItemConfiguration : IEntityTypeConfiguration<SampleItem>
 {
-    public void Configure(EntityTypeBuilder<Test> builder)
+    public void Configure(EntityTypeBuilder<SampleItem> builder)
     {
         builder.ToTable("Tests");
 
         builder.Property(x => x.Id)
             .HasConversion(x => x.Value,
-                id => new TestId(id));
+                id => new SampleItemId(id));
 
         builder.Property(x => x.Version).IsConcurrencyToken();
 

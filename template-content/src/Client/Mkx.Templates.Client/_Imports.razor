@@ -15,7 +15,9 @@
 @using Mkx.Templates.Shared.Routes
 @using Mkx.Templates.Shared.Authorization
 @using Mkx.Templates.Shared.Abstractions
-@using Mkx.Templates.Shared.DTOs.Tests
+@*#if (IncludeSample)*@
+@using Mkx.Templates.Shared.DTOs.SampleItems
+@*#endif*@
 @using Mkx.Templates.Client.Common
 @using Microsoft.AspNetCore.Authorization
 @using Mkx.Templates.Sdk.Server.Shared.Authorization

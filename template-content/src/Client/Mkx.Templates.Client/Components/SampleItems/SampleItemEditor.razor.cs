@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Mkx.Templates.Shared.Abstractions;
-using Mkx.Templates.Shared.DTOs.Tests;
+using Mkx.Templates.Shared.DTOs.SampleItems;
 using Mkx.Templates.Client.Components.UI;
 
-namespace Mkx.Templates.Client.Components.Tests;
+namespace Mkx.Templates.Client.Components.SampleItems;
 
-public partial class TestEditor
+public partial class SampleItemEditor
 {
     [CascadingParameter] private DialogSession Dialog { get; set; } = default!;
-    [Parameter] public GetTestResponse? Item { get; set; }
+    [Parameter] public GetSampleItemResponse? Item { get; set; }
     private UiForm _form = default!;
     private string _name = "";
     private string? _description;
@@ -30,7 +30,7 @@ public partial class TestEditor
         if (IsBusy) return;
         await _form.ValidateAsync();
         if (!_form.IsValid) return;
-        var result = await TryRequestAsync<ITestService, GetTestResponse>((service, token) => Item is null
+        var result = await TryRequestAsync<ISampleItemService, GetSampleItemResponse>((service, token) => Item is null
             ? service.CreateAsync(new(_name, _description), token)
             : service.UpdateAsync(Item.Id, new(_name, _description, Item.Version), token));
         if (result.Succeeded) { _dirty = false; AddSuccessToast("ذخیره شد."); Dialog.Close(DialogResult.Ok(true)); }

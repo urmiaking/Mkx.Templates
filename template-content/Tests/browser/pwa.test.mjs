@@ -31,7 +31,7 @@ test('installation never activates a waiting worker automatically', async () => 
 test('activation deletes only obsolete application caches', async () => { const app = worker(); app.cache('unrelated-app'); app.cache('Mkx.Templates-static-old'); await app.dispatch('install'); await app.dispatch('activate'); assert.equal(app.stores.has('unrelated-app'),true); assert.equal(app.stores.has('Mkx.Templates-static-old'),false); assert.equal(app.stores.has('Mkx.Templates-static-test-build'),true); });
 test('API, account, writes, logs and cross-origin requests bypass caching', async () => {
     const app = worker();
-    for (const value of [request('/api/tests'),request('/api/Account/auth-state'),request('/Account/Login'),request('/logs'),request('/_framework/app.wasm',{method:'POST'}),request('https://elsewhere.test/app.wasm')]) assert.equal(await app.dispatch('fetch',{request:value}),undefined);
+    for (const value of [request('/api/sample-items'),request('/api/Account/auth-state'),request('/Account/Login'),request('/logs'),request('/_framework/app.wasm',{method:'POST'}),request('https://elsewhere.test/app.wasm')]) assert.equal(await app.dispatch('fetch',{request:value}),undefined);
     assert.equal(app.stores.size,0);
 });
 test('only public non-HTML static responses are cached and writes are awaited', async () => {

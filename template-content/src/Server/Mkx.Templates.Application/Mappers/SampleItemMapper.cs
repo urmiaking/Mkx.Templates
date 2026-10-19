@@ -1,14 +1,14 @@
-using Mkx.Templates.Domain.TestAggregate;
-using Mkx.Templates.Shared.DTOs.Tests;
+using Mkx.Templates.Domain.SampleItemAggregate;
+using Mkx.Templates.Shared.DTOs.SampleItems;
 using Mapster;
 
 namespace Mkx.Templates.Application.Mappers;
 
-internal sealed class TestMapper : IRegister
+internal sealed class SampleItemMapper : IRegister
 {
     public void Register(TypeAdapterConfig config)
     {
-        config.NewConfig<Test, GetTestResponse>()
+        config.NewConfig<SampleItem, GetSampleItemResponse>()
             .Map(dest => dest.Id, src => src.Id.Value)
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Description, src => src.Description)

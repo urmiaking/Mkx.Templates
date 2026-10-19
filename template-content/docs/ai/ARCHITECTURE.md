@@ -16,7 +16,7 @@ Identity entities live in `src/Sdk/Mkx.Templates.Sdk.Server.Domain/Identity/`, t
 
 `Server/Services/UserAccountService` remains a deliberate host adapter because its account flows use cookies, SignInManager and HttpContext. Pure business rules should still move into Application/Domain as they emerge; moving this entire adapter into Application would introduce a host dependency cycle.
 
-Query intent goes into Infrastructure specifications. The complete Test feature is the reference; [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) maps every file. User/role management uses Identity's own stores with bounded pages and transaction boundaries. Do not wrap every Identity API in a second repository.
+Query intent goes into Infrastructure specifications. The complete optional SampleItem feature is the reference; [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md) maps every file. User/role management uses Identity's own stores with bounded pages and transaction boundaries. Do not wrap every Identity API in a second repository.
 
 DI scanning uses SDK lifetime attributes. Framework providers, authentication state and typed HTTP clients are registered explicitly. A typed client such as SmsSender must not also be decorated for scanning.
 

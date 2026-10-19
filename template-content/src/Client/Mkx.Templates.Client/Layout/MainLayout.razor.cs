@@ -9,11 +9,16 @@ namespace Mkx.Templates.Client.Layout;
 
 public partial class MainLayout : IAsyncDisposable
 {
+#if (IncludeSample)
+    private static bool IncludesSample => true;
+#else
+    private static bool IncludesSample => false;
+#endif
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ThemeService Theme { get; set; } = default!;
-    private bool _mobileMenuOpen, _notificationsOpen;
-    private ElementReference _sidebar;
+    private bool _mobileMenuOpen, _notificationsOpen, _themeChanging;
+    private ElementReference _sidebar, _themeButton;
     private IJSObjectReference? _module, _menu;
     private static string Today => DateTime.Now.ToString("dddd، yyyy/MM/dd", CultureInfo.GetCultureInfo("fa-IR"));
 
@@ -32,6 +37,13 @@ public partial class MainLayout : IAsyncDisposable
     private void OpenMenu() { _notificationsOpen = false; _mobileMenuOpen = true; }
     private void CloseMenu() => _mobileMenuOpen = false;
     private void OpenNotifications() { _mobileMenuOpen = false; _notificationsOpen = true; }
+    private async Task ToggleThemeAsync()
+    {
+        if (_themeChanging) return;
+        _themeChanging = true;
+        try { await Theme.ToggleModeAsync(_themeButton); }
+        finally { _themeChanging = false; }
+    }
     private void MenuKeyDown(KeyboardEventArgs args) { if (args.Key == "Escape") CloseMenu(); }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

@@ -15,11 +15,15 @@ public partial class BaseLayout : IAsyncDisposable
     private async void AppearanceChanged(object? sender, EventArgs args)
     {
         if (_disposed) return;
-        try { await InvokeAsync(async () => { await ApplyAsync(); StateHasChanged(); }); }
+        try { await InvokeAsync(StateHasChanged); }
         catch (JSDisconnectedException) { }
         catch (Exception ex) { if (!_disposed) await DispatchExceptionAsync(ex); }
     }
-    private ValueTask ApplyAsync() => JS.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
+    private async ValueTask ApplyAsync()
+    {
+        await JS.InvokeVoidAsync("Mkx.setPalette", ThemeService.Palette, false);
+        await JS.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
+    }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;

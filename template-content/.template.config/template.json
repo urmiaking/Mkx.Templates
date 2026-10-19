@@ -18,6 +18,12 @@
   ],
   "preferNameDirectory": false,
   "symbols": {
+    "IncludeSample": {
+      "type": "parameter",
+      "datatype": "bool",
+      "defaultValue": "true",
+      "description": "Include the tested SampleItem CRUD reference (domain, API, UI and sample-specific tests)."
+    },
     "HttpPort": {
       "type": "generated",
       "generator": "port",
@@ -33,6 +39,19 @@
     {
       "source": "./",
       "target": "./",
+      "modifiers": [
+        {
+          "condition": "(!IncludeSample)",
+          "exclude": [
+            "src/**/SampleItemAggregate/**",
+            "src/**/SampleItems/**",
+            "src/**/SampleItem*.cs",
+            "src/**/ISampleItem*.cs",
+            "src/**/SampleItems.razor",
+            "src/**/Migrations/20260930190627_TestCrudConcurrency*.cs"
+          ]
+        }
+      ],
       "exclude": [
         "**/[Bb]in/**",
         "**/[Oo]bj/**",

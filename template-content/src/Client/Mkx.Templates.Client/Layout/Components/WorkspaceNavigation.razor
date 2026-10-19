@@ -1,8 +1,12 @@
 <nav class="workspace-menu" aria-label="بخش‌های اصلی">
     <NavLink href="@ClientRoutes.Home.Index" Match="NavLinkMatch.All"><UiIcon Icon="home" /><span>خانه</span></NavLink>
-    <AuthorizeView Policy="@AppPolicies.Tests.View">
-        <NavLink href="@ClientRoutes.Tests.Index"><UiIcon Icon="check-circle" /><span>مدیریت تست‌ها</span></NavLink>
+
+@*#if (IncludeSample)*@
+<AuthorizeView Policy="@AppPolicies.SampleItems.View">
+        <NavLink href="@ClientRoutes.SampleItems.Index"><UiIcon Icon="check-circle" /><span>نمونهٔ CRUD</span></NavLink>
     </AuthorizeView>
+@*#endif*@
+
     <AuthorizeView Policy="@AppPolicies.Users.View">
         <NavLink href="@ClientRoutes.Users.Index" Match="NavLinkMatch.All"><UiIcon Icon="users" /><span>کاربران</span></NavLink>
         <NavLink href="@ClientRoutes.Users.RoleClaims"><UiIcon Icon="key" /><span>نقش‌ها و دسترسی‌ها</span></NavLink>

@@ -1,75 +1,55 @@
 @attribute [Route(ClientRoutes.Users.RoleClaims)]
 @attribute [Authorize(Policy = AppPolicies.Users.View)]
-
 @using Mkx.Templates.Sdk.Server.Shared.Authorization
 @inherits AppComponentBase
 
-<PageTitle>مدیریت دسترسی نقش‌های سیستم</PageTitle>
-
-@if (_isDisabled)
-{
-    <section class="ui-container pt-8 text-center">
-        <section class="ui-panel pa-6 rounded-lg my-4">
-            <UiIcon Icon="lock" Color="Color.Warning" Class="mb-3" />
-            <h6 class="fw-bold mb-2">مدیریت کاربران و نقش‌ها غیرفعال است</h6>
-            <p class="ui-type-body2 ui-color-secondary">
-                این بخش در دسترس نمی‌باشد.
-            </p>
-        </section>
-    </section>
-}
-else
-{
-    <AccountShell Title="دسترسی نقش‌ها" Description="مجوزهای نقش‌های اصلی سامانه را تنظیم کنید." Eyebrow="مدیریت سامانه">
-
-<ChildContent>
-        <section class="ui-panel pa-4 rounded-lg ">
-            <UiTable Items="_roles">
-                <HeaderContent>
-                    <th>عنوان نقش</th>
-                    <th>تعداد اعضا</th>
-                    <th>تعداد دسترسی‌های فعال</th>
-                    <th style="text-align: left;">عملیات</th>
-                </HeaderContent>
-                <RowTemplate Context="roleItem">
-                    <td data-label="عنوان نقش">
-                        <div class="d-flex align-center gap-3">
-                            <span class="ui-avatar ui-color-info">
-                                <UiIcon Icon="@(roleItem.RoleName == BuiltinRoles.Administrators ? "security" : "user")" />
-                            </span>
-                            <div>
-                                <p class="fw-bold ui-type-subtitle1">
-                                    @roleItem.RoleName.GetRoleName()
-                                </p>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td data-label="تعداد اعضا">
-                        <span class="ui-chip ui-color-default">
-                            @roleItem.MemberCount کاربر
-                        </span>
-                    </td>
-
-                    <td data-label="تعداد دسترسی‌های فعال">
-                        <span class="ui-chip ui-color-success">
-                            @roleItem.ClaimsCount مجوز تعریف شده
-                        </span>
-                    </td>
-
-                    <td data-label="عملیات" style="text-align: left;">
-                        <AuthorizeView Policy="@AppPolicies.Users.ManageClaims" Context="authCtx">
-                            <UiButton Variant="Variant.Filled"
-                                       Color="Color.Primary"
-                                       StartIcon="key"
-                                       OnClick="@(() => ManageRoleClaims(roleItem.RoleName))">
-                                تنظیم دسترسی‌های نقش
-                            </UiButton>
-                        </AuthorizeView>
-                    </td>
-                </RowTemplate>
-            </UiTable>
-        </section>
-
-</ChildContent></AccountShell>
-}
+<PageTitle>دسترسی نقش‌ها</PageTitle>
+<AccountShell Title="دسترسی نقش‌ها" Description="مجوزهای هر نقش را تنظیم کنید؛ تغییرات برای همهٔ اعضای آن نقش اعمال می‌شود." Eyebrow="مدیریت سامانه">
+    <Actions><UiButton Variant="Variant.Outlined" StartIcon="users" Href="@ClientRoutes.Users.Index">کاربران</UiButton></Actions>
+    <ChildContent>
+        @if (_isDisabled)
+        {
+            <div class="ui-empty"><UiIcon Icon="lock" /><p>مدیریت کاربران و نقش‌ها غیرفعال است.</p></div>
+        }
+        else if (_loadFailed)
+        {
+            <div class="ui-alert ui-alert-error" role="alert">@LastRequestError <UiButton OnClick="LoadAsync" Disabled="IsBusy">تلاش دوباره</UiButton></div>
+        }
+        else
+        {
+            @if (!string.IsNullOrEmpty(LastRequestError)) { <div class="ui-alert ui-alert-error mb-3" role="alert">@LastRequestError</div> }
+            <section class="roles-list" aria-label="نقش‌های سیستم" aria-busy="@_loading.ToString().ToLowerInvariant()">
+                <header class="roles-list-heading"><h2>نقش‌های سیستم</h2>@if (!_loading) { <span>@_roles.Count نقش</span> }</header>
+                @if (_loading)
+                {
+                    <p class="ui-empty" role="status">در حال دریافت نقش‌ها…</p>
+                }
+                else if (_roles.Count == 0)
+                {
+                    <p class="ui-empty">هنوز نقشی تعریف نشده است.</p>
+                }
+                else
+                {
+                    <ul class="roles-rows">
+                        @foreach (var role in _roles)
+                        {
+                            <li class="role-row" @key="role.RoleName">
+                                <div class="role-identity">
+                                    <span class="role-mark"><UiIcon Icon="@(role.RoleName == BuiltinRoles.Administrators ? "security" : "users")" /></span>
+                                    <div><h3>@role.RoleName.GetRoleName()</h3><span class="role-name" dir="ltr">@role.RoleName</span></div>
+                                </div>
+                                <dl class="role-stats"><div><dt>اعضا</dt><dd>@role.MemberCount <span>نفر</span></dd></div><div><dt>دسترسی فعال</dt><dd>@role.ClaimsCount <span>مجوز</span></dd></div></dl>
+                                <div class="role-action">
+                                    <AuthorizeView Policy="@AppPolicies.Users.ManageClaims">
+                                        <Authorized><UiButton Variant="Variant.Outlined" StartIcon="key" Disabled="IsBusy" OnClick="@(() => ManageRoleClaims(role.RoleName))" aria-label="@($"مدیریت دسترسی‌های {role.RoleName.GetRoleName()}")">مدیریت دسترسی‌ها</UiButton></Authorized>
+                                        <NotAuthorized><span class="role-readonly">فقط مشاهده</span></NotAuthorized>
+                                    </AuthorizeView>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
+            </section>
+        }
+    </ChildContent>
+</AccountShell>

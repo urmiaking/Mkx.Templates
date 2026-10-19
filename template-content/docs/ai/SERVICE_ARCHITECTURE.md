@@ -4,13 +4,13 @@ Shared owns service contracts and DTOs. Application implements use cases; Server
 
 Use `[ScopedService]` for ordinary implementation/validator/repository scanning. Register framework services and typed HTTP clients explicitly. Do not register a scanned class again. Dispose per-request HttpResponseMessage and propagate CancellationToken to HTTP/EF/validation calls.
 
-`TestClientService` is the executable HTTP reference:
+`SampleItemClientService` is the executable HTTP reference:
 
 ```csharp
-using var response = await client.GetAsync(ApiUrls.Tests.Get(id), cancellationToken);
+using var response = await client.GetAsync(ApiUrls.SampleItems.Get(id), cancellationToken);
 if (!response.IsSuccessStatusCode)
     throw await HttpRequestFailedException.GetExceptionAsync(response, cancellationToken);
-return await response.Content.ReadFromJsonAsync<GetTestResponse>(jsonOptions, cancellationToken)
+return await response.Content.ReadFromJsonAsync<GetSampleItemResponse>(jsonOptions, cancellationToken)
     ?? throw new UnexpectedHttpResponseException();
 ```
 

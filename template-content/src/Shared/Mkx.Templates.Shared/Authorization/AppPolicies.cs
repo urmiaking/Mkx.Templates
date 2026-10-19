@@ -9,9 +9,11 @@ public static class AppPolicies
         public const string ManageClaims = $"{nameof(Mkx.Templates)}-{nameof(Users)}-{nameof(ManageClaims)}";
     }
 
-    public static class Tests
+#if (IncludeSample)
+    public static class SampleItems
     {
-        public const string Manage = $"{nameof(Mkx.Templates)}-{nameof(Tests)}-{nameof(Manage)}";
-        public const string View = $"{nameof(Mkx.Templates)}-{nameof(Tests)}-{nameof(View)}";
+        public const string Manage = $"{nameof(Mkx.Templates)}-{nameof(SampleItems)}-{nameof(Manage)}";
+        public const string View = $"{nameof(Mkx.Templates)}-{nameof(SampleItems)}-{nameof(View)}";
     }
+#endif
 }

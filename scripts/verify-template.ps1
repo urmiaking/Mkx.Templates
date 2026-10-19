@@ -5,6 +5,7 @@ $verification = Join-Path ([IO.Path]::GetTempPath()) ("mkx-template-" + [guid]::
 $packageOutput = Join-Path $verification "packages"
 $hive = Join-Path $verification "hive"
 $generated = Join-Path $verification "Acme.Starter"
+$minimal = Join-Path $verification "Acme.Minimal"
 Push-Location $root
 try {
     & ./template-content/scripts/verify.ps1 -Configuration $Configuration
@@ -38,6 +39,15 @@ try {
     [xml]$generatedProject = Get-Content -LiteralPath (Join-Path $generated 'src/Server/Acme.Starter.Server/Acme.Starter.Server.csproj') -Raw
     if ($sourceProject.Project.PropertyGroup.UserSecretsId -eq $generatedProject.Project.PropertyGroup.UserSecretsId) { throw "Generated project shares the template UserSecretsId." }
     Push-Location $generated
+    try { & ./scripts/verify.ps1 -Configuration $Configuration } finally { Pop-Location }
+    if (-not (Test-Path -LiteralPath (Join-Path $generated 'src/Core/Acme.Starter.Domain/SampleItemAggregate/SampleItem.cs'))) { throw "Default generation lost the SampleItem reference." }
+    dotnet new mkx-blazor -n Acme.Minimal -o $minimal --IncludeSample false --debug:custom-hive $hive --no-update-check
+    if ($LASTEXITCODE -ne 0) { throw "Instantiation without sample failed." }
+    $minimalSources = Get-ChildItem -LiteralPath (Join-Path $minimal 'src') -Recurse -File | Where-Object { $_.Extension -in '.cs', '.razor' }
+    foreach ($file in $minimalSources) {
+        if ((Get-Content -LiteralPath $file.FullName -Raw) -match 'SampleItem|TestAggregate|(?:name|table): "Tests"') { throw "Sample reference leaked into minimal source: $($file.FullName)" }
+    }
+    Push-Location $minimal
     try { & ./scripts/verify.ps1 -Configuration $Configuration } finally { Pop-Location }
     Write-Host "Template verified. Package and generated solution: $verification"
 } finally { Pop-Location }

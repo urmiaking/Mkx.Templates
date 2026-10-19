@@ -1,7 +1,11 @@
 @attribute [Route(ClientRoutes.Home.Index)]
 <PageTitle>خانه</PageTitle>
 <section class="ui-container">
-    <header class="home-intro"><div><span class="home-kicker">فضای کاری شما</span><h1>روزتان بخیر</h1><p>از اینجا به کارها، حساب و دسترسی‌های خود برسید.</p></div><AuthorizeView Policy="@AppPolicies.Tests.Manage"><a class="ui-button ui-button-filled" href="@ClientRoutes.Tests.Create"><UiIcon Icon="plus" />ثبت جدید</a></AuthorizeView></header>
+    <header class="home-intro"><div><span class="home-kicker">فضای کاری شما</span><h1>روزتان بخیر</h1><p>از اینجا به کارها، حساب و دسترسی‌های خود برسید.</p></div>
+@*#if (IncludeSample)*@
+<AuthorizeView Policy="@AppPolicies.SampleItems.Manage"><a class="ui-button ui-button-filled" href="@ClientRoutes.SampleItems.Create"><UiIcon Icon="plus" />ثبت جدید</a></AuthorizeView>
+@*#endif*@
+</header>
     <div class="home-layout">
         <div class="home-main">
             <section class="home-feature">
@@ -11,7 +15,11 @@
             </section>
             <div class="home-section-head"><h2>بخش‌های پرکاربرد</h2><span>دسترسی سریع</span></div>
             <div class="home-links">
-                <AuthorizeView Policy="@AppPolicies.Tests.View"><ActionCard Title="مدیریت تست‌ها" Description="مشاهده، جستجو و ثبت اطلاعات" StartIcon="check-circle" Href="@ClientRoutes.Tests.Index" /></AuthorizeView>
+
+@*#if (IncludeSample)*@
+<AuthorizeView Policy="@AppPolicies.SampleItems.View"><ActionCard Title="نمونهٔ CRUD" Description="مشاهده، جستجو و ثبت اطلاعات" StartIcon="check-circle" Href="@ClientRoutes.SampleItems.Index" /></AuthorizeView>
+@*#endif*@
+
                 <AuthorizeView Policy="@AppPolicies.Users.View"><ActionCard Title="کاربران و دسترسی‌ها" Description="مدیریت اعضا، نقش‌ها و مجوزها" StartIcon="users" Href="@ClientRoutes.Users.Index" /></AuthorizeView>
                 <AuthorizeView><Authorized><ActionCard Title="امنیت حساب" Description="رمز دومرحله‌ای، کلید عبور و سرویس‌های متصل" StartIcon="key" Href="@ClientRoutes.UserAccounts.TwoFactorAuthentication" /></Authorized><NotAuthorized><ActionCard Title="بازیابی حساب" Description="بازنشانی رمز عبور با کد تأیید موبایل" StartIcon="key" Href="@ClientRoutes.Accounts.ForgotPassword" /></NotAuthorized></AuthorizeView>
             </div>

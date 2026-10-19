@@ -3,83 +3,52 @@ using Mkx.Templates.Client.Pages.Users.Components;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Claims;
 using Mkx.Templates.Shared.DTOs.Roles;
-using Mkx.Templates.Shared.Routes;
-using Mkx.Templates.Sdk.Server.Shared.Authorization;
 using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.Users;
 
 public partial class RoleClaims
 {
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت کاربران", href: ClientRoutes.Users.Index, icon: "users"),
-        new("دسترسی نقش‌های سیستم", href: ClientRoutes.Users.RoleClaims, icon: "key")
-    ];
-
     private List<RoleClaimsDto> _roles = [];
-    private bool _isDisabled;
+    private bool _isDisabled, _loadFailed, _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        var enabled = await SendRequestAsync<IUserManagementService, bool>(
-            (s, ct) => s.IsUserManagementEnabledAsync(ct));
-
-        if (!enabled)
-        {
-            _isDisabled = true;
-            return;
-        }
-
-        await LoadRolesAsync();
         await base.OnInitializedAsync();
+        await LoadAsync();
     }
 
-    private async Task LoadRolesAsync()
+    private async Task LoadAsync()
     {
-        await SendRequestAsync<IUserManagementService, List<RoleClaimsDto>>(
-            (service, ct) => service.GetRolesAsync(ct),
-            roles =>
-            {
-                _roles = roles ?? [];
-                StateHasChanged();
-            });
+        _loading = true;
+        _loadFailed = false;
+        var enabled = await TryRequestAsync<IUserManagementService, bool>((service, token) => service.IsUserManagementEnabledAsync(token));
+        if (!enabled.Succeeded) { _loading = false; _loadFailed = true; return; }
+        _isDisabled = !enabled.Value;
+        if (_isDisabled) { _loading = false; return; }
+        var roles = await TryRequestAsync<IUserManagementService, List<RoleClaimsDto>>((service, token) => service.GetRolesAsync(token));
+        if (roles.Succeeded) _roles = roles.Value ?? [];
+        _loadFailed = !roles.Succeeded;
+        _loading = false;
     }
 
     private async Task ManageRoleClaims(string roleName)
     {
-        List<PolicyTreeNodeDto>? tree = null;
-
-        await SendRequestAsync<IUserManagementService, List<PolicyTreeNodeDto>>(
-            (service, ct) => service.GetRoleClaimsTreeAsync(roleName, ct),
-            resTree => tree = resTree);
-
-        StateHasChanged();
-
-        if (tree == null) return;
-
+        if (IsBusy) return;
+        var tree = await TryRequestAsync<IUserManagementService, List<PolicyTreeNodeDto>>((service, token) => service.GetRoleClaimsTreeAsync(roleName, token));
+        if (!tree.Succeeded) return;
         var displayRole = roleName.GetRoleName();
-
-
         var parameters = new DialogParameters<ClaimsTreeDialog>
         {
-            { x => x.InitialTree, tree }
+            { component => component.InitialTree, tree.Value ?? [] },
+            { component => component.SaveChanges, (Func<IUserManagementService, List<string>, CancellationToken, Task>)((service, names, token) => service.UpdateRoleClaimsAsync(roleName, names, token)) }
         };
-
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = await DialogService.ShowAsync<ClaimsTreeDialog>($"مدیریت دسترسی‌های نقش: {displayRole}", parameters, options);
-        var result = await dialog.Result;
-
-        if (result is { Canceled: false, Data: List<string> grantedClaims })
+        var dialog = await DialogService.ShowAsync<ClaimsTreeDialog>($"مدیریت دسترسی‌های نقش: {displayRole}", parameters,
+            new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true });
+        if (await dialog.Result is { Canceled: false })
         {
-            await SendRequestAsync<IUserManagementService>(
-                (service, ct) => service.UpdateRoleClaimsAsync(roleName, grantedClaims, ct),
-                async () =>
-                {
-                    AddSuccessToast($"دسترسی‌های نقش '{displayRole}' با موفقیت بروزرسانی شد.");
-                    await LoadRolesAsync();
-                });
+            AddSuccessToast($"دسترسی‌های نقش «{displayRole}» به‌روز شد.");
+            await LoadAsync();
         }
     }
 }

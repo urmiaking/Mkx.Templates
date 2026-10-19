@@ -7,7 +7,9 @@ public class AppPolicyProvider : IApplicationPolicyProvider
     public string Category => "Mkx.Templates";
     public IEnumerable<PolicyDefinition> GetPolicies()
     {
-        yield return PolicyDefinition.Build(AppPolicies.Tests.View, "مشاهده تست‌ها", childPolicies: [PolicyDefinition.Build(AppPolicies.Tests.Manage, "مدیریت تست‌ها")]);
+#if (IncludeSample)
+        yield return PolicyDefinition.Build(AppPolicies.SampleItems.View, "مشاهده نمونه‌ها", childPolicies: [PolicyDefinition.Build(AppPolicies.SampleItems.Manage, "نمونهٔ CRUD")]);
+#endif
         yield return PolicyDefinition.Build(AppPolicies.Users.View, "مشاهده کاربران و دسترسی‌ها",
             childPolicies:
             [

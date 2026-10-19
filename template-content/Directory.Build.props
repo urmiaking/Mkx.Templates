@@ -3,5 +3,8 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <Deterministic>true</Deterministic>
+    <!--#if (IncludeSample)-->
+    <DefineConstants>$(DefineConstants);IncludeSample</DefineConstants>
+    <!--#endif-->
   </PropertyGroup>
 </Project>
