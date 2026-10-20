@@ -398,16 +398,37 @@ try {
     await page.waitForFunction(y => Math.abs(document.querySelector('.palette-edge-tab').getBoundingClientRect().top - y) < 2, dragged.y);
     await page.setViewportSize({ width: 375, height: 844 });
     const touchStart = await edgePalette.boundingBox();
+    const scrollBeforeDrag = await page.evaluate(() => scrollY);
+    await edgePalette.evaluate(node => {
+        node.originalCapture = node.setPointerCapture;
+        node.setPointerCapture = () => { throw new Error('Touch must not depend on pointer capture'); };
+    });
     const cdp = await context.newCDPSession(page);
     await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 16, y: touchStart.y + 25 }] });
     for (let distance = 20; distance <= 180; distance += 20) {
-        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 16, y: touchStart.y + 25 + distance }] });
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 16 + distance / 2, y: touchStart.y + 25 + distance }] });
+        await page.waitForTimeout(35);
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     const touchEnd = await edgePalette.boundingBox();
     assert(touchEnd.y > touchStart.y + 150, 'Touch dragging moves the edge control');
     assert.equal(await gallery.isVisible(), false);
+    assert.equal(await page.evaluate(() => scrollY), scrollBeforeDrag, 'Touch dragging does not scroll the page');
+    const savedAfterDrag = await page.evaluate(() => localStorage.getItem('Theme.PickerPosition'));
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 16, y: touchEnd.y + 25 }] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: 60, y: touchEnd.y - 35 }] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+    assert(Math.abs((await edgePalette.boundingBox()).y - touchEnd.y) < 2, 'Canceled touches restore their starting position');
+    assert.equal(await page.evaluate(() => localStorage.getItem('Theme.PickerPosition')), savedAfterDrag);
+    // A short tap must still open once after canceled native touch defaults.
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: 16, y: touchEnd.y + 25 }] });
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForTimeout(400); // Catch delayed compatibility clicks that could close a just-opened sheet.
+    await gallery.waitFor();
+    await page.getByRole('button', { name: 'بستن انتخاب رنگ', exact: true }).click();
+    await gallery.waitFor({ state: 'hidden' });
+    await edgePalette.evaluate(node => { node.setPointerCapture = node.originalCapture; delete node.originalCapture; });
     await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: false });
     await cdp.detach();
     await page.goto(base);
@@ -513,6 +534,67 @@ try {
     await page.locator('h1').click();
     await gallery.waitFor({ state: 'hidden' });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+    // Mobile users can hide the tab, choose colors in navigation, and restore it later.
+    await page.setViewportSize({ width: 375, height: 844 });
+    await edgePalette.click();
+    await gallery.waitFor();
+    await gallery.getByRole('button', { name: 'پنهان‌کردن دکمه رنگ در موبایل', exact: true }).click();
+    await gallery.waitFor({ state: 'hidden' });
+    await edgePalette.waitFor({ state: 'hidden' });
+    assert.equal(await page.evaluate(() => localStorage.getItem('Theme.MobilePickerHidden')), 'True');
+    assert(await page.getByRole('button', { name: 'باز کردن منوی اصلی', exact: true }).evaluate(node => node === document.activeElement));
+    await page.goto(base);
+    await page.locator('#main-content').waitFor();
+    assert.equal(await edgePalette.isVisible(), false, 'The hide preference survives reload');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await edgePalette.waitFor();
+    assert.equal(await page.locator('.workspace-sidebar-appearance').isVisible(), false, 'Mobile preference leaves desktop controls available');
+    for (const width of [320, 375]) {
+        await page.setViewportSize({ width, height: 844 });
+        assert.equal(await edgePalette.isVisible(), false);
+        await page.getByRole('button', { name: 'باز کردن منوی اصلی', exact: true }).click();
+        const menu = page.locator('.workspace-sidebar.mobile-open');
+        await menu.waitFor();
+        const chooser = menu.getByRole('group', { name: 'رنگ فضای کار', exact: true });
+        assert.equal(await chooser.getByRole('button').count(), 4);
+        assert.equal((await chooser.innerText()).trim(), '', 'Navigation colors have no visible text');
+        assert.equal(await menu.evaluate(node => node.scrollWidth > node.clientWidth), false);
+        const swatches = await chooser.boundingBox(), account = await menu.locator('.workspace-sidebar-bottom').boundingBox();
+        assert(swatches.y + swatches.height <= account.y, 'Palette choices sit above the account');
+        await chooser.getByRole('button', { name: 'اقیانوس', exact: true }).click();
+        await page.waitForFunction(() => document.documentElement.dataset.palette === 'ocean' && !document.documentElement.dataset.themeTransition);
+        await chooser.locator('[data-palette-choice=ocean][aria-pressed=true]:not(:disabled)').waitFor();
+        await chooser.getByRole('button', { name: 'اقیانوس', exact: true }).hover();
+        const alignment = await menu.locator('.workspace-sidebar-appearance').evaluate(row => {
+            const center = node => { const r = node.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2, width: r.width, height: r.height }; };
+            return [...row.querySelectorAll('button')].map(button => ({ button: center(button), content: center(button.querySelector('.palette-quick-swatch') || button.querySelector('svg')),
+                icon: button.querySelector('svg') ? center(button.querySelector('svg')) : null })).sort((a, b) => a.button.x - b.button.x);
+        });
+        assert(alignment.every(({ button, content, icon }) => button.width === 44 && button.height === 44 &&
+            Math.abs(button.x - content.x) < .5 && Math.abs(button.y - content.y) < .5 &&
+            (!icon || (Math.abs(button.x - icon.x) < .5 && Math.abs(button.y - icon.y) < .5))), 'Swatches, selected checks and visibility icon stay centered, including hover');
+        assert(alignment.every(({ button }) => Math.abs(button.y - alignment[0].button.y) < .5));
+        const spacing = alignment.slice(1).map((item, i) => item.button.x - alignment[i].button.x);
+        assert(Math.max(...spacing) - Math.min(...spacing) < .5, 'All five navigation controls have equal spacing');
+        await screenshot(`navigation-appearance-${width}`);
+        await menu.getByRole('button', { name: 'نمایش دکمه شناور رنگ', exact: true }).click();
+        await page.keyboard.press('Escape');
+        await edgePalette.waitFor();
+        await edgePalette.click();
+        await gallery.waitFor();
+        assert.equal(await gallery.getByRole('button', { name: 'اقیانوس', exact: true }).getAttribute('aria-pressed'), 'true');
+        if (width === 320) {
+            await gallery.getByRole('button', { name: 'پنهان‌کردن دکمه رنگ در موبایل', exact: true }).click();
+            await edgePalette.waitFor({ state: 'hidden' });
+        } else {
+            // Restore the palette expected by the remaining account/SSR checks.
+            await gallery.getByRole('button', { name: 'زنبق', exact: true }).click();
+            await page.waitForFunction(() => document.documentElement.dataset.palette === 'iris' && !document.documentElement.dataset.themeTransition);
+            await page.keyboard.press('Escape');
+            await gallery.waitFor({ state: 'hidden' });
+        }
+    }
 
     for (const viewport of [{ width: 375, height: 844 }, { width: 844, height: 390 },
         { width: 768, height: 1024 }, { width: 960, height: 800 }]) {

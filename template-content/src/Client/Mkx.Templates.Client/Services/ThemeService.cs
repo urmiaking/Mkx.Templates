@@ -10,8 +10,17 @@ public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
     public static IReadOnlyList<(string Id, string Name)> Palettes { get; } =
         [("jade", "یشم"), ("ocean", "اقیانوس"), ("iris", "زنبق"), ("amber", "کهربا")];
     public string Palette { get; private set; } = "jade";
+    public bool MobilePickerHidden { get; private set; }
     public bool IsDarkMode { get; private set; }
     public event EventHandler? OnToggleMode;
+    public async Task SetMobilePickerHiddenAsync(bool hidden)
+    {
+        MobilePickerHidden = hidden;
+        try { await storage.SetItemAsStringAsync(LocalStorageKeys.MobilePickerHidden, hidden.ToString()); }
+        catch (JSException) { /* Visibility still changes when storage is unavailable. */ }
+        await js.InvokeVoidAsync("Mkx.setMobilePickerHidden", hidden);
+        OnToggleMode?.Invoke(this, EventArgs.Empty);
+    }
     public async Task SetPaletteAsync(string palette, ElementReference source)
     {
         if (palette == Palette || !Palettes.Any(item => item.Id == palette)) return;
@@ -47,6 +56,12 @@ public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
         {
             var saved = await storage.GetItemAsStringAsync(LocalStorageKeys.Palette);
             if (Palettes.Any(item => item.Id == saved)) Palette = saved!;
+        }
+        catch (JSException) { }
+        try
+        {
+            var saved = await storage.GetItemAsStringAsync(LocalStorageKeys.MobilePickerHidden);
+            if (bool.TryParse(saved, out var hidden)) MobilePickerHidden = hidden;
         }
         catch (JSException) { }
         OnToggleMode?.Invoke(this, EventArgs.Empty);

@@ -1,8 +1,8 @@
-// Native popovers own dismissal/focus; Pointer Events handle mouse, pen and touch dragging.
+// Pointer capture handles mouse/pen; explicit non-passive Touch Events keep phone gestures out of native scrolling.
 export function bind(trigger, popover) {
     const host = trigger.closest('.palette-picker-floating');
     const storageKey = 'Theme.PickerPosition';
-    let fraction = .5, pointer = null, suppressClick = false, frame = 0;
+    let fraction = .5, pointer = null, touch = null, suppressClick = false, lastTouch = -Infinity, frame = 0;
     try {
         const saved = localStorage.getItem(storageKey);
         if (saved !== null && saved.trim() !== '' && Number.isFinite(Number(saved))) fraction = Math.max(0, Math.min(1, Number(saved)));
@@ -58,7 +58,7 @@ export function bind(trigger, popover) {
     const close = () => { if (popover.matches(':popover-open')) popover.hidePopover(); };
     const resized = () => { placeTab(); position(); };
     const pointerDown = event => {
-        if (!event.isPrimary || event.button !== 0) return;
+        if (event.pointerType === 'touch' || !event.isPrimary || event.button !== 0 || touch) return;
         suppressClick = false;
         pointer = { id: event.pointerId, y: event.clientY, x: event.clientX, top: host.getBoundingClientRect().top, fraction, dragged: false };
         trigger.setPointerCapture(event.pointerId);
@@ -82,7 +82,50 @@ export function bind(trigger, popover) {
         else if (finished.dragged) { suppressClick = true; save(); }
         if (trigger.hasPointerCapture(event.pointerId)) trigger.releasePointerCapture(event.pointerId);
     };
+    // A canceled touchstart suppresses compatibility clicks. Also reject delayed ghost clicks on mobile browsers.
+    const touchStart = event => {
+        if (event.touches.length !== 1 || pointer) return;
+        const point = event.changedTouches[0];
+        touch = { id: point.identifier, x: point.clientX, y: point.clientY, top: host.getBoundingClientRect().top, fraction, dragged: false };
+        suppressClick = false;
+        if (event.cancelable) event.preventDefault();
+        document.addEventListener('touchmove', touchMove, { passive: false });
+        document.addEventListener('touchend', touchEnd, { passive: false });
+        document.addEventListener('touchcancel', touchEnd, { passive: false });
+    };
+    const touchMove = event => {
+        if (!touch) return;
+        const point = [...event.changedTouches].find(point => point.identifier === touch.id);
+        if (!point) return;
+        if (event.cancelable) event.preventDefault();
+        const dy = point.clientY - touch.y;
+        if (!touch.dragged && Math.hypot(dy, point.clientX - touch.x) < 6) return;
+        touch.dragged = true;
+        host.dataset.dragging = '';
+        close();
+        move(touch.top + dy);
+    };
+    const touchEnd = event => {
+        if (!touch || ![...event.changedTouches].some(point => point.identifier === touch.id)) return;
+        if (event.cancelable) event.preventDefault();
+        const finished = touch;
+        touch = null;
+        detachTouch();
+        lastTouch = performance.now();
+        delete host.dataset.dragging;
+        if (event.type === 'touchcancel') { fraction = finished.fraction; placeTab(); }
+        else if (finished.dragged) { suppressClick = true; save(); }
+        else trigger.click();
+    };
+    const detachTouch = () => {
+        document.removeEventListener('touchmove', touchMove);
+        document.removeEventListener('touchend', touchEnd);
+        document.removeEventListener('touchcancel', touchEnd);
+    };
     const click = event => {
+        if (event.detail > 0 && performance.now() - lastTouch < 700) {
+            event.preventDefault(); event.stopImmediatePropagation(); return;
+        }
         if (!suppressClick) return;
         suppressClick = false;
         event.preventDefault();
@@ -98,6 +141,7 @@ export function bind(trigger, popover) {
         save();
     };
     placeTab();
+    trigger.addEventListener('touchstart', touchStart, { passive: false });
     trigger.addEventListener('pointerdown', pointerDown);
     trigger.addEventListener('pointermove', pointerMove);
     trigger.addEventListener('pointerup', finishPointer);
@@ -111,9 +155,17 @@ export function bind(trigger, popover) {
     window.visualViewport?.addEventListener('resize', resized);
     window.visualViewport?.addEventListener('scroll', resized);
     host.dataset.ready = '';
-    return { close, dispose() {
+    return { close,
+        async closeAnimated() {
+            close();
+            await Promise.all(popover.getAnimations().map(animation => animation.finished.catch(() => {})));
+        },
+        focusNavigation() { document.querySelector('.workspace-menu-toggle')?.focus({ preventScroll: true }); },
+        dispose() {
         close();
         cancelAnimationFrame(frame);
+        trigger.removeEventListener('touchstart', touchStart);
+        detachTouch();
         trigger.removeEventListener('pointerdown', pointerDown);
         trigger.removeEventListener('pointermove', pointerMove);
         trigger.removeEventListener('pointerup', finishPointer);

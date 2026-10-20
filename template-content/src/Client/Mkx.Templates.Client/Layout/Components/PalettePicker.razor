@@ -18,7 +18,10 @@
         <div class="palette-popover-content">
             <header class="palette-popover-heading">
                 <div><strong>رنگ فضای کار</strong><p>یک رنگ، در روشنایی و تاریکی</p></div>
-                <button type="button" class="palette-dismiss" popovertarget="@_id" popovertargetaction="hide" aria-label="بستن انتخاب رنگ"><UiIcon Icon="close" /></button>
+                <div class="palette-heading-actions">
+                    <button type="button" class="palette-dismiss palette-mobile-hide" disabled="@_changing" aria-label="پنهان‌کردن دکمه رنگ در موبایل" title="پنهان‌کردن؛ انتخاب رنگ از منوی کناری" @onclick="HideOnMobileAsync"><UiIcon Icon="eye-off" /></button>
+                    <button type="button" class="palette-dismiss" popovertarget="@_id" popovertargetaction="hide" aria-label="بستن انتخاب رنگ"><UiIcon Icon="close" /></button>
+                </div>
             </header>
             <div class="palette-options" role="group" aria-label="پالت‌های رنگ">
                 @foreach (var palette in ThemeService.Palettes)
@@ -44,6 +47,13 @@
     private readonly string _id = $"palette-{Guid.NewGuid():N}";
     private ElementReference _trigger, _popover;
     private IJSObjectReference? _module, _binding;
+    private async Task HideOnMobileAsync()
+    {
+        if (_binding is null || _changing) return;
+        await _binding.InvokeVoidAsync("closeAnimated");
+        await Theme.SetMobilePickerHiddenAsync(true);
+        await _binding.InvokeVoidAsync("focusNavigation");
+    }
     private async Task SelectPaletteAsync(string palette)
     {
         if (_changing) return;

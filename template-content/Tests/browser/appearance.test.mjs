@@ -6,7 +6,7 @@ import vm from 'node:vm';
 const script = readFileSync(new URL('../../src/Server/Mkx.Templates.Server/wwwroot/js/app.js', import.meta.url), 'utf8');
 const button = { getBoundingClientRect: () => ({ left: 100, top: 20, width: 40, height: 40 }) };
 
-function browser({ reduced = false, supported = true, saved = null, palette = null, storageBlocked = false, rejectSnapshot = false } = {}) {
+function browser({ reduced = false, supported = true, saved = null, palette = null, pickerHidden = null, storageBlocked = false, rejectSnapshot = false } = {}) {
     const animations = [];
     let snapshots = 0;
     const root = {
@@ -25,7 +25,7 @@ function browser({ reduced = false, supported = true, saved = null, palette = nu
             finished: Promise.resolve(), skipTransition() {} };
     };
     const sandbox = { document, innerWidth: 1440, innerHeight: 1000, setTimeout, clearTimeout,
-        localStorage: { getItem(key) { if (storageBlocked) throw new Error('blocked'); return key === 'Theme.Palette' ? palette : saved; } },
+        localStorage: { getItem(key) { if (storageBlocked) throw new Error('blocked'); return key === 'Theme.Palette' ? palette : key === 'Theme.MobilePickerHidden' ? pickerHidden : saved; } },
         matchMedia: query => ({ matches: query.includes('reduced-motion') && reduced }),
     };
     sandbox.window = sandbox;
@@ -86,6 +86,18 @@ test('the final dark clip is retained through delayed snapshot removal and then 
 test('saved appearance restores without animation and blocked storage falls back to the system', () => {
     assert.equal(browser({ saved: 'True' }).root.dataset.theme, 'dark');
     assert.equal(browser({ storageBlocked: true }).root.dataset.theme, 'light');
+});
+
+test('mobile picker visibility restores independently and rejects malformed or inaccessible storage', () => {
+    const state = browser({ pickerHidden: 'True', palette: 'iris', saved: 'True' });
+    assert.equal(state.root.dataset.mobilePickerHidden, 'true');
+    assert.equal(state.root.dataset.palette, 'iris');
+    assert.equal(state.root.dataset.theme, 'dark');
+    state.app.setMobilePickerHidden(false);
+    assert.equal(state.root.dataset.mobilePickerHidden, 'false');
+    for (const options of [{ pickerHidden: 'invalid' }, { storageBlocked: true }, {}]) {
+        assert.equal(browser(options).root.dataset.mobilePickerHidden, 'false');
+    }
 });
 
 test('palette restoration validates storage and remains independent of light/dark preference', async () => {

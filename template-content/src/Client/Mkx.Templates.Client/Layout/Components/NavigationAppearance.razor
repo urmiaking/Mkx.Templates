@@ -1,0 +1,36 @@
+@implements IDisposable
+@inject ThemeService Theme
+
+<div class="workspace-sidebar-appearance">
+    <div @ref="_source" class="palette-quick-options" role="group" aria-label="رنگ فضای کار">
+        @foreach (var palette in ThemeService.Palettes)
+        {
+            <button type="button" class="palette-option palette-quick-option" data-palette-choice="@palette.Id"
+                    aria-label="@palette.Name" title="@palette.Name" aria-pressed="@((Theme.Palette == palette.Id).ToString().ToLowerInvariant())"
+                    disabled="@_changing" @onclick="() => SelectAsync(palette.Id)">
+                <span class="palette-quick-swatch" aria-hidden="true">@if (Theme.Palette == palette.Id) { <UiIcon Icon="check" /> }</span>
+            </button>
+        }
+    </div>
+    <button type="button" class="palette-visibility-toggle" aria-pressed="@((!Theme.MobilePickerHidden).ToString().ToLowerInvariant())"
+            aria-label="@(Theme.MobilePickerHidden ? "نمایش دکمه شناور رنگ" : "پنهان‌کردن دکمه شناور رنگ")"
+            title="@(Theme.MobilePickerHidden ? "نمایش دکمه شناور رنگ" : "پنهان‌کردن دکمه شناور رنگ")"
+            @onclick="() => Theme.SetMobilePickerHiddenAsync(!Theme.MobilePickerHidden)">
+        <UiIcon Icon="@(Theme.MobilePickerHidden ? "eye" : "eye-off")" />
+    </button>
+</div>
+
+@code {
+    private ElementReference _source;
+    private bool _changing;
+    protected override void OnInitialized() => Theme.OnToggleMode += AppearanceChanged;
+    private void AppearanceChanged(object? sender, EventArgs args) => _ = InvokeAsync(StateHasChanged);
+    private async Task SelectAsync(string palette)
+    {
+        if (_changing) return;
+        _changing = true;
+        try { await Theme.SetPaletteAsync(palette, _source); }
+        finally { _changing = false; }
+    }
+    public void Dispose() => Theme.OnToggleMode -= AppearanceChanged;
+}

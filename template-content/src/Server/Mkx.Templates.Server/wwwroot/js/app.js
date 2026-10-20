@@ -1,6 +1,7 @@
 window.Mkx = window.Mkx || {};
 Mkx.removeSplash = () => document.getElementById('app-loading')?.remove();
 Mkx.systemDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
+Mkx.setMobilePickerHidden = hidden => { document.documentElement.dataset.mobilePickerHidden = String(hidden === true); };
 Mkx.setPalette = async (palette, animate = true, source = null) => {
     const root = document.documentElement;
     const valid = ['jade', 'ocean', 'iris', 'amber'].includes(palette) ? palette : 'jade';
@@ -76,6 +77,8 @@ Mkx.revealAppearance = async (apply, source, reverse, kind) => {
     }
 };
 Mkx.restoreAppearance = () => {
+    try { Mkx.setMobilePickerHidden(localStorage.getItem('Theme.MobilePickerHidden')?.toLowerCase() === 'true'); }
+    catch { Mkx.setMobilePickerHidden(false); }
     try { Mkx.setPalette(localStorage.getItem('Theme.Palette'), false); }
     catch { Mkx.setPalette('jade', false); }
     try { const saved = localStorage.getItem('Theme.IsDarkMode'); Mkx.setAppearance(saved === null ? Mkx.systemDark() : saved.toLowerCase() === 'true'); }

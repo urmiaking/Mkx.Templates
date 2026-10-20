@@ -21,6 +21,7 @@ public partial class BaseLayout : IAsyncDisposable
     }
     private async ValueTask ApplyAsync()
     {
+        await JS.InvokeVoidAsync("Mkx.setMobilePickerHidden", ThemeService.MobilePickerHidden);
         await JS.InvokeVoidAsync("Mkx.setPalette", ThemeService.Palette, false);
         await JS.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
     }
