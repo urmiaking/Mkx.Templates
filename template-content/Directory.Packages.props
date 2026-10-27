@@ -36,6 +36,7 @@
     <PackageVersion Include="Serilog.Sinks.MSSqlServer" Version="10.0.0" />
     <PackageVersion Include="Serilog.UI" Version="4.0.0" />
     <PackageVersion Include="Serilog.UI.MsSqlServerProvider" Version="4.0.0" />
+    <PackageVersion Include="WebPush" Version="1.0.13" />
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="10.3.0" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
     <!-- SqlClient still requests the vulnerable 9.x dependency; pin its supported .NET 10 replacement. -->

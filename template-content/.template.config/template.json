@@ -64,6 +64,7 @@
         "**/*.pfx",
         "**/*.log",
         "**/appsettings.Local.json",
+        "**/appsettings.Push.local.json",
         "**/.env",
         "**/.env.*"
       ]

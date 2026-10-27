@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using Microsoft.AspNetCore.Components.Authorization;
 using Mkx.Templates.Client.Services;
 
 namespace Mkx.Templates.Client.Layout;
@@ -17,6 +18,8 @@ public partial class MainLayout : IAsyncDisposable
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
     [Inject] private ThemeService Theme { get; set; } = default!;
+    [Inject] private BrowserPushService BrowserPush { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthState { get; set; } = default!;
     private bool _mobileMenuOpen, _notificationsOpen, _themeChanging;
     private ElementReference _sidebar, _themeButton;
     private IJSObjectReference? _module, _menu;
@@ -51,6 +54,15 @@ public partial class MainLayout : IAsyncDisposable
         {
             _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/navigation.js");
             _menu = await _module.InvokeAsync<IJSObjectReference>("bind", _sidebar);
+            try
+            {
+                if ((await AuthState.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true)
+                    await BrowserPush.RestoreGrantedAsync();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or JSException or JSDisconnectedException)
+            {
+                // Push is optional: registration must never interrupt layout rendering.
+            }
         }
         if (_menu is not null) await _menu.InvokeVoidAsync("update", _mobileMenuOpen);
     }

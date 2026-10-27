@@ -45,7 +45,10 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Instantiation without sample failed." }
     $minimalSources = Get-ChildItem -LiteralPath (Join-Path $minimal 'src') -Recurse -File | Where-Object { $_.Extension -in '.cs', '.razor' }
     foreach ($file in $minimalSources) {
-        if ((Get-Content -LiteralPath $file.FullName -Raw) -match 'SampleItem|TestAggregate|(?:name|table): "Tests"') { throw "Sample reference leaked into minimal source: $($file.FullName)" }
+        $source = Get-Content -LiteralPath $file.FullName -Raw
+        # Ignore compile-time excluded sample blocks in EF snapshots and migrations.
+        $source = [regex]::Replace($source, '(?ms)^[ \t]*#if[ \t]*\([ \t]*IncludeSample[ \t]*\)[ \t]*\r?\n.*?^[ \t]*#endif[ \t]*(?:\r?\n|$)', '')
+        if ($source -match 'SampleItem|TestAggregate|(?:name|table): "Tests"') { throw "Sample reference leaked into minimal source: $($file.FullName)" }
     }
     Push-Location $minimal
     try { & ./scripts/verify.ps1 -Configuration $Configuration } finally { Pop-Location }

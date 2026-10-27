@@ -32,7 +32,7 @@ Before creating an abstraction, service, component, route, policy, DTO, helper, 
 | [DOMAIN_KNOWLEDGE.md](docs/ai/DOMAIN_KNOWLEDGE.md) | Business glossary/invariants/workflows |
 | [VERIFICATION.md](docs/ai/VERIFICATION.md) | Definition of done |
 | [TOOLS.md](docs/ai/TOOLS.md) | Build/test/EF CLI commands |
-| [OPERATIONS.md](docs/ai/OPERATIONS.md) | Defaults, deployment and optional providers |
+| [PUSH_NOTIFICATIONS.md](docs/ai/PUSH_NOTIFICATIONS.md) | Web Push setup, VAPID keys, browser subscriptions, server sending and privacy |\n| [OPERATIONS.md](docs/ai/OPERATIONS.md) | Defaults, deployment and optional providers |
 | [PERFORMANCE.md](docs/ai/PERFORMANCE.md) | Mobile effects, budgets and measurement |
 | [SKILLS.md](docs/ai/SKILLS.md) | Compact high-frequency rules |
 | [decisions/](docs/ai/decisions/) | Architectural decision records |

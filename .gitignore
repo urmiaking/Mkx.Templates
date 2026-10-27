@@ -371,3 +371,5 @@ FodyWeavers.xsd
 /reports/
 /dist/
 /test-mud/
+# Unique VAPID keys are local to this application; never commit them.
+**/appsettings.Push.local.json

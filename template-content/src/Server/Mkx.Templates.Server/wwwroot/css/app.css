@@ -1533,6 +1533,20 @@ textarea {
     color:var(--ui-text-secondary);
     margin:3px 0 0
 }
+.notification-push-preference {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+    padding:14px 20px;
+    border-bottom:1px solid var(--ui-border);
+}
+.notification-push-preference > div { flex:1 1 180px; min-width:0 }
+.notification-push-preference strong { font-size:12px }
+.notification-push-preference p { font-size:11px; line-height:1.8; color:var(--ui-text-secondary); margin:4px 0 0 }
+.notification-push-preference .ui-button { white-space:nowrap; min-height:36px }
+.notification-push-preference .ui-field-error { flex-basis:100% }
 .notification-channel {
     display:grid;
     place-items:center;

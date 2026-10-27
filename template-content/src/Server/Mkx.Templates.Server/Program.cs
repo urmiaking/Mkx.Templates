@@ -8,6 +8,9 @@ try
     Console.WriteLine("Application is starting up.");
 
     var builder = WebApplication.CreateBuilder(args);
+    // Unique local keys are not included in source control or the template package.
+    builder.Configuration.AddJsonFile("appsettings.Push.local.json", optional: true, reloadOnChange: true);
+    // Local VAPID secrets are not included in the source repository or template package.
 
     builder.Host.ConfigureSerilog();
     Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");

@@ -1,8 +1,24 @@
+@inject Mkx.Templates.Client.Services.BrowserPushService Push
+@using Microsoft.AspNetCore.Components.Authorization
 @if (Open)
 {
     <UiModal Title="اعلان‌ها" Class="notification-panel" OnClose="Close">
         <div class="notification-shell">
             <div class="notification-summary"><span class="notification-channel"><UiIcon Icon="bell" /></span><div><strong>پیام‌های حساب شما</strong><p>تغییرات و پیام‌های مهم را اینجا دنبال کنید.</p></div></div>
+            <AuthorizeView>
+                <Authorized>
+                    <section class="notification-push-preference" aria-label="اعلان مرورگر">
+                        <div><strong>اعلان‌های دستگاه</strong><p>@PushDescription</p></div>
+                        @if (_pushStatus is { Configured: true, Supported: true })
+                        {
+                            <button type="button" class="ui-button ui-button-filled" disabled="@_pushBusy" @onclick="TogglePushAsync">
+                                @(_pushBusy ? "در حال انجام…" : _pushStatus.Subscribed ? "غیرفعال‌سازی" : "فعال‌سازی")
+                            </button>
+                        }
+                        @if (_pushError is not null) { <p role="alert" class="ui-field-error">@_pushError</p> }
+                    </section>
+                </Authorized>
+            </AuthorizeView>
             <section class="notification-list" aria-label="فهرست اعلان‌ها" aria-live="polite">
                 @if (ChildContent is not null) { @ChildContent }
                 else
@@ -18,5 +34,50 @@
     [Parameter] public bool Open { get; set; }
     [Parameter] public EventCallback<bool> OpenChanged { get; set; }
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [CascadingParameter] private Task<AuthenticationState>? CurrentAuthentication { get; set; }
+    private Mkx.Templates.Client.Services.BrowserPushStatus? _pushStatus;
+    private bool _pushBusy, _pushLoading, _pushLoaded;
+    private string? _pushError;
+    private string PushDescription => _pushStatus switch
+    {
+        null => "در حال بررسی پشتیبانی مرورگر…",
+        { Configured: false } => "سرویس Push در سرور پیکربندی نشده است.",
+        { Supported: false } => "مرورگر یا اتصال فعلی از اعلان پشتیبانی نمی‌کند.",
+        { Permission: "denied" } => "دسترسی اعلان در تنظیمات مرورگر مسدود شده است.",
+        { Subscribed: true } => "اعلان‌ها برای این دستگاه فعال هستند.",
+        _ => "برای دریافت اعلان حتی هنگام بسته بودن برنامه فعال کنید."
+    };
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!Open || _pushLoaded || _pushLoading) return;
+        _pushLoading = true;
+        try
+        {
+            if (CurrentAuthentication is not null && (await CurrentAuthentication).User.Identity?.IsAuthenticated == true)
+                _pushStatus = await Push.StatusAsync();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or Microsoft.JSInterop.JSException)
+        {
+            _pushError = "دریافت وضعیت اعلان‌ها امکان‌پذیر نیست.";
+        }
+        finally { _pushLoading = false; _pushLoaded = true; await InvokeAsync(StateHasChanged); }
+    }
+    private async Task TogglePushAsync()
+    {
+        if (_pushBusy || _pushStatus is null) return;
+        _pushBusy = true;
+        _pushError = null;
+        try
+        {
+            if (_pushStatus.Subscribed) await Push.DisableAsync();
+            else await Push.EnableAsync();
+            _pushStatus = await Push.StatusAsync();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or Microsoft.JSInterop.JSException)
+        {
+            _pushError = "تغییر تنظیمات اعلان ناموفق بود. دوباره تلاش کنید.";
+        }
+        finally { _pushBusy = false; }
+    }
     private Task Close() => OpenChanged.InvokeAsync(false);
 }

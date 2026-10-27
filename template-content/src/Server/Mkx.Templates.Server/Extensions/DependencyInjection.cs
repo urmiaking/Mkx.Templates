@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Mkx.Templates.Application.Abstractions;
+using Mkx.Templates.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,6 +19,8 @@ public static class DependencyInjection
     {
         internal IServiceCollection AddServer(IConfiguration configuration)
         {
+            services.AddScoped<PushSubscriptionService>();
+            services.AddScoped<IWebPushSender, WebPushSender>();
             services.AddControllers(configuration)
                 .AddComponents()
                 .AddSwagger()

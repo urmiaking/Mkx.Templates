@@ -37,6 +37,7 @@ public static class DependencyInjection
             services.AddScoped<ToastService>();
 
             services.AddScoped<ThemeService>();
+            services.AddScoped<BrowserPushService>();
             services.AddScoped<WebAuthnService>();
 
             return services;
