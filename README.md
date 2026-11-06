@@ -36,3 +36,5 @@ Both variants retain the test project and shared infrastructure. Agents setting 
 `-o` explicitly selects the output directory. The generated solution has six numbered folders: Server, Client, Shared, Core, Sdk and Tests (13 projects). It includes its own README, agent guide, package versions, EF tool manifest and optional local SQL compose configuration. Follow the generated README to configure database and first administrator secrets; no fixed administrator credentials ship with the template.
 
 Pushes to `master` run template verification and publish a versioned package to NuGet after verification succeeds. Pull requests run verification without publishing.
+
+NuGet Trusted Publishing authorizes `urmiaking/Mkx.Templates` and `publish.yml` for the package owner `mskhodadadi`. The publish job exchanges a GitHub OIDC token for a short-lived NuGet key.

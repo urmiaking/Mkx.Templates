@@ -10,6 +10,9 @@ jobs:
   publish:
     needs: verify
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -17,7 +20,12 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Pack template
         run: dotnet pack Mkx.Templates.Blazor.csproj -c Release -o out /p:PackageVersion=1.0.${{ github.run_number }}
+      - name: NuGet login via OIDC
+        id: nuget-login
+        uses: NuGet/login@v1
+        with:
+          user: mskhodadadi
       - name: Publish to NuGet.org
         env:
-          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push out/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
