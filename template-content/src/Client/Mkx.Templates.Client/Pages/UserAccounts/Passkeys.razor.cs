@@ -2,7 +2,6 @@ using Blazored.LocalStorage;
 
 using Mkx.Templates.Client.Services;
 using Mkx.Templates.Shared.DTOs.UserAccounts;
-using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
 using Microsoft.AspNetCore.Components;
 using Mkx.Templates.Client.Components.UI;
@@ -13,13 +12,6 @@ public partial class Passkeys
 {
     [Inject] public WebAuthnService WebAuthnService { get; set; } = default!;
     [Inject] public ILocalStorageService LocalStorage { get; set; } = default!;
-
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
-        new("مدیریت کلیدهای عبور", href: ClientRoutes.UserAccounts.Passkeys, icon: "fingerprint")
-    ];
 
     private List<GetPasskeyResponse>? _passkeys;
 

@@ -60,6 +60,8 @@ try {
                 ...['Users-View', 'Users-Manage', 'Users-ManageClaims', 'SampleItems-View', 'SampleItems-Manage']
                     .map(policy => claim(`${prefix}-${policy}`, '')),
             ] };
+        } else if (pathname === '/api/push/configuration' && method === 'GET') {
+            body = { enabled: false, publicKey: null };
         } else if (pathname.endsWith('/antiforgery')) {
             body = { requestToken: 'ui-fixture-token' };
         } else if (pathname === '/api/sample-items' && method === 'GET') {
@@ -148,6 +150,14 @@ try {
     };
 
     await navigate('/');
+    const appBar = page.locator('.workspace-topbar');
+    const breadcrumb = page.getByRole('navigation', { name: 'مسیر صفحه', exact: true });
+    assert.equal(await breadcrumb.locator('[aria-current=page]').innerText(), 'صفحه اصلی');
+    assert(await appBar.locator('.workspace-appbar-wordmark').evaluate(node => {
+        const rect = node.getBoundingClientRect(), header = node.closest('header').getBoundingClientRect();
+        return Math.abs(rect.x + rect.width / 2 - (header.x + header.width / 2)) < 1;
+    }));
+    assert.equal(await breadcrumb.locator('a').count(), 0);
     assert.equal(await page.locator('.workspace-sidebar').evaluate(node => node.getBoundingClientRect().width), 238);
     assert(await page.locator('.workspace-sidebar').getByRole('button', { name: 'خروج از حساب', exact: true }).isEnabled());
     assert.equal(await page.getByRole('button', { name: 'باز کردن منوی اصلی' }).isVisible(), false);
@@ -185,6 +195,7 @@ try {
     if (includesSample) {
         await page.locator('.workspace-create').click();
         await page.getByRole('dialog', { name: 'افزودن نمونه' }).waitFor();
+        assert.equal(await appBar.locator('[aria-current=page]').textContent(), 'نمونه‌ها');
         await page.getByRole('button', { name: 'انصراف', exact: true }).click();
         await page.getByRole('dialog').waitFor({ state: 'detached' });
 
@@ -437,7 +448,8 @@ try {
     await edgePalette.focus();
     await page.keyboard.press('Home');
     const minimum = await edgePalette.boundingBox();
-    assert(minimum.y >= 70 && minimum.y < 110);
+    const appBarBounds = await appBar.boundingBox();
+    assert(Math.abs(minimum.y - (appBarBounds.y + appBarBounds.height + 12)) < 2, 'The tab stays below both AppBar rows');
     await page.keyboard.press('End');
     const maximum = await edgePalette.boundingBox();
     const bottomNavigation = await page.locator('.workspace-bottom-nav').boundingBox();
@@ -500,6 +512,11 @@ try {
     assert.equal(await page.locator('.account-page').getAttribute('data-palette-marker'), 'retained');
     for (const width of [375, 320]) {
         await page.setViewportSize({ width, height: 844 });
+        const routeRow = await appBar.locator('.workspace-appbar-route').boundingBox();
+        const header = await appBar.boundingBox();
+        assert.equal(routeRow.width, header.width);
+        assert.equal(routeRow.y + routeRow.height, header.y + header.height);
+        assert(routeRow.y > (await appBar.locator('.workspace-appbar-wordmark').boundingBox()).y);
         const bounds = await page.locator('.workspace-topbar-actions').evaluate(node => [...node.children].map(child => child.getBoundingClientRect()).filter(rect => rect.width > 0)
             .map(rect => ({ x: rect.x, width: rect.width, height: rect.height })).sort((a, b) => a.x - b.x));
         assert.equal(bounds.length, 3);
@@ -640,6 +657,7 @@ try {
     await page.getByRole('button', { name: 'باز کردن منوی اصلی' }).click();
     await page.locator('.workspace-sidebar.mobile-open').waitFor();
     assert(await page.locator('.workspace-main').evaluate(node => node.inert));
+    assert(await appBar.evaluate(node => node.inert));
     assert(await page.locator('.palette-picker-floating').evaluate(node => node.inert));
     await page.keyboard.press('Escape');
     await page.waitForFunction(() => !document.querySelector('.workspace-main').inert);
@@ -654,8 +672,11 @@ try {
     await page.keyboard.press('Escape');
     await notifications.waitFor({ state: 'detached' });
     await navigate('/user-accounts/enable-authenticator');
+    assert.equal(await breadcrumb.locator('[aria-current=page]').innerText(), 'اتصال برنامه رمزساز');
     await screenshot('authenticator-mobile');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    await breadcrumb.getByRole('link', { name: 'ورود دو مرحله‌ای', exact: true }).click();
+    await breadcrumb.locator('[aria-current=page]').getByText('ورود دو مرحله‌ای', { exact: true }).waitFor();
 
     // Static SSR pages use real server-rendered form markup; no sign-in is submitted.
     await page.emulateMedia({ reducedMotion: 'no-preference' });

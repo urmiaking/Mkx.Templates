@@ -15,14 +15,6 @@ public partial class EnableAuthenticator
 {
     private const string AuthenticatorUriFormat = "otpauth://totp/{0}?secret={1}&issuer={0}&digits=6";
 
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
-        new("رمز دو مرحله ای", href: ClientRoutes.UserAccounts.TwoFactorAuthentication, icon: "key"),
-        new("فعالسازی", href: ClientRoutes.UserAccounts.EnableAuthenticator, icon: "check"),
-    ];
-
     private GetAuthenticatorKeyResponse? _authenticatorKey;
     private string? _svgGraphicsPath;
     private string? _code;

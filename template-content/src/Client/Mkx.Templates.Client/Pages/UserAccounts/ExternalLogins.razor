@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inherits AppComponentBase
 <PageTitle>حساب‌های متصل</PageTitle>
-<AccountShell Title="حساب‌های متصل" Description="روش‌های ورود از طریق سرویس‌های دیگر را مدیریت کنید." BackHref="@ClientRoutes.UserAccounts.Index" BackLabel="حساب من">
+<AccountShell Title="حساب‌های متصل" Description="روش‌های ورود از طریق سرویس‌های دیگر را مدیریت کنید.">
     @if (_externalLogins is null)
     { @if (LastRequestError is not null) { <div class="ui-alert ui-alert-error" role="alert">@LastRequestError <UiButton OnClick="LoadExternalProvidersAsync" Disabled="IsBusy">تلاش دوباره</UiButton></div> } else { <span class="ui-spinner" role="status" aria-label="دریافت سرویس‌ها"></span> } }
     else

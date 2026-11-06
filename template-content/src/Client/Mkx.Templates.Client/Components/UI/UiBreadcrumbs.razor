@@ -1,11 +1,35 @@
-<nav class="ui-breadcrumbs" aria-label="مسیر صفحه">
-    @foreach (var item in Items)
-    {
-        <a href="@item.Href">@item.Text</a>
-    }
+<nav @attributes="Attributes" class="ui-breadcrumbs" aria-label="مسیر صفحه">
+    <ol role="list" class="ui-breadcrumbs-list">
+        @for (var i = 0; i < _items.Length; i++)
+        {
+            var item = _items[i];
+            var current = i == _items.Length - 1;
+            <li class="ui-breadcrumb-item">
+                @if (i > 0)
+                {
+                    <span class="ui-breadcrumb-separator" aria-hidden="true">
+                        @if (SeparatorTemplate is not null) { @SeparatorTemplate }
+                        else { <UiIcon Icon="chevron-left" /> }
+                    </span>
+                }
+                @if (!current && item.Href is not null)
+                {
+                    <a class="ui-breadcrumb-label" href="@item.Href" title="@item.Text"><UiIcon Icon="@item.icon" /><span>@item.Text</span></a>
+                }
+                else
+                {
+                    <span class="ui-breadcrumb-label" aria-current="@(current ? "page" : null)" title="@item.Text"><UiIcon Icon="@item.icon" /><span>@item.Text</span></span>
+                }
+            </li>
+        }
+    </ol>
 </nav>
 @code {
     [Parameter] public IEnumerable<BreadcrumbItem> Items { get; set; } = [];
     [Parameter] public RenderFragment? SeparatorTemplate { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? Attributes { get; set; }
+
+    private BreadcrumbItem[] _items = [];
+
+    protected override void OnParametersSet() => _items = Items.ToArray();
 }

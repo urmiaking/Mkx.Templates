@@ -1,0 +1,64 @@
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<UiBreadcrumbs Items="_items" @key="_path" />
+
+@code {
+    private static readonly Dictionary<string, string> Labels = new(StringComparer.OrdinalIgnoreCase)
+    {
+        [ClientRoutes.Users.Index] = "مدیریت کاربران",
+        [ClientRoutes.Users.RoleClaims] = "دسترسی نقش‌ها",
+        [ClientRoutes.UserAccounts.Index] = "حساب من",
+        [ClientRoutes.UserAccounts.AccountsList] = "حساب‌های کاربری",
+        [ClientRoutes.UserAccounts.ExternalLogins] = "حساب‌های متصل",
+        [ClientRoutes.UserAccounts.Passkeys] = "کلیدهای عبور",
+        [ClientRoutes.UserAccounts.TwoFactorAuthentication] = "ورود دو مرحله‌ای",
+        [ClientRoutes.UserAccounts.EnableAuthenticator] = "اتصال برنامه رمزساز",
+@*#if (IncludeSample)*@
+        [ClientRoutes.SampleItems.Index.Trim('/')] = "نمونه‌ها",
+@*#endif*@
+    };
+
+    private string? _path;
+    private IReadOnlyList<BreadcrumbItem> _items = [];
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        UpdateTrail(Navigation.Uri);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) =>
+        _ = InvokeAsync(() =>
+        {
+            if (UpdateTrail(args.Location)) StateHasChanged();
+        });
+
+    private bool UpdateTrail(string location)
+    {
+        var path = Navigation.ToBaseRelativePath(location).Split('?', '#')[0].Trim('/');
+        if (path == _path) return false;
+
+        _path = path;
+        var items = new List<BreadcrumbItem> { new("صفحه اصلی", ClientRoutes.Home.Index, "home") };
+        var prefix = "";
+        foreach (var segment in path.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            prefix = prefix.Length == 0 ? segment : $"{prefix}/{segment}";
+            if (!Labels.TryGetValue(prefix, out var label)) continue;
+
+            if (prefix.Equals(ClientRoutes.UserAccounts.EnableAuthenticator, StringComparison.OrdinalIgnoreCase))
+                items.Add(new BreadcrumbItem(Labels[ClientRoutes.UserAccounts.TwoFactorAuthentication], ClientRoutes.UserAccounts.TwoFactorAuthentication));
+
+            items.Add(new BreadcrumbItem(label, prefix));
+        }
+
+        if (path.Length > 0 && items.Count == 1)
+            items.Add(new BreadcrumbItem("صفحه"));
+
+        _items = items.Count <= 4 ? items : [items[0], .. items.TakeLast(3)];
+        return true;
+    }
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
+}

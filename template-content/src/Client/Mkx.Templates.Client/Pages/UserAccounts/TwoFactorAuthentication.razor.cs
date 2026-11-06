@@ -1,20 +1,11 @@
 using Mkx.Templates.Shared.DTOs.UserAccounts;
-using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Shared.Abstractions;
 using Microsoft.AspNetCore.Components;
-using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.UserAccounts;
 
 public partial class TwoFactorAuthentication
 {
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
-        new("رمز دو مرحله ای", href: ClientRoutes.UserAccounts.TwoFactorAuthentication, icon: "key")
-    ];
-
     public GetTwoFactorAuthStatusResponse? TwoFactorAuthStatus { get; set; }
 
     protected override async Task OnInitializedAsync()

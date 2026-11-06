@@ -248,21 +248,23 @@ button:disabled .ui-icon {
 }
 /* Workspace structure follows the full MeetFlow navigation, not a collapsible rail. */
 .workspace-shell {
+    --workspace-appbar-height:82px;
+    --workspace-route-height:0px;
+    --workspace-header-height:calc(var(--workspace-appbar-height) + var(--workspace-route-height) + env(safe-area-inset-top));
     min-height:100dvh;
     direction:rtl
 }
 .workspace-sidebar {
     position:fixed;
     inset-inline-start:0;
-    inset-block:0;
+    inset-block:var(--workspace-header-height) 0;
     width:238px;
     display:flex;
     flex-direction:column;
     padding:32px 20px;
     z-index:60;
     background:var(--ui-sidebar);
-    border-inline-end:1px solid var(--ui-border);
-    height:100dvh
+    border-inline-end:1px solid var(--ui-border)
 }
 .workspace-brand {
     display:flex;
@@ -420,29 +422,55 @@ button:disabled .ui-icon {
 .workspace-content {
     margin-inline-start:238px;
     min-width:0;
-    padding-top:82px
+    padding-top:var(--workspace-header-height)
 }
 .workspace-topbar {
     position:fixed;
     top:0;
-    inset-inline-start:238px;
-    inset-inline-end:0;
-    height:82px;
-    display:flex;
+    inset-inline:0;
+    height:var(--workspace-header-height);
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    grid-template-rows:minmax(0,1fr);
     align-items:center;
-    justify-content:space-between;
-    padding:0 36px;
-    gap:16px;
+    padding:env(safe-area-inset-top) clamp(16px,2.2vw,36px) 0;
+    column-gap:12px;
     z-index:50;
     background:var(--ui-surface);
     border-bottom:1px solid var(--ui-border);
     box-shadow:0 3px 14px #0a394c08
 }
+.workspace-appbar-leading,.workspace-appbar-brand,.workspace-appbar-end {
+    display:flex;
+    align-items:center;
+    min-width:0;
+    gap:12px
+}
+.workspace-appbar-leading { gap:clamp(12px,2vw,25px) }
+.workspace-appbar-brand { flex:none }
+.workspace-appbar-mark {
+    display:grid;
+    place-items:center;
+    min-width:44px;
+    min-height:44px;
+    border-radius:12px
+}
+.workspace-appbar-route { min-width:0 }
+.workspace-appbar-wordmark { min-width:0; max-width:30vw; text-align:center }
+.workspace-appbar-wordmark .workspace-brand-copy strong {
+    font-size:clamp(18px,2vw,24px);
+    overflow:hidden;
+    text-overflow:ellipsis
+}
+.workspace-appbar-end { justify-self:end }
 .workspace-date {
     font-size:13px;
     display:flex;
     align-items:center;
     gap:9px;
+    white-space:nowrap;
+    padding-inline-start:12px;
+    border-inline-start:1px solid var(--ui-border);
     color:var(--ui-text-secondary)
 }
 .workspace-date .ui-icon {
@@ -453,7 +481,7 @@ button:disabled .ui-icon {
 .workspace-topbar-actions {
     display:flex;
     align-items:center;
-    gap:16px
+    gap:8px
 }
 .workspace-topbar .workspace-avatar {
     width:44px;
@@ -602,12 +630,12 @@ button:disabled .ui-icon {
 }
 .workspace-main {
     padding:34px clamp(24px,3.25vw,52px) 60px;
-    min-height:calc(100dvh - 82px);
+    min-height:calc(100dvh - var(--workspace-header-height));
     max-width:1344px;
     margin-inline:auto;
     min-width:0
 }
-.workspace-menu-toggle,.workspace-menu-close,.workspace-menu-scrim,.workspace-mobile-brand,.workspace-bottom-nav {
+.workspace-menu-toggle,.workspace-menu-close,.workspace-menu-scrim,.workspace-bottom-nav {
     display:none
 }
 /* Account screens use the reference page composition and grouped panels. */
@@ -617,32 +645,46 @@ button:disabled .ui-icon {
     margin-inline:auto;
     min-width:0
 }
-.account-breadcrumb,.ui-breadcrumbs {
+.ui-breadcrumbs-list {
     display:flex;
     align-items:center;
-    gap:9px;
-    font-size:11px;
-    color:var(--ui-text-secondary);
-    margin:0 0 14px;
-    flex-wrap:wrap
+    gap:4px;
+    list-style:none;
+    margin:0;
+    padding:0;
+    white-space:nowrap
 }
-.account-breadcrumb a {
+.ui-breadcrumb-item {
     display:inline-flex;
     align-items:center;
-    gap:6px;
-    color:var(--ui-link)
-}
-.account-breadcrumb .ui-icon {
-    width:16px;
-    height:16px
-}
-.ui-breadcrumbs a {
+    min-width:0;
+    gap:4px;
+    font-size:12px;
     color:var(--ui-text-secondary)
 }
-.ui-breadcrumbs a+a:before {
-    content:'/';
-    padding-inline-end:8px
+.ui-breadcrumb-label {
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-width:0;
+    min-height:32px;
+    padding:4px 8px;
+    border-radius:10px;
+    color:inherit
 }
+.ui-breadcrumb-label[aria-current="page"] {
+    background:var(--ui-soft);
+    color:var(--ui-heading);
+    font-weight:600
+}
+a.ui-breadcrumb-label:hover,a.ui-breadcrumb-label:focus-visible {
+    background:var(--ui-soft);
+    color:var(--ui-link)
+}
+.ui-breadcrumb-label > span { overflow:hidden; text-overflow:ellipsis }
+.ui-breadcrumb-item .ui-icon { width:16px; height:16px; flex:none }
+.ui-breadcrumb-separator { display:inline-flex; flex:none; opacity:.65 }
+.ui-breadcrumb-separator .ui-icon { width:13px; height:13px }
 .account-hero,.page-heading {
     display:flex;
     align-items:flex-end;
@@ -1957,8 +1999,8 @@ textarea {
 .workspace-main>* {
     animation:page-enter .34s ease-out
 }
-.account-breadcrumb {
-    animation:section-enter .38s var(--ui-motion) backwards
+.workspace-appbar-route .ui-breadcrumbs-list {
+    animation:section-enter .26s var(--ui-motion) backwards
 }
 .account-hero,.home-intro {
     animation:section-enter .44s var(--ui-motion) backwards
@@ -2008,12 +2050,6 @@ textarea {
     .home-layout {
         grid-template-columns:minmax(0,1fr) 240px
     }
-    .workspace-topbar {
-        padding-inline:24px
-    }
-    .workspace-topbar-actions {
-        gap:12px
-    }
 }
 @media(max-width:959.98px) {
     html[data-mobile-picker-hidden=true] .palette-picker-floating { visibility:hidden; pointer-events:none }
@@ -2036,54 +2072,44 @@ textarea {
     .palette-visibility-toggle:hover { color:var(--ui-link); background:var(--ui-soft) }
     .palette-visibility-toggle .ui-icon { width:19px; height:19px }
     .palette-quick-swatch .ui-icon,.palette-visibility-toggle .ui-icon { display:block }
-    .workspace-content {
-        margin-inline-start:0;
-        padding-top:72px
-    }
+    .workspace-shell { --workspace-appbar-height:72px; --workspace-route-height:46px }
+    .workspace-content { margin-inline-start:0 }
     .workspace-topbar {
-        height:72px;
-        inset-inline-start:0;
-        padding-inline:22px;
-        gap:12px
+        grid-template-columns:auto minmax(0,1fr) auto;
+        grid-template-rows:var(--workspace-appbar-height) minmax(0,1fr);
+        padding-inline:0;
+        column-gap:8px;
+        border-bottom:0
     }
-    .workspace-date {
-        display:none
-    }
-    .workspace-menu-toggle {
-        display:inline-grid;
-        flex:none
-    }
-    .workspace-mobile-brand {
-        display:flex;
-        align-items:center;
-        gap:8px;
-        min-width:0;
-        margin-inline-end:auto
-    }
-    .workspace-mobile-brand .workspace-brand-mark {
-        width:35px;
-        height:35px;
+    .workspace-appbar-leading { display:contents }
+    .workspace-appbar-brand { grid-area:1 / 1; margin-inline-start:12px; gap:4px }
+    .workspace-menu-toggle { display:inline-grid; flex:none }
+    .workspace-appbar-mark .workspace-brand-mark {
+        width:32px;
+        height:32px;
         border-radius:11px
     }
-    .workspace-mobile-brand .workspace-brand-mark .ui-icon {
-        width:24px;
-        height:24px
+    .workspace-appbar-mark .ui-icon { width:22px; height:22px }
+    .workspace-appbar-wordmark { grid-area:1 / 2; max-width:none }
+    .workspace-appbar-wordmark .workspace-brand-copy strong { font-size:clamp(12px,3vw,16px); text-align:right }
+    .workspace-appbar-end { grid-area:1 / 3; margin-inline-end:12px }
+    .workspace-appbar-route {
+        grid-area:2 / 1 / 3 / -1;
+        align-self:stretch;
+        display:flex;
+        align-items:center;
+        padding-inline:12px;
+        border-block:1px solid var(--ui-border)
     }
-    .workspace-mobile-brand .workspace-brand-copy strong {
-        font-size:16px
-    }
-    .workspace-topbar-actions {
-        margin-inline-start:auto;
-        gap:8px
-    }
-    .workspace-search {
-        display:none
-    }
+    .workspace-appbar-route .ui-breadcrumbs { min-width:0 }
+    .workspace-appbar-route .ui-breadcrumbs-list { animation:none }
+    .workspace-appbar-route a.ui-breadcrumb-label { min-height:44px }
+    .workspace-date,.workspace-search { display:none }
     .workspace-main {
-        padding:28px 22px calc(110px + env(safe-area-inset-bottom));
-        min-height:calc(100dvh - 72px)
+        padding:28px 22px calc(110px + env(safe-area-inset-bottom))
     }
     .workspace-sidebar {
+        inset-block-start:0;
         width:min(328px,88vw);
         height:100dvh;
         max-width:100%;
@@ -2214,23 +2240,7 @@ textarea {
     }
 }
 @media(max-width:650px) {
-    .workspace-topbar {
-        padding:env(safe-area-inset-top) 12px 0;
-        height:calc(70px + env(safe-area-inset-top));
-        gap:7px
-    }
-    .workspace-content {
-        padding-top:calc(70px + env(safe-area-inset-top))
-    }
-    .workspace-mobile-brand .workspace-brand-mark {
-        display:none
-    }
-    .workspace-mobile-brand .workspace-brand-copy strong {
-        font-size:14px
-    }
-    .workspace-topbar-actions {
-        gap:8px
-    }
+    .workspace-shell { --workspace-appbar-height:70px }
     .workspace-topbar .workspace-icon-button {
         width:44px;
         border:0;
@@ -2407,9 +2417,10 @@ textarea {
         inset-inline-end:16px
     }
 }
-@media(max-width:430px) {
-    .workspace-mobile-brand .workspace-brand-copy { display:none }
-    .workspace-mobile-brand .workspace-brand-mark { display:inline-grid; width:30px; height:30px }
+@media(max-width:390px) {
+    .workspace-topbar { column-gap:4px }
+    .workspace-appbar-brand { margin-inline-start:8px }
+    .workspace-appbar-end { margin-inline-end:8px }
 }
 @media(max-width:370px) {
     .workspace-create-circle {
@@ -2419,9 +2430,6 @@ textarea {
     .workspace-bottom-nav>a {
         font-size:10px
     }
-}
-@media(max-width:350px) {
-    .workspace-mobile-brand { display:none }
 }
 @media(prefers-reduced-motion:reduce) {
     *,*::before,*::after {

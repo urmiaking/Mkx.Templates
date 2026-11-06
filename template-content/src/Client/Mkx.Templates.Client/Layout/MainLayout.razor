@@ -24,21 +24,7 @@
     </aside>
 
     <div class="workspace-content">
-        <header class="workspace-topbar">
-            <button type="button" class="workspace-menu-toggle workspace-icon-button" aria-label="باز کردن منوی اصلی" aria-expanded="@_mobileMenuOpen.ToString().ToLowerInvariant()" aria-controls="workspace-navigation" @onclick="OpenMenu"><UiIcon Icon="menu" /></button>
-            <a class="workspace-mobile-brand" href="@ClientRoutes.Home.Index"><BrandLockup Compact="true" /></a>
-            <span class="workspace-date"><UiIcon Icon="calendar" />@Today</span>
-            <div class="workspace-topbar-actions">
-
-@*#if (IncludeSample)*@
-<AuthorizeView Policy="@AppPolicies.SampleItems.View"><a class="workspace-icon-button workspace-search" href="@ClientRoutes.SampleItems.Index" aria-label="جستجو در اطلاعات"><UiIcon Icon="search" /></a></AuthorizeView>
-@*#endif*@
-
-                <button type="button" @ref="_themeButton" class="workspace-icon-button" aria-label="@(Theme.IsDarkMode ? "فعال‌سازی حالت روشن" : "فعال‌سازی حالت تاریک")" aria-pressed="@Theme.IsDarkMode.ToString().ToLowerInvariant()" disabled="@_themeChanging" @onclick="ToggleThemeAsync"><UiIcon Icon="@(Theme.IsDarkMode ? "sun" : "moon")" /></button>
-                <button type="button" class="workspace-icon-button" aria-label="اعلان‌ها" aria-haspopup="dialog" @onclick="OpenNotifications"><UiIcon Icon="bell" /></button>
-                <WorkspaceIdentity Class="workspace-top-avatar" />
-            </div>
-        </header>
+        <AppBar DrawerOpen="_mobileMenuOpen" OnMenuRequested="OpenMenu" OnNotificationsRequested="OpenNotifications" />
         <main id="main-content" class="workspace-main" tabindex="-1">@Body</main>
     </div>
 

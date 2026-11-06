@@ -3,19 +3,12 @@ using Mkx.Templates.Client.Pages.Users.Components;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.Claims;
 using Mkx.Templates.Shared.DTOs.Users;
-using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.Users;
 
 public partial class Index
 {
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت کاربران", href: ClientRoutes.Users.Index, icon: "users")
-    ];
-
     private UiTable<UserDto>? _table;
     private bool _loadFailed;
     private string _searchQuery = string.Empty;

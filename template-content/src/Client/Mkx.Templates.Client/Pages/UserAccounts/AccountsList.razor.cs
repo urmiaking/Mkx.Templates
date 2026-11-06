@@ -3,7 +3,6 @@ using Mkx.Templates.Client.Pages.UserAccounts.ViewModels;
 using Mkx.Templates.Sdk.Server.Shared.Data;
 using Mkx.Templates.Shared.Abstractions;
 using Mkx.Templates.Shared.DTOs.UserAccounts;
-using Mkx.Templates.Shared.Routes;
 using Mkx.Templates.Client.Components.UI;
 
 namespace Mkx.Templates.Client.Pages.UserAccounts;
@@ -13,13 +12,6 @@ public partial class AccountsList
     private UiTable<GetUserAccountResponse> _table = default!;
     private int _currentPage;
     private string? _searchString;
-
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
-        new("مدیریت کاربران", href: ClientRoutes.UserAccounts.AccountsList, icon: "users")
-    ];
 
     private readonly DialogOptions _dialogOptions = new ()
     {

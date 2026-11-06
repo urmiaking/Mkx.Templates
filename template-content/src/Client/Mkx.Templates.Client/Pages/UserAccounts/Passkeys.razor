@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inherits AppComponentBase
 <PageTitle>کلیدهای عبور</PageTitle>
-<AccountShell Title="کلیدهای عبور" Description="با اثر انگشت، چهره یا PIN دستگاه وارد حساب خود شوید." BackHref="@ClientRoutes.UserAccounts.Index" BackLabel="حساب من">
+<AccountShell Title="کلیدهای عبور" Description="با اثر انگشت، چهره یا PIN دستگاه وارد حساب خود شوید.">
     <Actions><UiButton Variant="Variant.Filled" StartIcon="plus" OnClick="AddNewPasskey" Disabled="IsBusy">افزودن کلید عبور</UiButton></Actions>
     <ChildContent><section class="account-panel"><header class="account-panel-head"><div><h2>دستگاه‌های قابل اعتماد</h2><p>کلیدهای ثبت‌شده برای ورود به حساب شما</p></div><UiIcon Icon="fingerprint" /></header>
         @if (_passkeys is null)

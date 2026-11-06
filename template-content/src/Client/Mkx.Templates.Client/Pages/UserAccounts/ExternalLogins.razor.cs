@@ -11,13 +11,6 @@ public partial class ExternalLogins
 {
     [SupplyParameterFromQuery(Name = "result")] public string? LinkResult { get; set; }
 
-    private readonly List<BreadcrumbItem> _breadcrumbs =
-    [
-        new("صفحه اصلی", href: ClientRoutes.Home.Index, icon: "home"),
-        new("مدیریت حساب", href: ClientRoutes.UserAccounts.Index, icon: "settings"),
-        new("احراز هویت خارجی", href: ClientRoutes.UserAccounts.ExternalLogins, icon: "link")
-    ];
-
     private GetExternalProviderResponse? _externalLogins;
     private bool _buttonDisabled;
 

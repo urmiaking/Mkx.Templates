@@ -1,4 +1,3 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Components.Web;
@@ -17,20 +16,16 @@ public partial class MainLayout : IAsyncDisposable
 #endif
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
-    [Inject] private ThemeService Theme { get; set; } = default!;
     [Inject] private BrowserPushService BrowserPush { get; set; } = default!;
     [Inject] private AuthenticationStateProvider AuthState { get; set; } = default!;
-    private bool _mobileMenuOpen, _notificationsOpen, _themeChanging;
-    private ElementReference _sidebar, _themeButton;
+    private bool _mobileMenuOpen, _notificationsOpen;
+    private ElementReference _sidebar;
     private IJSObjectReference? _module, _menu;
-    private static string Today => DateTime.Now.ToString("dddd، yyyy/MM/dd", CultureInfo.GetCultureInfo("fa-IR"));
 
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += LocationChanged;
-        Theme.OnToggleMode += AppearanceChanged;
     }
-    private void AppearanceChanged(object? sender, EventArgs args) => InvokeAsync(StateHasChanged);
     private void LocationChanged(object? sender, LocationChangedEventArgs args)
     {
         _mobileMenuOpen = false;
@@ -40,13 +35,6 @@ public partial class MainLayout : IAsyncDisposable
     private void OpenMenu() { _notificationsOpen = false; _mobileMenuOpen = true; }
     private void CloseMenu() => _mobileMenuOpen = false;
     private void OpenNotifications() { _mobileMenuOpen = false; _notificationsOpen = true; }
-    private async Task ToggleThemeAsync()
-    {
-        if (_themeChanging) return;
-        _themeChanging = true;
-        try { await Theme.ToggleModeAsync(_themeButton); }
-        finally { _themeChanging = false; }
-    }
     private void MenuKeyDown(KeyboardEventArgs args) { if (args.Key == "Escape") CloseMenu(); }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -69,7 +57,6 @@ public partial class MainLayout : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         Navigation.LocationChanged -= LocationChanged;
-        Theme.OnToggleMode -= AppearanceChanged;
         try
         {
             if (_menu is not null) { await _menu.InvokeVoidAsync("dispose"); await _menu.DisposeAsync(); }

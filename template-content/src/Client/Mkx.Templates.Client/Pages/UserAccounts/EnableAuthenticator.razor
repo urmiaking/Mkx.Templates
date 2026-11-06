@@ -2,7 +2,7 @@
 @attribute [Authorize]
 @inherits AppComponentBase
 <PageTitle>اتصال برنامه رمزساز</PageTitle>
-<AccountShell Title="اتصال برنامه رمزساز" Description="با سه گام ساده، ورود دو مرحله‌ای حساب خود را فعال کنید." BackHref="@ClientRoutes.UserAccounts.TwoFactorAuthentication" BackLabel="امنیت حساب">
+<AccountShell Title="اتصال برنامه رمزساز" Description="با سه گام ساده، ورود دو مرحله‌ای حساب خود را فعال کنید.">
     @if (LastRequestError is not null)
     { <div class="ui-alert ui-alert-error" role="alert">@LastRequestError <UiButton Disabled="IsBusy" OnClick="LoadSharedKeyAndQrCodeUriAsync">تلاش دوباره</UiButton></div> }
     <div class="authenticator-steps">

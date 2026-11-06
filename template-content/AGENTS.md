@@ -68,7 +68,7 @@ The UI follows a calm Persian RTL workspace: Vazirmatn, navy/teal light accents 
 
 Jade is the default palette; ocean, iris and amber also have paired light/dark tokens. Preserve the independent persisted palette and mode preferences and the draggable edge appearance control described in UI_GUIDE.md.
 
-Use semantic HTML and the native Blazor primitives in Components/UI. The desktop sidebar is permanently 238px wide. Below 960px, full-height navigation overlays content and reserves no horizontal space; the bottom bar includes a raised central action. See UI_GUIDE.md for forms, dialogs and styling.
+Use semantic HTML and the native Blazor primitives in Components/UI. The desktop sidebar is permanently 238px wide below the full-width AppBar. Below 960px, the AppBar places the breadcrumb in its second row, full-height navigation overlays content and the bottom bar includes a raised central action. See UI_GUIDE.md for forms, dialogs and styling.
 
 Page-entry motion applies on phones, tablets and desktop, including headers, grouped bodies/tables and identity cards. Preserve the operating system's reduced-motion preference; do not disable motion based only on viewport size.
 
