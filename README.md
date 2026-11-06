@@ -37,4 +37,4 @@ Both variants retain the test project and shared infrastructure. Agents setting 
 
 Pushes to `master` run template verification and publish a versioned package to NuGet after verification succeeds. Pull requests run verification without publishing.
 
-NuGet Trusted Publishing authorizes `urmiaking/Mkx.Templates` and `publish.yml` for the package owner `mskhodadadi`. The publish job exchanges a GitHub OIDC token for a short-lived NuGet key.
+NuGet Trusted Publishing authorizes `urmiaking/Mkx.Templates`, `publish.yml` and the `production` environment for the package owner `mskhodadadi`. The publish job exchanges a GitHub OIDC token for a short-lived NuGet key.
