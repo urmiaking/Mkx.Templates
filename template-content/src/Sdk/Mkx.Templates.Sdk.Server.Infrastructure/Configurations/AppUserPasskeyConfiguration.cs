@@ -17,7 +17,7 @@ internal class AppUserPasskeyConfiguration : IEntityTypeConfiguration<AppUserPas
             .HasForeignKey(ut => ut.UserId)
             .IsRequired();
 
-        builder.OwnsOne(x => x.Data, b =>
+        builder.ComplexProperty(x => x.Data, b =>
         {
             b.ToJson();
         });

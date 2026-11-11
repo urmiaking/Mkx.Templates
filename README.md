@@ -1,6 +1,6 @@
 # Mkx.Templates.Blazor
 
-A .NET 10 Blazor solution template with Persian RTL native Blazor UI, SQL Server, Identity and a tested agent-oriented development path. Application source and durable instructions live in `template-content/`.
+A .NET 11 Blazor solution template with Persian RTL native Blazor UI, SQL Server, Identity and a tested agent-oriented development path. Application source and durable instructions live in `template-content/`.
 
 ## Validate the application and package
 
@@ -8,13 +8,13 @@ A .NET 10 Blazor solution template with Persian RTL native Blazor UI, SQL Server
 ./scripts/verify-template.ps1
 ```
 
-Requires .NET 10 SDK and Node.js 22+. The script builds/tests the source, packs the template, inspects package exclusions, installs into an isolated template hive, then generates and builds/tests `Acme.Starter` with the sample and `Acme.Minimal` without it. It never changes your normal template installation.
+Requires .NET 11 SDK and Node.js 22+. The script builds/tests the source, packs the template, inspects package exclusions, installs into an isolated template hive, then generates and builds/tests `Acme.Starter` with the sample and `Acme.Minimal` without it. It never changes your normal template installation.
 
 ## Package and install
 
 ```powershell
 dotnet pack Mkx.Templates.Blazor.csproj -c Release
-dotnet new install bin/Release/Mkx.Templates.Blazor.1.0.0.nupkg
+dotnet new install bin/Release/Mkx.Templates.Blazor.2.0.0.nupkg
 ```
 
 For editable local installation, use `dotnet new install ./template-content`.

@@ -10,7 +10,6 @@ using Serilog.Ui.Web.Extensions;
 using System.Reflection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
-
 namespace Mkx.Templates.Server.Extensions;
 
 public static class WebHostingExtensions
@@ -49,7 +48,6 @@ public static class WebHostingExtensions
 
             if (app.Environment.IsDevelopment())
             {
-                app.UseWebAssemblyDebugging();
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
