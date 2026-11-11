@@ -6,8 +6,8 @@
     <PackageVersion>1.0.0</PackageVersion>
     <Title>Mkx Blazor Solution Template</Title>
     <Authors>Mkx</Authors>
-    <Description>Visual Studio / dotnet new template for a Blazor solution using .NET 10 and .slnx.</Description>
-    <PackageTags>dotnet-new;templates;blazor;slnx;net10</PackageTags>
+    <Description>Visual Studio / dotnet new template for a Blazor solution using .NET 11 and .slnx.</Description>
+    <PackageTags>dotnet-new;templates;blazor;slnx;net11</PackageTags>
     
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageReadmeFile>README.md</PackageReadmeFile>

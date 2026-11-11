@@ -1,10 +1,10 @@
 # Mkx.Templates
 
-.NET 10 Blazor template with a Persian RTL interface, native Blazor components, SQL Server, Identity, policies and a tested CRUD reference. Start agent work at [AGENTS.md](AGENTS.md). The solution contains 12 application/SDK projects and one executable test project.
+.NET 11 Blazor template with a Persian RTL interface, native Blazor components, SQL Server, Identity, policies and a tested CRUD reference. Start agent work at [AGENTS.md](AGENTS.md). The solution contains 12 application/SDK projects and one executable test project.
 
 ## Prerequisites
 
-Install .NET 10 SDK. `global.json` selects a stable 10.0 feature band. Node.js 22+ runs the dependency-free PWA tests. SQL Server is required to run the application; integration tests use isolated in-memory SQLite and need no external database. Optional local SQL setup requires Docker with Linux containers.
+Install .NET 11 SDK. `global.json` selects a stable 10.0 feature band. Node.js 22+ runs the dependency-free PWA tests. SQL Server is required to run the application; integration tests use isolated in-memory SQLite and need no external database. Optional local SQL setup requires Docker with Linux containers.
 
 ## Local start
 
