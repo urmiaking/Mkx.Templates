@@ -85,7 +85,7 @@ public partial class Login
 
         if (_options.AllowLocal)
         {
-            if (!_editContext.Validate())
+            if (!await _editContext.ValidateAsync())
                 return;
 
             var actualUsername = Input.Username;

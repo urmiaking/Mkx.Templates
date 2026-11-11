@@ -3,7 +3,7 @@
   <PropertyGroup>
     <PackageType>Template</PackageType>
     <PackageId>Mkx.Templates.Blazor</PackageId>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>2.0.0</PackageVersion>
     <Title>Mkx Blazor Solution Template</Title>
     <Authors>Mkx</Authors>
     <Description>Visual Studio / dotnet new template for a Blazor solution using .NET 11 and .slnx.</Description>

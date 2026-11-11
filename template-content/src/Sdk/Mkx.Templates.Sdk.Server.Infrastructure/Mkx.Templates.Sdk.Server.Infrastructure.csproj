@@ -13,6 +13,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
 		<PackageReference Include="Rebus" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="Rebus.ServiceProvider" />
 		<PackageReference Include="Rebus.SqlServer" />
 	</ItemGroup>

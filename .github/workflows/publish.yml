@@ -15,12 +15,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '11.0.x'
       - name: Pack template
-        run: dotnet pack Mkx.Templates.Blazor.csproj -c Release -o out /p:PackageVersion=1.0.${{ github.run_number }}
+        run: dotnet pack Mkx.Templates.Blazor.csproj -c Release -o out /p:PackageVersion=2.0.${{ github.run_number }}
       - name: NuGet login via OIDC
         id: nuget-login
         uses: NuGet/login@v1

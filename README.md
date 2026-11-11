@@ -14,7 +14,7 @@ Requires .NET 11 SDK and Node.js 22+. The script builds/tests the source, packs 
 
 ```powershell
 dotnet pack Mkx.Templates.Blazor.csproj -c Release
-dotnet new install bin/Release/Mkx.Templates.Blazor.1.0.0.nupkg
+dotnet new install bin/Release/Mkx.Templates.Blazor.2.0.0.nupkg
 ```
 
 For editable local installation, use `dotnet new install ./template-content`.
