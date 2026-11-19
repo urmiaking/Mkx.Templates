@@ -16,6 +16,7 @@ public class PersistingRevalidatingAuthenticationStateProvider : RevalidatingSer
     private readonly PersistentComponentState _state;
     private readonly IdentityOptions _options;
     private readonly PersistingComponentStateSubscription _subscription;
+    private Task<AuthenticationState>? _authenticationStateTask;
 
     public PersistingRevalidatingAuthenticationStateProvider(
         ILoggerFactory loggerFactory,
@@ -27,6 +28,8 @@ public class PersistingRevalidatingAuthenticationStateProvider : RevalidatingSer
         _scopeFactory = serviceScopeFactory;
         _state = persistentComponentState;
         _options = optionsAccessor.Value;
+        // The host supplies the current state through this notification before persistence.
+        AuthenticationStateChanged += state => _authenticationStateTask = state;
 
         _subscription = _state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
     }
@@ -54,7 +57,8 @@ public class PersistingRevalidatingAuthenticationStateProvider : RevalidatingSer
 
     private async Task OnPersistingAsync()
     {
-        var authenticationState = await GetAuthenticationStateAsync();
+        if (_authenticationStateTask is null) return;
+        var authenticationState = await _authenticationStateTask;
         var principal = authenticationState.User;
 
         if (principal.Identity?.IsAuthenticated == true)

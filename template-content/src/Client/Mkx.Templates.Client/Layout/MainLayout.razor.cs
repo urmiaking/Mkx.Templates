@@ -16,8 +16,9 @@ public partial class MainLayout : IAsyncDisposable
 #endif
     [Inject] private NavigationManager Navigation { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
     [Inject] private BrowserPushService BrowserPush { get; set; } = default!;
-    [Inject] private AuthenticationStateProvider AuthState { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
     private bool _mobileMenuOpen, _notificationsOpen;
     private ElementReference _sidebar;
     private IJSObjectReference? _module, _menu;
@@ -40,11 +41,19 @@ public partial class MainLayout : IAsyncDisposable
     {
         if (firstRender)
         {
-            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/navigation.js");
-            _menu = await _module.InvokeAsync<IJSObjectReference>("bind", _sidebar);
             try
             {
-                if ((await AuthState.GetAuthenticationStateAsync()).User.Identity?.IsAuthenticated == true)
+                _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/navigation.js");
+                _menu = await _module.InvokeAsync<IJSObjectReference>("bind", _sidebar);
+            }
+            catch (JSException ex)
+            {
+                Logger.LogWarning(ex, "Navigation enhancements are unavailable; the native navigation remains usable.");
+            }
+            try
+            {
+                if (AuthenticationStateTask is not null &&
+                    (await AuthenticationStateTask).User.Identity?.IsAuthenticated == true)
                     await BrowserPush.RestoreGrantedAsync();
             }
             catch (Exception ex) when (ex is HttpRequestException or JSException or JSDisconnectedException)
@@ -52,7 +61,11 @@ public partial class MainLayout : IAsyncDisposable
                 // Push is optional: registration must never interrupt layout rendering.
             }
         }
-        if (_menu is not null) await _menu.InvokeVoidAsync("update", _mobileMenuOpen);
+        if (_menu is not null)
+        {
+            try { await _menu.InvokeVoidAsync("update", _mobileMenuOpen); }
+            catch (JSException ex) { Logger.LogWarning(ex, "Unable to synchronize mobile navigation focus."); }
+        }
     }
     public async ValueTask DisposeAsync()
     {

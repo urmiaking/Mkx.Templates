@@ -6,6 +6,7 @@ public partial class BaseLayout : IAsyncDisposable
 {
     [Inject] private ThemeService ThemeService { get; set; } = default!;
     [Inject] private IJSRuntime JS { get; set; } = default!;
+    [Inject] private ILogger<BaseLayout> Logger { get; set; } = default!;
     private bool _disposed;
     private DotNetObjectReference<BaseLayout>? _receiver;
     protected override void OnInitialized()
@@ -21,18 +22,38 @@ public partial class BaseLayout : IAsyncDisposable
     }
     private async ValueTask ApplyAsync()
     {
-        await JS.InvokeVoidAsync("Mkx.setMobilePickerHidden", ThemeService.MobilePickerHidden);
-        await JS.InvokeVoidAsync("Mkx.setPalette", ThemeService.Palette, false);
-        await JS.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
+        try
+        {
+            await JS.InvokeVoidAsync("Mkx.setMobilePickerHidden", ThemeService.MobilePickerHidden);
+            await JS.InvokeVoidAsync("Mkx.setPalette", ThemeService.Palette, false);
+            await JS.InvokeVoidAsync("Mkx.setAppearance", ThemeService.IsDarkMode);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to initialize browser appearance; saved preferences are retained.");
+        }
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        await ThemeService.LoadSettingsAsync(await JS.InvokeAsync<bool>("Mkx.systemDark"));
+        var systemDark = false;
+        try { systemDark = await JS.InvokeAsync<bool>("Mkx.systemDark"); }
+        catch (JSException ex) { Logger.LogWarning(ex, "Unable to read system appearance preference."); }
+        await ThemeService.LoadSettingsAsync(systemDark);
+
         _receiver = DotNetObjectReference.Create(this);
-        await JS.InvokeVoidAsync("Mkx.watchSystemAppearance", _receiver);
+        try { await JS.InvokeVoidAsync("Mkx.watchSystemAppearance", _receiver); }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Unable to watch system appearance changes.");
+            _receiver.Dispose();
+            _receiver = null;
+        }
+
         await ApplyAsync();
-        await JS.InvokeVoidAsync("Mkx.removeSplash");
+        // Do not leave the splash screen visible if one of the optional JS initializers fails.
+        try { await JS.InvokeVoidAsync("Mkx.removeSplash"); }
+        catch (JSException ex) { Logger.LogWarning(ex, "Unable to remove the startup splash screen."); }
     }
     [JSInvokable]
     public Task SystemAppearanceChanged(bool dark) => _disposed ? Task.CompletedTask : ThemeService.SetDarkModeAsync(dark, false);

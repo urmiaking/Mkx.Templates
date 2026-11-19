@@ -1,5 +1,6 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
+@inject ILogger<UiModal> Logger
 <dialog class="ui-modal @Class" @ref="_dialog" aria-labelledby="@_titleId" @onkeydown="KeyDown" @onclick="BackdropClick">
     <section class="ui-modal-panel" @ref="_panel" @onclick:stopPropagation="true">
         <header class="ui-modal-header"><h2 id="@_titleId">@Title</h2>@if (ShowClose) { <UiIconButton Icon="close" aria-label="بستن" Disabled="Busy" OnClick="Close" /> }</header>
@@ -21,8 +22,16 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/modal.js");
-        await _module.InvokeVoidAsync("activate", _panel, _dialog);
+        try
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/modal.js");
+            await _module.InvokeVoidAsync("activate", _panel, _dialog);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogError(ex, "Unable to open the modal dialog.");
+            await DispatchExceptionAsync(ex);
+        }
     }
     private Task Close() => Busy ? Task.CompletedTask : OnClose.InvokeAsync();
     private Task KeyDown(KeyboardEventArgs e) => e.Key == "Escape" && CloseOnEscape ? Close() : Task.CompletedTask;

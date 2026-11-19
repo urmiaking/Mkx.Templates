@@ -13,6 +13,8 @@ Keep busy actions disabled, retain input on failed saves and show field/request 
 
 The recovery phone field uses one bordered wrapper around its icon and native telephone input. Keep the input border and shadow reset more specific than the global input styles; show focus on the wrapper with `:focus-within`.
 
+Browser interop failures are handled at their point of use. Optional appearance and push enhancements retain usable native controls when JavaScript is unavailable, while modal activation errors reach the component error boundary rather than silently claiming the dialog opened. Keep interop calls guarded without disabling BL0016 or suppressing unexpected failures.
+
 ## OTP fields
 Reuse `UiOtpField` for password recovery, phone-change verification and authenticator setup. It presents six visual cells over one labeled native input, preserving full-code paste, password-manager/SMS autofill, leading zeros, numeric keyboard and LTR order. Both JS and `OtpCode.Normalize` accept Persian/Arabic digits. Decorative cells are hidden from assistive technology. `Sms=false` prevents WebOTP requests for authenticator codes.
 

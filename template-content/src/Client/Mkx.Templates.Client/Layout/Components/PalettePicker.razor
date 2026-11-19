@@ -2,6 +2,7 @@
 @inject ThemeService Theme
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject ILogger<PalettePicker> Logger
 
 <div class="palette-picker-floating">
     <button @ref="_trigger" type="button" class="palette-edge-tab"
@@ -50,9 +51,11 @@
     private async Task HideOnMobileAsync()
     {
         if (_binding is null || _changing) return;
-        await _binding.InvokeVoidAsync("closeAnimated");
+        try { await _binding.InvokeVoidAsync("closeAnimated"); }
+        catch (JSException ex) { Logger.LogWarning(ex, "Palette picker close animation failed."); }
         await Theme.SetMobilePickerHiddenAsync(true);
-        await _binding.InvokeVoidAsync("focusNavigation");
+        try { await _binding.InvokeVoidAsync("focusNavigation"); }
+        catch (JSException ex) { Logger.LogWarning(ex, "Unable to move focus back to mobile navigation."); }
     }
     private async Task SelectPaletteAsync(string palette)
     {
@@ -75,8 +78,15 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/palette-picker.js");
-        _binding = await _module.InvokeAsync<IJSObjectReference>("bind", _trigger, _popover);
+        try
+        {
+            _module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/palette-picker.js");
+            _binding = await _module.InvokeAsync<IJSObjectReference>("bind", _trigger, _popover);
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex, "Floating palette picker is unavailable; navigation appearance controls remain available.");
+        }
     }
     public async ValueTask DisposeAsync()
     {

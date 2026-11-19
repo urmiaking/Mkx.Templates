@@ -5,7 +5,7 @@ using Mkx.Templates.Client.Common;
 
 namespace Mkx.Templates.Client.Services;
 
-public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
+public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js, ILogger<ThemeService> logger)
 {
     public static IReadOnlyList<(string Id, string Name)> Palettes { get; } =
         [("jade", "یشم"), ("ocean", "اقیانوس"), ("iris", "زنبق"), ("amber", "کهربا")];
@@ -18,7 +18,8 @@ public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
         MobilePickerHidden = hidden;
         try { await storage.SetItemAsStringAsync(LocalStorageKeys.MobilePickerHidden, hidden.ToString()); }
         catch (JSException) { /* Visibility still changes when storage is unavailable. */ }
-        await js.InvokeVoidAsync("Mkx.setMobilePickerHidden", hidden);
+        try { await js.InvokeVoidAsync("Mkx.setMobilePickerHidden", hidden); }
+        catch (JSException ex) { logger.LogWarning(ex, "Unable to apply {AppearanceSetting} in the browser.", "mobile picker visibility"); }
         OnToggleMode?.Invoke(this, EventArgs.Empty);
     }
     public async Task SetPaletteAsync(string palette, ElementReference source)
@@ -28,7 +29,8 @@ public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
         try { await storage.SetItemAsStringAsync(LocalStorageKeys.Palette, palette); }
         catch (JSException) { /* Keep appearance usable when storage is blocked. */ }
         if (Palette != palette) return;
-        await js.InvokeVoidAsync("Mkx.setPalette", palette, true, source);
+        try { await js.InvokeVoidAsync("Mkx.setPalette", palette, true, source); }
+        catch (JSException ex) { logger.LogWarning(ex, "Unable to apply {AppearanceSetting} in the browser.", "palette"); }
         OnToggleMode?.Invoke(this, EventArgs.Empty);
     }
     public Task ToggleModeAsync(ElementReference source) => SetDarkModeAsync(!IsDarkMode, source: source);
@@ -40,7 +42,8 @@ public sealed class ThemeService(ILocalStorageService storage, IJSRuntime js)
             try { await storage.SetItemAsStringAsync(LocalStorageKeys.IsDarkMode, value.ToString()); }
             catch (JSException) { /* The selected appearance still works without browser storage. */ }
         }
-        await js.InvokeVoidAsync("Mkx.setAppearance", value, source);
+        try { await js.InvokeVoidAsync("Mkx.setAppearance", value, source); }
+        catch (JSException ex) { logger.LogWarning(ex, "Unable to apply {AppearanceSetting} in the browser.", "appearance"); }
         OnToggleMode?.Invoke(this, EventArgs.Empty);
     }
     public async Task LoadSettingsAsync(bool systemDark)

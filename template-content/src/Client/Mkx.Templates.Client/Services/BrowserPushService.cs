@@ -20,6 +20,7 @@ public sealed class BrowserPushService(HttpClient http, IJSRuntime js)
             var state = await js.InvokeAsync<PushState>("mkxPush.state", ct);
             return new(state.Supported, state.Permission, state.Subscribed, true);
         }
+        catch (JSDisconnectedException) { return new(false, "unsupported", false, true); }
         catch (JSException) { return new(false, "unsupported", false, true); }
     }
 
@@ -44,7 +45,10 @@ public sealed class BrowserPushService(HttpClient http, IJSRuntime js)
 
     private async Task<BrowserPushStatus> SubscribeAsync(string method, string publicKey, CancellationToken ct)
     {
-        var response = await js.InvokeAsync<PushRegistration>(method, ct, publicKey);
+        PushRegistration response;
+        try { response = await js.InvokeAsync<PushRegistration>(method, ct, publicKey); }
+        catch (JSDisconnectedException) { return new(false, "unsupported", false, true); }
+        catch (JSException) { return new(false, "unsupported", false, true); }
         if (response is not { Subscribed: true, Endpoint: not null, P256dh: not null, Auth: not null })
             return new(response.Supported, response.Permission, false, true);
         using var save = await http.PostAsJsonAsync("/api/push/subscriptions",
@@ -55,7 +59,10 @@ public sealed class BrowserPushService(HttpClient http, IJSRuntime js)
 
     public async Task DisableAsync(CancellationToken ct = default)
     {
-        var state = await js.InvokeAsync<PushState>("mkxPush.state", ct);
+        PushState state;
+        try { state = await js.InvokeAsync<PushState>("mkxPush.state", ct); }
+        catch (JSDisconnectedException) { return; }
+        catch (JSException) { throw; }
         try
         {
             if (!string.IsNullOrWhiteSpace(state.Endpoint))
@@ -71,7 +78,9 @@ public sealed class BrowserPushService(HttpClient http, IJSRuntime js)
         finally
         {
             // On API failure, local unsubscribe still prevents notifications to this browser.
-            await js.InvokeVoidAsync("mkxPush.unsubscribe", ct, true);
+            try { await js.InvokeVoidAsync("mkxPush.unsubscribe", ct, true); }
+            catch (JSDisconnectedException) { }
+            catch (JSException) { }
         }
     }
 

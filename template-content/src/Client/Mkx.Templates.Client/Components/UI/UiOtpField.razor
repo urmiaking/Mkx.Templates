@@ -1,6 +1,7 @@
 @using Mkx.Templates.Shared.Utilities
 @implements IDisposable
 @inject IJSRuntime JS
+@inject ILogger<UiOtpField> Logger
 
 <div class="otp-field" aria-invalid="@(_invalid ? "true" : "false")">
     <label class="sms-login-label" for="@_id">@Label</label>
@@ -36,7 +37,9 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         // SSR runs the same initializer on DOMContentLoaded; interactive dialogs initialize when rendered.
-        if (firstRender) await JS.InvokeVoidAsync("Mkx.otp.initialize");
+        if (!firstRender) return;
+        try { await JS.InvokeVoidAsync("Mkx.otp.initialize"); }
+        catch (JSException ex) { Logger.LogWarning(ex, "OTP browser enhancement failed; the native input remains available."); }
     }
     private async Task ChangeAsync(ChangeEventArgs args)
     {
