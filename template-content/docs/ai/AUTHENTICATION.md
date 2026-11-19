@@ -10,7 +10,7 @@ Cookie events are configured after Identity defaults, preserving security-stamp 
 
 BootstrapAdmin defaults to disabled and never contains fixed credentials. Opt-in configuration supplies username and a strong password through secrets. Identity minimum password length is 12, with at least four unique characters. Login failures lock out by default. Bootstrap creation is idempotent by username; it does not reset or promote an existing account silently.
 
-The administrative screen accepts only built-in roles, protects administrator accounts from deletion/demotion through generic user management, and resets contact verification when contact details change. Do not key administrator protections to a literal username.
+The administrative screen accepts only built-in roles, protects administrator accounts from deletion/demotion through generic user management, and resets contact verification when contact details change. User editing supports updating the username along with name, email, phone, optional password and roles. The server requires and validates a unique username using Identity normalization; an existing username is permitted for its own account. Changes invalidate the security stamp, so existing sessions must authenticate again after stamp validation. Do not key administrator protections to a literal username.
 
 MVC mutations require antiforgery; logout is POST. The client obtains a fresh token for each mutation. SSR forms retain their framework antiforgery support. Auth-state/token responses and API responses are no-store; PWA never caches them.
 

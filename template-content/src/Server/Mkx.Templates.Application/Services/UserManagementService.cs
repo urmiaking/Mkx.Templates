@@ -127,9 +127,20 @@ public class UserManagementService(
 
         foreach (var role in dto.Roles) EnsureBuiltinRole(role);
         if (string.IsNullOrWhiteSpace(dto.Name)) throw new BadRequestException("نام الزامی است.");
+        if (string.IsNullOrWhiteSpace(dto.UserName)) throw new BadRequestException("نام کاربری الزامی است.");
+
+        var userName = dto.UserName.Trim();
+        if (!string.Equals(user.UserName, userName, StringComparison.Ordinal))
+        {
+            var existingUser = await userManager.FindByNameAsync(userName);
+            if (existingUser is not null && existingUser.Id != user.Id)
+                throw new BadRequestException("نام کاربری قبلاً ثبت شده است.");
+        }
+
         if (user.Email != dto.Email) user.EmailConfirmed = false;
         if (user.PhoneNumber != dto.PhoneNumber) user.PhoneNumberConfirmed = false;
         user.SetName(dto.Name);
+        user.UserName = userName;
         user.Email = dto.Email;
         user.PhoneNumber = dto.PhoneNumber;
 

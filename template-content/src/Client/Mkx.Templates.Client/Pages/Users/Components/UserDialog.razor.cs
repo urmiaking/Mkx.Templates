@@ -45,7 +45,7 @@ public partial class UserDialog
         if (_form.IsValid)
         {
             var result = await TryRequestAsync<IUserManagementService, bool>((service, ct) => IsEdit
-                ? service.UpdateUserAsync(new UpdateUserDto { Id = Model.Id, Name = Model.Name, Email = Model.Email, PhoneNumber = Model.PhoneNumber, NewPassword = Model.Password, Roles = Model.SelectedRoles }, ct)
+                ? service.UpdateUserAsync(new UpdateUserDto { Id = Model.Id, Name = Model.Name, UserName = Model.UserName, Email = Model.Email, PhoneNumber = Model.PhoneNumber, NewPassword = Model.Password, Roles = Model.SelectedRoles }, ct)
                 : service.CreateUserAsync(new CreateUserDto { Name = Model.Name, UserName = Model.UserName, Email = Model.Email, PhoneNumber = Model.PhoneNumber, Password = Model.Password ?? "", Roles = Model.SelectedRoles }, ct));
             if (result.Succeeded && result.Value) { _originalModel = JsonSerializer.Serialize(Model); AddSuccessToast("ذخیره شد."); Dialog.Close(DialogResult.Ok(true)); }
         }

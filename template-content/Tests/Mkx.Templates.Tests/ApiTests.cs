@@ -293,11 +293,86 @@ public class ApiTests
         Assert.Equal(HttpStatusCode.OK, created.StatusCode);
         var page = await client.GetFromJsonAsync<PagedList<UserDto>>(ApiUrls.UserManagement.GetUsers(new(Search: "rollback-test")), Token);
         var user = Assert.Single(page!.Data);
-        using var failed = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(), new UpdateUserDto { Id = user.Id, Name = "should-roll-back", NewPassword = "aaaaaaaaaaaa", Roles = ["Users"] }, Token);
+        using var failed = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(), new UpdateUserDto { Id = user.Id, Name = "should-roll-back", UserName = "rollback-renamed", NewPassword = "aaaaaaaaaaaa", Roles = ["Users"] }, Token);
         Assert.Equal(HttpStatusCode.BadRequest, failed.StatusCode);
         var after = await client.GetFromJsonAsync<UserDto>(ApiUrls.UserManagement.GetUserById(user.Id), Token);
         Assert.Equal("original", after!.Name);
+        Assert.Equal("rollback-test", after.UserName);
     }
+    [Fact]
+    public async Task UserManagementCanRenameUserAndUpdateProfile()
+    {
+        using var host = new TestHost();
+        using var client = host.Client(AppPolicies.Users.View, AppPolicies.Users.Manage);
+        await CsrfAsync(client);
+
+        using var created = await client.PostAsJsonAsync(ApiUrls.UserManagement.CreateUser(),
+            new CreateUserDto { Name = "Before", UserName = "before-rename", Password = "safe-long-password", Roles = ["Users"] }, Token);
+        Assert.Equal(HttpStatusCode.OK, created.StatusCode);
+
+        var page = await client.GetFromJsonAsync<PagedList<UserDto>>(
+            ApiUrls.UserManagement.GetUsers(new(Search: "before-rename")), Token);
+        var user = Assert.Single(page!.Data);
+        using var updated = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(),
+            new UpdateUserDto
+            {
+                Id = user.Id,
+                Name = "After",
+                UserName = "after-rename",
+                Email = "after@example.com",
+                PhoneNumber = "09123456789",
+                Roles = ["Users"]
+            }, Token);
+        Assert.Equal(HttpStatusCode.OK, updated.StatusCode);
+
+        var after = await client.GetFromJsonAsync<UserDto>(ApiUrls.UserManagement.GetUserById(user.Id), Token);
+        Assert.NotNull(after);
+        Assert.Equal("After", after.Name);
+        Assert.Equal("after-rename", after.UserName);
+        Assert.Equal("after@example.com", after.Email);
+        Assert.Equal("09123456789", after.PhoneNumber);
+        Assert.Contains("Users", after.Roles);
+        var renamedPage = await client.GetFromJsonAsync<PagedList<UserDto>>(
+            ApiUrls.UserManagement.GetUsers(new(Search: "after-rename")), Token);
+        Assert.Equal(user.Id, Assert.Single(renamedPage!.Data).Id);
+
+        // Saving an unchanged username must remain valid.
+        using var unchanged = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(),
+            new UpdateUserDto { Id = user.Id, Name = "After", UserName = "after-rename", Email = after.Email, PhoneNumber = after.PhoneNumber, Roles = ["Users"] }, Token);
+        Assert.Equal(HttpStatusCode.OK, unchanged.StatusCode);
+    }
+
+    [Fact]
+    public async Task UserManagementRejectsDuplicateAndBlankUsernameWithoutChangingProfile()
+    {
+        using var host = new TestHost();
+        using var client = host.Client(AppPolicies.Users.View, AppPolicies.Users.Manage);
+        await CsrfAsync(client);
+
+        foreach (var userName in new[] { "rename-source", "rename-target" })
+        {
+            using var created = await client.PostAsJsonAsync(ApiUrls.UserManagement.CreateUser(),
+                new CreateUserDto { Name = userName, UserName = userName, Password = "safe-long-password", Roles = ["Users"] }, Token);
+            Assert.Equal(HttpStatusCode.OK, created.StatusCode);
+        }
+        var page = await client.GetFromJsonAsync<PagedList<UserDto>>(
+            ApiUrls.UserManagement.GetUsers(new(Search: "rename-source")), Token);
+        var user = Assert.Single(page!.Data);
+
+        using var duplicate = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(),
+            new UpdateUserDto { Id = user.Id, Name = "changed", UserName = "RENAME-TARGET", Roles = ["Users"] }, Token);
+        Assert.Equal(HttpStatusCode.BadRequest, duplicate.StatusCode);
+
+        using var blank = await client.PutAsJsonAsync(ApiUrls.UserManagement.UpdateUser(),
+            new UpdateUserDto { Id = user.Id, Name = "changed", UserName = " ", Roles = ["Users"] }, Token);
+        Assert.Equal(HttpStatusCode.BadRequest, blank.StatusCode);
+
+        var unchanged = await client.GetFromJsonAsync<UserDto>(ApiUrls.UserManagement.GetUserById(user.Id), Token);
+        Assert.NotNull(unchanged);
+        Assert.Equal("rename-source", unchanged.UserName);
+        Assert.Equal("rename-source", unchanged.Name);
+    }
+
     [Fact]
     public async Task UnknownRoleIsRejectedWithoutCreatingAUser()
     {

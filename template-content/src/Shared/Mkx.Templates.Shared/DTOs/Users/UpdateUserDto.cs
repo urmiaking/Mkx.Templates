@@ -7,6 +7,8 @@ public class UpdateUserDto
     public Guid Id { get; set; }
     [Required, StringLength(200)]
     public string Name { get; set; } = string.Empty;
+    [Required, StringLength(256)]
+    public string UserName { get; set; } = string.Empty;
     [EmailAddress, StringLength(256)]
     public string? Email { get; set; }
     [Phone, StringLength(32)]
