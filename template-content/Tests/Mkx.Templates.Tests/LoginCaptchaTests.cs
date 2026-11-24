@@ -59,7 +59,7 @@ public sealed class LoginCaptchaTests
         using var initial = await client.GetAsync(ClientRoutes.Accounts.Login, Token);
         Assert.Equal(HttpStatusCode.OK, initial.StatusCode);
         var browser = Regex.Match(string.Join(";", initial.Headers.GetValues("Set-Cookie")),
-            "Mkx\\.Templates_LoginChallenge=([a-f0-9]{32})").Groups[1].Value;
+            Regex.Escape("Mkx.Templates_LoginChallenge") + "=([a-f0-9]{32})").Groups[1].Value;
         Assert.NotEmpty(browser);
         var html = await initial.Content.ReadAsStringAsync(Token);
         Assert.DoesNotContain("name=\"Input.CaptchaAnswer\"", html);
