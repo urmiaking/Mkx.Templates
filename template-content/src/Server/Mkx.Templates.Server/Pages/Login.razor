@@ -5,16 +5,33 @@
 <div class="identity-brand"><BrandLockup /></div>
 <header class="identity-heading"><h1>ورود به سامانه</h1><p>برای ادامه، اطلاعات حساب خود را وارد کنید.</p></header>
 
-<EditForm class="identity-form" Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+<EditForm class="identity-form" EditContext="_editContext" method="post" OnSubmit="LoginUser" FormName="login">
     @if (_options.AllowLocal)
     {
         <label class="ui-field"><span>نام کاربری / شماره تلفن همراه</span><InputText @bind-Value="Input.Username" autocomplete="username" required dir="ltr" /></label>
         <label class="ui-field"><span>رمز عبور</span><InputText @bind-Value="Input.Password" type="password" autocomplete="current-password" required dir="ltr" /></label>
+        @if (_captcha is not null)
+        {
+            <div class="login-captcha">
+                <div class="login-captcha-heading"><label for="login-captcha-answer">کد امنیتی</label></div>
+                <input type="hidden" name="Input.CaptchaId" value="@_captcha.Id" />
+                <div class="login-captcha-visual">
+                    <img src="@_captcha.Image" alt="تصویر کد امنیتی" width="180" height="56" />
+                    <button class="ui-button ui-button-outlined login-captcha-refresh" type="button" data-login-captcha-refresh="@ApiUrls.Accounts.RefreshCaptcha()" aria-label="تازه‌سازی کد امنیتی" title="تصویر جدید">
+                        <UiIcon Icon="history" />
+                    </button>
+                </div>
+                <label class="ui-field">
+                    <InputText id="login-captcha-answer" @bind-Value="Input.CaptchaAnswer" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="کد داخل تصویر را وارد کنید" dir="ltr" aria-label="کد امنیتی" />
+                </label>
+                <div class="ui-alert ui-alert-error" role="alert" data-login-captcha-error hidden></div>
+            </div>
+        }
         <div class="identity-options">
             @if (_options.ShowRememberMe) { <label class="ui-checkbox"><InputCheckbox @bind-Value="Input.RememberMe" />مرا به خاطر بسپار</label> }
             <a href="@ClientRoutes.Accounts.ForgotPassword">رمز عبور را فراموش کرده‌اید؟</a>
         </div>
-        @if (!string.IsNullOrWhiteSpace(_errorMessage)) { <StatusMessage Message="@_errorMessage" Severity="Severity.Error" /> }
+        @if (!string.IsNullOrWhiteSpace(_errorMessage)) { <div class="ui-alert ui-alert-error" role="alert" data-login-error>@_errorMessage</div> }
         <div class="d-flex align-center gap-2">
             <button class="ui-button ui-button-filled identity-submit" type="submit">ورود <UiIcon Icon="forward" /></button>
             <div id="passkey-login-section" style="display:none"><PasskeySubmit Name="Input.Passkey" Auto="true" Username="Input.Username" /></div>

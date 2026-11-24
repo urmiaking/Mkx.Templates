@@ -1,5 +1,4 @@
 window.Mkx = window.Mkx || {};
-Mkx.removeSplash = () => document.getElementById('app-loading')?.remove();
 Mkx.systemDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
 Mkx.setMobilePickerHidden = hidden => { document.documentElement.dataset.mobilePickerHidden = String(hidden === true); };
 Mkx.setPalette = async (palette, animate = true, source = null) => {

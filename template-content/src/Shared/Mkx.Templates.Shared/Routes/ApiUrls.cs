@@ -21,6 +21,7 @@ public static class ApiUrls
     public static class Accounts
     {
         public static string Antiforgery() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Antiforgery);
+        public static string RefreshCaptcha() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.RefreshCaptcha);
         public static string PerformExternalLogin() => BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.PerformExternalLogin);
         public static string Logout(string? returnUrl) =>
             BuildUrl(ApiRoutes.Accounts.Base, ApiRoutes.Accounts.Logout).AppendQueryString(new { returnUrl });

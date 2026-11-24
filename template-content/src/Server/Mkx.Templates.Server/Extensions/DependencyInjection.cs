@@ -19,6 +19,7 @@ public static class DependencyInjection
     {
         internal IServiceCollection AddServer(IConfiguration configuration)
         {
+            services.AddSingleton<LoginCaptchaService>();
             services.AddScoped<PushSubscriptionService>();
             services.AddScoped<IWebPushSender, WebPushSender>();
             services.AddControllers(configuration)

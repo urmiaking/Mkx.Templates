@@ -20,6 +20,7 @@ public static class ApiRoutes
         public const string PerformExternalLogin = "PerformExternalLogin";
         public const string AuthState = "auth-state";
         public const string Antiforgery = "antiforgery";
+        public const string RefreshCaptcha = "captcha/refresh";
 
         public static class Manage
         {

@@ -45,6 +45,15 @@ public class AccountsController(
         return NoContent();
     }
 
+    [HttpPost(ApiRoutes.Accounts.RefreshCaptcha)]
+    [AllowAnonymous]
+    public IActionResult RefreshCaptcha([FromForm] string id, [FromServices] Mkx.Templates.Server.Services.LoginCaptchaService captcha)
+    {
+        Response.Headers.CacheControl = "no-store";
+        var challenge = captcha.Refresh(Mkx.Templates.Server.Services.LoginCaptchaService.GetBrowserKey(HttpContext), id);
+        return challenge is null ? BadRequest() : Ok(challenge);
+    }
+
     [HttpGet(ApiRoutes.Accounts.Antiforgery)]
     [AllowAnonymous]
     public IActionResult GetAntiforgeryToken()

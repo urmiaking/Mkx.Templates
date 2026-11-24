@@ -1712,6 +1712,45 @@ textarea {
     min-height:49px;
     font-size:14px
 }
+
+.login-captcha {
+    display:grid;
+    gap:8px;
+    padding:12px;
+    border:1px solid var(--ui-border);
+    border-radius:12px;
+    background:var(--ui-surface)
+}
+.login-captcha-heading,.login-captcha-visual {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px
+}
+.login-captcha-heading {
+    font-size:13px;
+    font-weight:600
+}
+.login-captcha [hidden] {
+    display:none!important
+}
+.login-captcha-heading span {
+    font-size:12px;
+    color:var(--ui-text-secondary);
+    font-weight:400
+}
+.login-captcha-visual img {
+    max-width:calc(100% - 52px);
+    height:auto;
+    border-radius:10px
+}
+.login-captcha-refresh {
+    width:44px;
+    min-height:44px;
+    padding:0;
+    flex:none
+}
+
 .identity-options {
     display:flex;
     align-items:center;
@@ -1895,18 +1934,51 @@ textarea {
     color:var(--ui-heading);
     font-size:25px
 }
-.splash-progress-track {
-    margin-top:24px;
-    height:3px;
-    border-radius:3px;
-    background:var(--ui-border);
-    overflow:hidden
+#app-loading.fade-out {
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 220ms ease
 }
-.splash-progress-bar {
-    height:100%;
-    width:40%;
+.splash-meter {
+    margin-top:24px
+}
+.splash-meter-label {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:8px;
+    color:var(--ui-text-secondary);
+    font-size:12px
+}
+#splash-percentage {
+    color:var(--ui-heading);
+    font-weight:700;
+    font-variant-numeric:tabular-nums
+}
+#splash-progress {
+    display:block;
+    appearance:none;
+    width:100%;
+    height:5px;
+    border:0;
+    border-radius:8px;
+    overflow:hidden;
+    background:var(--ui-border);
+    color:var(--ui-secondary)
+}
+#splash-progress::-webkit-progress-bar {
+    background:var(--ui-border);
+    border-radius:8px
+}
+#splash-progress::-webkit-progress-value {
     background:var(--ui-secondary);
-    animation:loading 1.4s ease-in-out infinite
+    border-radius:8px;
+    transition:width 120ms linear
+}
+#splash-progress::-moz-progress-bar {
+    background:var(--ui-secondary);
+    border-radius:8px
 }
 #blazor-error-ui {
     display:none;
@@ -1948,14 +2020,6 @@ textarea {
 @keyframes spin {
     to {
         transform:rotate(360deg)
-    }
-}
-@keyframes loading {
-    from {
-        transform:translateX(250%)
-    }
-    to {
-        transform:translateX(-250%)
     }
 }
 @keyframes dialog-enter {

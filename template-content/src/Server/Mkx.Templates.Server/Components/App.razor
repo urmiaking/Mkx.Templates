@@ -32,8 +32,12 @@
         <div id="app-loading">
             <div class="splash-screen">
                 <span class="brand-text" dir="ltr">Mkx.Templates</span>
-                <div class="splash-progress-track">
-                    <div class="splash-progress-bar"></div>
+                <div class="splash-meter">
+                    <div class="splash-meter-label">
+                        <span id="splash-phase" role="status">در حال بارگیری فایل‌های برنامه</span>
+                        <bdi id="splash-percentage" aria-hidden="true">۰٪</bdi>
+                    </div>
+                    <progress id="splash-progress" dir="ltr" max="100" value="0" aria-label="پیشرفت بارگیری فایل‌های برنامه"></progress>
                 </div>
             </div>
         </div>
@@ -48,7 +52,9 @@
         <script src="@Assets["js/pwa-helper.js"]"></script>
     }
     <script src="@Assets["js/app.js"]"></script>
+    <script src="@Assets["js/app-startup.js"]"></script>
     <script src="@Assets["js/login-otp.js"]"></script>
+    <script src="@Assets["js/login-captcha.js"]"></script>
     <script src="@Assets["js/webauthn.js"]"></script>
     <script src="@Assets["js/push-client.js"]"></script>
 </body>
